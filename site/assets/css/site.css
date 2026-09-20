@@ -758,6 +758,32 @@ main > .next + .section {
   .topbar__cta { margin-top: 0; margin-left: 10px; width: auto; min-height: 44px; padding: 12px 20px; }
 }
 
+/* No-JS drawer fallback. The slide-in drawer is opened by the toggle, which is
+   inert without a script, so below the desktop breakpoint the menu would sit
+   hidden off-screen and every link, Companies included, would be unreachable.
+   With scripting off the bar becomes an in-flow header instead: brand and CTA
+   on one row, the full menu (Companies list expanded) beneath. A media query
+   rather than :not(.js) so script-enabled visitors never see it flash. */
+@media (scripting: none) and (max-width: 939.98px) {
+  .topbar { position: relative; }
+  /* Hero rules come later in the file; the extra selector wins on specificity. */
+  body .hero { margin-top: 0; }
+  .topbar__inner { flex-wrap: wrap; height: auto; min-height: var(--topbar-h); }
+  .topbar__toggle { display: none; }
+  .topbar__cta { margin-left: auto; }
+  .topbar__nav {
+    position: static;
+    order: 3;
+    flex: 1 0 100%;
+    height: auto;
+    padding: 0 0 var(--s3);
+    overflow: visible;
+    transform: none;
+    visibility: visible;
+    transition: none;
+  }
+}
+
 /* --- 8. Mobile sticky action bar ----------------------------------------- */
 .mobile-cta {
   position: fixed;
