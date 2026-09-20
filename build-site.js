@@ -113,6 +113,15 @@ function ctaBand() {
   </section>`;
 }
 
+/* Mobile-only sticky action bar. Hidden in CSS until the hero scrolls away;
+   site.js toggles .is-visible, and it stays visible if JS never runs. */
+function mobileCta() {
+  return `  <div class="mobile-cta" data-mobile-cta>
+    <a class="btn btn--primary" href="contact.html">Contact Us</a>
+    <a class="btn btn--accent" href="${PHONE_HREF}">${PHONE}</a>
+  </div>`;
+}
+
 function footer() {
   const ventureLinks = VENTURES.map(v => `            <a href="${v.file}">${v.name}</a>`).join('\n');
   return `  <footer class="footer">
@@ -168,7 +177,7 @@ function page({ slug, title, desc, active, head = '', body, ogImage = 'hero-home
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${title}</title>
 <meta name="description" content="${desc}">
 <link rel="canonical" href="${canonical}">
@@ -188,7 +197,7 @@ function page({ slug, title, desc, active, head = '', body, ogImage = 'hero-home
 <link rel="apple-touch-icon" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Roboto:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Newsreader:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="assets/css/site.css">
 ${head}</head>
 <body>
@@ -198,6 +207,7 @@ ${body}
 </main>
 ${ctaBand()}
 ${footer()}
+${mobileCta()}
 <script src="assets/js/site.js" defer></script>
 </body>
 </html>
@@ -209,14 +219,13 @@ ${footer()}
 const stars = '<span aria-hidden="true">*</span>';
 
 function ventureCards() {
-  return VENTURES.map((v, i) => `        <article class="card venture reveal" data-delay="${i % 4}">
+  return VENTURES.map((v, i) => `        <article class="card venture reveal" data-delay="${i % 3}">
           <div class="venture__media">
             <img src="assets/img/${v.img}" alt="${v.name} — ${v.title}" loading="lazy" decoding="async">
           </div>
           <div class="venture__body">
             <p class="venture__kicker">${v.kicker}</p>
             <h3 class="venture__title">${v.name}</h3>
-            <p><strong>${v.title}</strong></p>
             <p>${v.copy}</p>
             <div class="card__foot"><a class="link-arrow" href="${v.file}">Read More</a></div>
           </div>
@@ -251,7 +260,6 @@ function splitImage(src, alt, opts = {}) {
 
 const homeBody = `${hero({
   image: 'hero-home.webp',
-  eyebrow: 'NEXGEN Holdings',
   title: 'Building the Next Generation of Impact-Driven Ventures',
   lead: `Building the Future of Clean Energy &amp; Digital Innovation — a Gulf-based holding company leading high-impact ventures in renewable energy, intelligent finance, data automation, and smart living technologies, delivering measurable results for governments, utilities, banks, and enterprises.`,
   actions: `<a class="btn btn--accent" href="inpipe-energy.html">Explore Clean Energy</a>
@@ -262,12 +270,11 @@ const homeBody = `${hero({
   <section class="section">
     <div class="container split">
       <div class="reveal">
-        <p class="eyebrow">Who we are?</p>
         <h2>Innovation With Purpose. Impact With Scale.</h2>
         <p class="lead">NexGen is a diversified holding company headquartered in the Gulf, focused on building ventures that deliver economic, environmental, and digital transformation.</p>
         <p>Our portfolio spans clean energy, financial technology, workforce solutions, smart living, and digital automation, each designed to solve real challenges and create real value.</p>
         <p>We partner with global technology leaders, regional institutions, and forward-thinking organizations to bring world-class solutions to the GCC.</p>
-        <div class="btn-row" style="margin-top:24px"><a class="btn btn--outline" href="about.html">Learn More</a></div>
+        <div class="btn-row mt-3"><a class="btn btn--outline" href="about.html">Learn More</a></div>
       </div>
       <div class="dock reveal" data-delay="1">
         <img src="assets/img/home-dock-1.webp" alt="NexGen Holdings corporate presentation visual" loading="lazy" decoding="async">
@@ -280,23 +287,22 @@ const homeBody = `${hero({
     <div class="container split">
       ${splitImage('inpipe-plant.webp', 'HydroXS in-pipe hydropower technology')}
       <div class="reveal" data-delay="1">
-        <p class="eyebrow">Flagship focus: Clean Energy</p>
         <h2>Clean Energy First — Transforming Water Pressure Into Renewable Power</h2>
         <p>NexGen is the Exclusive Regional Partner of InPipe Energy (USA), bringing the HydroXS technology to the Gulf.</p>
         <p>HydroXS converts excess water pressure inside pipelines into clean electricity—helping utilities cut energy costs, extend asset life, and reduce emissions without altering existing operations.</p>
-        <div class="btn-row" style="margin-top:24px"><a class="btn btn--primary" href="inpipe-energy.html">Learn More About InPipe</a></div>
+        <div class="btn-row mt-3"><a class="btn btn--primary" href="inpipe-energy.html">Learn More About InPipe</a></div>
       </div>
     </div>
   </section>
 
   <section class="section">
     <div class="container">
-      <div class="center reveal" style="max-width:720px;margin-inline:auto">
+      <div class="center reveal intro">
         <p class="eyebrow">Our companies</p>
         <h2>Five Ventures Shaping the Future</h2>
         <p class="lead">Beyond clean energy, NexGen builds a growing portfolio of digital ventures shaping the future of finance, workforce empowerment, data intelligence, and smart living.</p>
       </div>
-      <div class="grid grid-3" style="margin-top:48px">
+      <div class="grid grid-3 mt-5">
 ${ventureCards()}
       </div>
     </div>
@@ -304,11 +310,11 @@ ${ventureCards()}
 
   <section class="section section--alt">
     <div class="container">
-      <div class="center reveal" style="max-width:720px;margin-inline:auto">
+      <div class="center reveal intro">
         <p class="eyebrow">Why NexGen</p>
         <h2>Built for Long-Term Relevance</h2>
       </div>
-      <div class="grid grid-3" style="margin-top:40px">
+      <div class="grid grid-3 mt-4">
         <article class="card reveal">
           <h3>Regional Presence &amp; Local Insight</h3>
           <p>Active across Bahrain, Kuwait, Saudi Arabia, and the wider GCC.</p>
@@ -327,7 +333,6 @@ ${ventureCards()}
 
 const aboutBody = `${hero({
   image: 'hero-about.webp',
-  eyebrow: 'About Us',
   title: 'About NexGen Holdings',
   lead: 'A Gulf-based holding company building and scaling high-impact ventures across clean energy, financial innovation, and intelligent digital platforms.',
 })}
@@ -335,7 +340,6 @@ const aboutBody = `${hero({
   <section class="section">
     <div class="container split split--reverse">
       <div class="reveal">
-        <p class="eyebrow">Who we are</p>
         <h2>Building the Next Generation of Impact-Driven Ventures</h2>
         <p class="lead">NexGen Holdings is a diversified holding company headquartered in the Gulf, focused on creating, scaling, and operating ventures that deliver measurable economic, environmental, and technological impact.</p>
         <p>We operate at the intersection of clean energy, financial technology, data intelligence, and smart living, transforming proven ideas into structured, market-ready businesses. NexGen combines strategic vision, regional insight, and disciplined execution to ensure every venture is built for long-term relevance and sustainable growth.</p>
@@ -347,11 +351,11 @@ const aboutBody = `${hero({
 
   <section class="section section--alt">
     <div class="container">
-      <div class="center reveal" style="max-width:720px;margin-inline:auto">
+      <div class="center reveal intro">
         <p class="eyebrow">Why NexGen</p>
         <h2>Our Vision &amp; Mission</h2>
       </div>
-      <div class="grid grid-2" style="margin-top:40px">
+      <div class="grid grid-2 mt-4">
         <article class="panel reveal">
           <h3>Our Vision</h3>
           <p>To become the Gulf’s leading innovation holding—driving the transition toward sustainable energy, intelligent finance, and future-ready digital ecosystems.</p>
@@ -366,11 +370,11 @@ const aboutBody = `${hero({
 
   <section class="section">
     <div class="container">
-      <div class="center reveal" style="max-width:720px;margin-inline:auto">
+      <div class="center reveal intro">
         <p class="eyebrow">Our values</p>
         <h2>How We Work</h2>
       </div>
-      <div class="grid grid-3" style="margin-top:40px">
+      <div class="grid grid-3 mt-4">
         <div class="value reveal">
           <h3>Innovation</h3>
           <p>We challenge conventional thinking and invest in forward-looking solutions.</p>
@@ -404,7 +408,7 @@ const aboutBody = `${hero({
       <div class="reveal">
         <p class="eyebrow">Founder’s message</p>
         <h2>Abdullah Sultan AlMutairi</h2>
-        <p class="person__role" style="color:#50d7d5">Founder &amp; Chief Executive Officer</p>
+        <p class="person__role">Founder &amp; Chief Executive Officer</p>
         <p>NexGen was founded on the belief that innovation must deliver real value—not just ideas.</p>
         <p>As a holding company, our role goes beyond capital allocation. We actively shape ventures that address critical challenges facing our region, from clean energy and infrastructure efficiency to financial systems and digital transformation.</p>
         <p>We take a disciplined and selective approach, partnering with proven global innovators and regional institutions to ensure each venture is practical, scalable, and aligned with the long-term priorities of the Gulf.</p>
@@ -418,11 +422,11 @@ const aboutBody = `${hero({
 
   <section class="section">
     <div class="container">
-      <div class="center reveal" style="max-width:720px;margin-inline:auto">
+      <div class="center reveal intro">
         <p class="eyebrow">Leadership</p>
         <h2>Our Leadership Structure</h2>
       </div>
-      <div class="grid grid-2" style="margin-top:40px">
+      <div class="grid grid-2 mt-4">
         <article class="person reveal">
           <div class="person__media"><img src="assets/img/team-omar.webp" alt="Omar Almutairi, Head Of Fintech" loading="lazy" decoding="async"></div>
           <div class="person__body">
@@ -441,10 +445,10 @@ const aboutBody = `${hero({
         </article>
       </div>
 
-      <div class="center reveal" style="max-width:720px;margin:72px auto 0">
+      <div class="center reveal intro mt-6">
         <h2>Advisory Board</h2>
       </div>
-      <div class="grid grid-3" style="margin-top:32px">
+      <div class="grid grid-3 mt-4">
         <a class="advisor reveal" href="https://www.linkedin.com/in/abdullahmansouralenezi" target="_blank" rel="noopener">
           <img src="assets/img/advisor-alenzi.webp" alt="Abdullah Alenzi" loading="lazy" decoding="async">
           <span>
@@ -478,22 +482,21 @@ const aboutBody = `${hero({
         <p>NexGen selectively engages with strategic partners, institutional investors, and family offices that share our vision for sustainable growth and high-impact innovation across clean energy and digital ventures.</p>
         <p>We do not pursue open fundraising or public investment offerings. All partnership and investment discussions are evaluated privately and aligned with NexGen’s strategic roadmap, governance standards, and long-term objectives.</p>
         <p>Organizations interested in exploring strategic alignment with NexGen are invited to submit a confidential inquiry.</p>
-        <div class="btn-row" style="margin-top:24px"><a class="btn btn--primary" href="contact.html">Express Strategic Interest</a></div>
+        <div class="btn-row mt-3"><a class="btn btn--primary" href="contact.html">Express Strategic Interest</a></div>
       </div>
       <div class="reveal" data-delay="1">
-        <p class="eyebrow">Looking forward</p>
+        </p>
         <h2>Looking Forward</h2>
         <p>NexGen continues to expand its portfolio with future ventures aligned with sustainability, intelligent infrastructure, and digital transformation. Our platform is designed to evolve—welcoming new opportunities that strengthen the NexGen ecosystem while preserving focus, quality, and strategic intent.</p>
-        <h3 style="margin-top:32px">Partner With NexGen</h3>
+        <h3 class="mt-4">Partner With NexGen</h3>
         <p>Whether you represent a government entity, enterprise, financial institution, or strategic partner, NexGen welcomes conversations that shape the future of clean energy and intelligent digital innovation.</p>
-        <div class="btn-row" style="margin-top:24px"><a class="btn btn--outline" href="contact.html">Contact Us</a></div>
+        <div class="btn-row mt-3"><a class="btn btn--outline" href="contact.html">Contact Us</a></div>
       </div>
     </div>
   </section>`;
 
 const companiesBody = `${hero({
   image: 'hero-about.webp',
-  eyebrow: 'Our companies',
   title: 'Our Companies',
   lead: 'Beyond clean energy, NexGen builds a growing portfolio of digital ventures shaping the future of finance, workforce empowerment, data intelligence, and smart living.',
 })}
@@ -518,7 +521,7 @@ const inpipeBody = `${hero({
   <section class="section">
     <div class="container split">
       <div class="reveal">
-        <p class="eyebrow">The challenge</p>
+        </p>
         <h2>The Challenge</h2>
         <p>Water delivery across the GCC consumes massive electricity. At pressure-control points, this energy is traditionally wasted as heat, driving up operating costs and carbon emissions.</p>
         <p>Utilities need solutions that:</p>
@@ -537,10 +540,9 @@ const inpipeBody = `${hero({
   <section class="section section--alt">
     <div class="container split split--reverse">
       <div class="reveal">
-        <p class="eyebrow">HydroXS solution</p>
         <h2>HydroXS Solution</h2>
         <p><strong>HydroXS</strong> installs directly onto existing pipeline infrastructure and captures energy from excess pressure. As water flows through, the system safely reduces pressure while generating clean electricity.</p>
-        <h3 style="margin-top:32px">Key Advantages</h3>
+        <h3 class="mt-4">Key Advantages</h3>
         <ul class="checklist">
           <li>No change in water operations</li>
           <li>Predictable renewable power (day &amp; night)</li>
@@ -555,12 +557,12 @@ const inpipeBody = `${hero({
 
   <section class="section section--dark">
     <div class="container">
-      <div class="center reveal" style="max-width:720px;margin-inline:auto">
-        <p class="eyebrow">Real results</p>
+      <div class="center reveal intro">
+        </p>
         <h2>Real Results</h2>
         <p class="lead">Examples from existing deployments:</p>
       </div>
-      <div class="stats reveal" style="margin-top:40px">
+      <div class="stats reveal mt-4">
         <div class="stat">
           <p class="stat__value">200,000</p>
           <p class="stat__label">kWh annually from a single site (up to)</p>
@@ -584,7 +586,7 @@ const inpipeBody = `${hero({
   <section class="section">
     <div class="container split">
       <div class="reveal">
-        <p class="eyebrow">GCC use cases</p>
+        </p>
         <h2>GCC Use Cases</h2>
         <p>HydroXS is an ideal fit for:</p>
         <ul class="checklist">
@@ -599,21 +601,21 @@ const inpipeBody = `${hero({
       <div class="reveal" data-delay="1">
         <p class="eyebrow">Delivery process</p>
         <h2>NexGen Manages The Full Journey</h2>
-        <ol class="steps" style="margin-top:24px">
+        <ol class="steps mt-3">
           <li class="step"><div><h3>Data Collection Support</h3></div></li>
           <li class="step"><div><h3>Hydraulic &amp; Energy Analysis</h3></div></li>
           <li class="step"><div><h3>Technical &amp; Financial Proposal</h3></div></li>
           <li class="step"><div><h3>Procurement &amp; Installation</h3></div></li>
           <li class="step"><div><h3>Commissioning &amp; Monitoring</h3></div></li>
         </ol>
-        <div class="btn-row" style="margin-top:32px"><a class="btn btn--primary" href="contact.html">Request Engineering Assessment</a></div>
+        <div class="btn-row mt-4"><a class="btn btn--primary" href="contact.html">Request Engineering Assessment</a></div>
       </div>
     </div>
   </section>`;
 
 const trustFlowBody = `${hero({
   mark: 'venture-trust-flow.webp',
-  eyebrow: 'Trust Flow',
+  eyebrow: 'Corporate &amp; Investor Onboarding AI',
   title: 'Trust Flow',
   lead: 'Intelligent onboarding for banks &amp; investment firms — a unified AI platform that accelerates onboarding, elevates compliance accuracy, and streamlines documentation for banks, corporate clients, investment firms, funds, and asset managers.',
   actions: `<a class="btn btn--accent" href="contact.html">Request a Demo</a>`,
@@ -622,10 +624,9 @@ const trustFlowBody = `${hero({
 
   <section class="section">
     <div class="container">
-      <div class="center reveal" style="max-width:760px;margin-inline:auto">
-        <p class="eyebrow">Trust Flow</p>
+      <div class="center reveal intro--wide">
         <h2>Intelligent Onboarding for Banks &amp; Investment Firms</h2>
-        <p class="lead">A unified AI platform that accelerates onboarding, elevates compliance accuracy, and streamlines documentation for banks, corporate clients, investment firms, funds, and asset managers.</p>
+        <p class="lead">Every file arrives complete, sourced, and audit-ready — without an analyst retyping a single document.</p>
       </div>
     </div>
   </section>
@@ -633,7 +634,7 @@ const trustFlowBody = `${hero({
   <section class="section section--alt">
     <div class="container split">
       <div class="reveal">
-        <p class="eyebrow">The challenge</p>
+        </p>
         <h2>The Challenge</h2>
         <p>Financial institutions waste time and resources on:</p>
         <ul class="checklist">
@@ -644,13 +645,13 @@ const trustFlowBody = `${hero({
           <li>High regulatory pressure</li>
           <li>Long turnaround times</li>
         </ul>
-        <p style="margin-top:24px">These bottlenecks delay revenue, frustrate clients, and increase operational costs.</p>
+        <p class="mt-3">These bottlenecks delay revenue, frustrate clients, and increase operational costs.</p>
       </div>
       <div class="reveal" data-delay="1">
-        <p class="eyebrow">The solution</p>
+        </p>
         <h2>The Solution</h2>
         <p><strong>Trust Flow</strong> automates the entire onboarding process with AI, ensuring fast, accurate, and complete files.</p>
-        <h3 style="margin-top:32px">What It Includes</h3>
+        <h3 class="mt-4">What It Includes</h3>
         <ul class="checklist">
           <li>AI document extraction</li>
           <li>Automated KYC/KYB</li>
@@ -667,7 +668,6 @@ const trustFlowBody = `${hero({
   <section class="section">
     <div class="container split">
       <div class="reveal">
-        <p class="eyebrow">Who Trust Flow serves</p>
         <h2>Who Trust Flow Serves</h2>
         <ul class="checklist">
           <li>Banks</li>
@@ -679,7 +679,6 @@ const trustFlowBody = `${hero({
         </ul>
       </div>
       <div class="reveal" data-delay="1">
-        <p class="eyebrow">Value for institutions</p>
         <h2>Value For Institutions</h2>
         <ul class="checklist">
           <li>Cost optimization</li>
@@ -689,7 +688,7 @@ const trustFlowBody = `${hero({
           <li>Standardized risk evaluation</li>
           <li>Reduced operational workload</li>
         </ul>
-        <div class="btn-row" style="margin-top:32px">
+        <div class="btn-row mt-4">
           <a class="btn btn--primary" href="contact.html">Schedule a Strategy Call</a>
           <a class="btn btn--outline" href="contact.html">Contact Us</a>
         </div>
@@ -699,7 +698,7 @@ const trustFlowBody = `${hero({
 
 const jypBody = `${hero({
   mark: 'venture-jyp.webp',
-  eyebrow: 'JYP',
+  eyebrow: 'Workforce Payments',
   title: 'JYP',
   lead: 'Smart wallet for the GCC workforce — a secure, multilingual wallet for salary distribution, low-cost remittances, and seamless employer integration.',
   actions: `<a class="btn btn--accent" href="contact.html">Partner With Us</a>`,
@@ -708,10 +707,9 @@ const jypBody = `${hero({
 
   <section class="section">
     <div class="container">
-      <div class="center reveal" style="max-width:760px;margin-inline:auto">
-        <p class="eyebrow">JYP</p>
+      <div class="center reveal intro--wide">
         <h2>Smart Wallet For The GCC Workforce</h2>
-        <p class="lead">A secure, multilingual wallet for salary distribution, low-cost remittances, and seamless employer integration.</p>
+        <p class="lead">Salaries reach workers the same day, and the money they send home costs a fraction of a bank transfer.</p>
       </div>
     </div>
   </section>
@@ -719,7 +717,7 @@ const jypBody = `${hero({
   <section class="section section--alt">
     <div class="container split">
       <div class="reveal">
-        <p class="eyebrow">The problem</p>
+        </p>
         <h2>The Problem</h2>
         <p>Financial institutions waste time and resources on:</p>
         <ul class="checklist">
@@ -730,10 +728,10 @@ const jypBody = `${hero({
         </ul>
       </div>
       <div class="reveal" data-delay="1">
-        <p class="eyebrow">The solution</p>
+        </p>
         <h2>The Solution</h2>
         <p><strong>JYP</strong> provides employers and workers with a modern financial platform that reduces costs, increases transparency, and improves access.</p>
-        <h3 style="margin-top:32px">Features</h3>
+        <h3 class="mt-4">Features</h3>
         <ul class="checklist">
           <li>Digital salary payments</li>
           <li>Wallet-to-wallet transfers</li>
@@ -750,7 +748,7 @@ const jypBody = `${hero({
     <div class="container">
       <div class="grid grid-2">
         <div class="panel reveal">
-          <p class="eyebrow">Value for employers</p>
+          </p>
           <h3>Value For Employers</h3>
           <ul class="checklist">
             <li>Full compliance</li>
@@ -759,7 +757,7 @@ const jypBody = `${hero({
           </ul>
         </div>
         <div class="panel reveal" data-delay="1">
-          <p class="eyebrow">Value for workers</p>
+          </p>
           <h3>Value For Workers</h3>
           <ul class="checklist">
             <li>Cheaper remittances</li>
@@ -768,7 +766,7 @@ const jypBody = `${hero({
           </ul>
         </div>
       </div>
-      <div class="btn-row center" style="margin-top:40px;justify-content:center">
+      <div class="btn-row center-actions">
         <a class="btn btn--primary" href="contact.html">Schedule a Strategy Call</a>
         <a class="btn btn--outline" href="contact.html">Contact Us</a>
       </div>
@@ -787,8 +785,7 @@ const esaalBody = `${hero({
 
   <section class="section">
     <div class="container">
-      <div class="center reveal" style="max-width:760px;margin-inline:auto">
-        <p class="eyebrow">In collaboration with Esaal</p>
+      <div class="center reveal intro--wide">
         <h2>Digital Receipts &amp; Spending Intelligence</h2>
         <p class="lead">An AI engine that converts receipts into structured, searchable financial data—powering insights for individuals, businesses, and retailers. Esaal replaces the paper receipt with a smarter, digital one, and turns every transaction into a real-time customer signal.</p>
       </div>
@@ -798,7 +795,7 @@ const esaalBody = `${hero({
   <section class="section section--alt">
     <div class="container split">
       <div class="reveal">
-        <p class="eyebrow">The problem</p>
+        </p>
         <h2>The Problem</h2>
         <p>Financial institutions waste time and resources on:</p>
         <ul class="checklist">
@@ -809,10 +806,10 @@ const esaalBody = `${hero({
         </ul>
       </div>
       <div class="reveal" data-delay="1">
-        <p class="eyebrow">The solution</p>
+        </p>
         <h2>The Solution</h2>
         <p><strong>Esaal</strong> turns every receipt—paper, email, POS—into clean, structured financial data instantly.</p>
-        <h3 style="margin-top:32px">Features</h3>
+        <h3 class="mt-4">Features</h3>
         <ul class="checklist">
           <li>AI receipt scanning</li>
           <li>Spending insights</li>
@@ -826,11 +823,11 @@ const esaalBody = `${hero({
 
   <section class="section">
     <div class="container">
-      <div class="center reveal" style="max-width:760px;margin-inline:auto">
+      <div class="center reveal intro--wide">
         <p class="eyebrow">The platform</p>
         <h2>Seamless Plug-n-Play With Your POS</h2>
       </div>
-      <div class="grid grid-3" style="margin-top:40px">
+      <div class="grid grid-3 mt-4">
         <article class="card reveal">
           <h3>Plug-n-Play Integration</h3>
           <p>Smart receipts integrate directly with your POS and other tools. No additional apps or hardware required for you or your customers.</p>
@@ -861,11 +858,11 @@ const esaalBody = `${hero({
 
   <section class="section section--dark">
     <div class="container">
-      <div class="center reveal" style="max-width:720px;margin-inline:auto">
+      <div class="center reveal intro">
         <p class="eyebrow">By the numbers</p>
         <h2>It works. We’ve got the receipts.</h2>
       </div>
-      <div class="stats reveal" style="margin-top:40px">
+      <div class="stats reveal mt-4">
         <div class="stat">
           <p class="stat__value">15,000<sup>+</sup></p>
           <p class="stat__label">Yearly receipts sent from over 15k stores across the world</p>
@@ -889,26 +886,26 @@ const esaalBody = `${hero({
   <section class="section">
     <div class="container split">
       <div class="reveal">
-        <p class="eyebrow">Value</p>
+        </p>
         <h2>Value</h2>
         <ul class="checklist">
           <li>Clear spending for individuals</li>
           <li>Accurate records for businesses</li>
           <li>Deep insights for retailers</li>
         </ul>
-        <h3 style="margin-top:32px">Capture Every Purchase</h3>
-        <ol class="steps" style="margin-top:16px">
+        <h3 class="mt-4">Capture Every Purchase</h3>
+        <ol class="steps mt-2">
           <li class="step"><div><h3>Tap into Convenience: Get the App</h3><p>Hit download through the App Store, Google Play or App Gallery.</p></div></li>
           <li class="step"><div><h3>Quick Sign-Up: Your Number or UAE PASS, Your Choice</h3><p>A simple touch, a swift sign-up, and you’re in.</p></div></li>
           <li class="step"><div><h3>Embrace the Ease: Enjoy the Esaal Edge</h3><p>Step into a world of effortless e-billing and seamless transactions.</p></div></li>
         </ol>
-        <div class="btn-row" style="margin-top:32px">
+        <div class="btn-row mt-4">
           <a class="btn btn--primary" href="contact.html">Contact Us</a>
           <a class="btn btn--outline" href="https://apps.apple.com/ae/app/esaal/id6444912096" target="_blank" rel="noopener">App Store</a>
         </div>
       </div>
       <figure class="figure figure--plate reveal" data-delay="1">
-        <img src="assets/img/venture-esaal.webp" alt="Esaal app icon" loading="lazy" decoding="async" style="max-width:220px;margin-inline:auto">
+        <img src="assets/img/venture-esaal.webp" alt="Esaal app icon" loading="lazy" decoding="async" class="figure__mark figure__mark--lg">
         <figcaption>Esaal — the new, smarter way to E-receipt. In collaboration with Esaal.</figcaption>
       </figure>
     </div>
@@ -916,7 +913,7 @@ const esaalBody = `${hero({
 
 const dariBody = `${hero({
   mark: 'venture-dari.webp',
-  eyebrow: 'Dari',
+  eyebrow: 'Smart Living',
   title: 'Dari',
   lead: 'AI Smart Living — a home and building ecosystem that understands behavior, emotion, and lifestyle.',
   actions: `<a class="btn btn--accent" href="contact.html">Partner With Us</a>`,
@@ -925,10 +922,9 @@ const dariBody = `${hero({
 
   <section class="section">
     <div class="container">
-      <div class="center reveal" style="max-width:760px;margin-inline:auto">
-        <p class="eyebrow">Dari</p>
+      <div class="center reveal intro--wide">
         <h2>AI-Powered Smart Living System</h2>
-        <p class="lead">A home and building ecosystem that understands behavior, emotion, and lifestyle.</p>
+        <p class="lead">Automation that anticipates the people in a building instead of reacting to the devices in it.</p>
       </div>
     </div>
   </section>
@@ -936,15 +932,15 @@ const dariBody = `${hero({
   <section class="section section--alt">
     <div class="container split">
       <div class="reveal">
-        <p class="eyebrow">The problem</p>
+        </p>
         <h2>The Problem</h2>
         <p>Traditional smart home systems are device-based and reactive. They don’t understand people.</p>
       </div>
       <div class="reveal" data-delay="1">
-        <p class="eyebrow">The solution</p>
+        </p>
         <h2>The Solution</h2>
         <p><strong>Dari</strong> creates human-centric automation using behavioral and emotional AI.</p>
-        <h3 style="margin-top:32px">Features</h3>
+        <h3 class="mt-4">Features</h3>
         <ul class="checklist">
           <li>Behavioral learning</li>
           <li>Emotion-aware automation</li>
@@ -958,17 +954,17 @@ const dariBody = `${hero({
 
   <section class="section">
     <div class="container">
-      <div class="center reveal" style="max-width:720px;margin-inline:auto">
-        <p class="eyebrow">Value</p>
+      <div class="center reveal intro">
+        </p>
         <h2>Value</h2>
       </div>
-      <div class="grid grid-4" style="margin-top:40px">
+      <div class="grid grid-4 mt-4">
         <div class="value reveal"><h3>Energy efficiency</h3></div>
         <div class="value reveal" data-delay="1"><h3>Comfort</h3></div>
         <div class="value reveal" data-delay="2"><h3>Safety</h3></div>
         <div class="value reveal" data-delay="3"><h3>Premium living experience</h3></div>
       </div>
-      <div class="btn-row center" style="margin-top:40px;justify-content:center">
+      <div class="btn-row center-actions">
         <a class="btn btn--primary" href="contact.html">Schedule a Strategy Call</a>
         <a class="btn btn--outline" href="contact.html">Contact Us</a>
       </div>
@@ -977,7 +973,7 @@ const dariBody = `${hero({
 
 const sabyBody = `${hero({
   mark: 'venture-saby.webp',
-  eyebrow: 'SABY',
+  eyebrow: 'Technology Studio',
   title: 'SABY',
   lead: 'Modern technology studio — software engineering, AI development, digital transformation, and enterprise platforms.',
   actions: `<a class="btn btn--accent" href="contact.html">Partner With Us</a>`,
@@ -987,12 +983,12 @@ const sabyBody = `${hero({
   <section class="section">
     <div class="container split">
       <div class="reveal">
-        <p class="eyebrow">Who we are</p>
+        </p>
         <h2>Who We Are</h2>
         <p>SABY is NexGen’s dedicated studio delivering modern, scalable digital solutions for the region.</p>
       </div>
       <div class="reveal" data-delay="1">
-        <p class="eyebrow">Expertise</p>
+        </p>
         <h2>Expertise</h2>
         <ul class="checklist">
           <li>AI &amp; automation</li>
@@ -1008,16 +1004,15 @@ const sabyBody = `${hero({
 
   <section class="section section--alt">
     <div class="container">
-      <div class="center reveal" style="max-width:720px;margin-inline:auto">
-        <p class="eyebrow">Why SABY?</p>
+      <div class="center reveal intro">
         <h2>Why SABY?</h2>
       </div>
-      <div class="grid grid-3" style="margin-top:40px">
+      <div class="grid grid-3 mt-4">
         <article class="card reveal"><h3>Modern engineering practices</h3></article>
         <article class="card reveal" data-delay="1"><h3>Fast delivery cycles</h3></article>
         <article class="card reveal" data-delay="2"><h3>Enterprise-grade execution</h3></article>
       </div>
-      <div class="btn-row center" style="margin-top:40px;justify-content:center">
+      <div class="btn-row center-actions">
         <a class="btn btn--primary" href="contact.html">Schedule a Strategy Call</a>
         <a class="btn btn--outline" href="contact.html">Contact Us</a>
       </div>
@@ -1025,7 +1020,6 @@ const sabyBody = `${hero({
   </section>`;
 
 const contactBody = `${hero({
-  eyebrow: 'Get in touch',
   title: 'Contact Us',
   lead: 'Whether you represent a government entity, enterprise, financial institution, or strategic partner, NexGen welcomes conversations that shape the future of clean energy and intelligent digital innovation.',
   cls: ' hero--plate',
@@ -1036,7 +1030,7 @@ const contactBody = `${hero({
       <div class="reveal">
         <p class="eyebrow">Direct lines</p>
         <h2>Talk to NexGen</h2>
-        <div class="contact-card" style="margin-top:24px">
+        <div class="contact-card mt-3">
           <a class="contact-row" href="${PHONE_HREF}">
             <span class="contact-row__label">Phone</span>
             <span class="contact-row__value">${PHONE}</span>
@@ -1062,12 +1056,12 @@ const contactBody = `${hero({
 
   <section class="section section--alt">
     <div class="container">
-      <div class="center reveal" style="max-width:760px;margin-inline:auto">
+      <div class="center reveal intro--wide">
         <p class="eyebrow">Where we operate</p>
         <h2>Regional Presence &amp; Local Insight</h2>
         <p class="lead">Active across Bahrain, Kuwait, Saudi Arabia, and the wider GCC.</p>
       </div>
-      <div class="grid grid-3" style="margin-top:40px">
+      <div class="grid grid-3 mt-4">
         <article class="card reveal">
           <h3>Clean Energy</h3>
           <p>HydroXS in-pipe hydropower with InPipe Energy (USA) for utilities, municipalities, and large facilities.</p>
