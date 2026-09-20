@@ -13,16 +13,25 @@ const LINKEDIN = 'https://www.linkedin.com/company/nexgen-holdings/';
 const FOOTER_COPY = '© Copyright 2025 NEXGEN Holding';
 
 const NAV = [
-  ['Home', 'index.html'],
-  ['About Us', 'about.html'],
-  ['InPipe Energy', 'inpipe-energy.html'],
-  ['Our Companies', 'companies.html'],
-  ['Trust Flow', 'trust-flow.html'],
-  ['JYP', 'jyp.html'],
-  ['Esaal', 'esaal.html'],
-  ['Dari', 'dari.html'],
-  ['SABY', 'saby.html'],
-  ['Contact Us', 'contact.html'],
+  { label: 'Home', href: 'index.html' },
+  { label: 'About Us', href: 'about.html' },
+  { label: 'InPipe Energy', href: 'inpipe-energy.html' },
+  /* The five ventures live behind the section they belong to, so the row stays
+     readable instead of becoming a list of ten. The parent is a real link to
+     the overview page, and a separate caret button owns the disclosure. */
+  {
+    label: 'Our Companies',
+    href: 'companies.html',
+    id: 'companies-menu',
+    children: [
+      { label: 'Trust Flow', href: 'trust-flow.html' },
+      { label: 'JYP', href: 'jyp.html' },
+      { label: 'Esaal', href: 'esaal.html' },
+      { label: 'Dari', href: 'dari.html' },
+      { label: 'SABY', href: 'saby.html' },
+    ],
+  },
+  { label: 'Contact Us', href: 'contact.html' },
 ];
 
 const VENTURES = [
@@ -71,9 +80,27 @@ const VENTURES = [
 /* ---------------------------------------------------------------- partials */
 
 function topbar(active) {
-  const items = NAV.map(([label, href]) => {
-    const current = href === active ? ' aria-current="page"' : '';
-    return `          <li><a href="${href}"${current}>${label}</a></li>`;
+  const items = NAV.map((item) => {
+    if (!item.children) {
+      const current = item.href === active ? ' aria-current="page"' : '';
+      return `          <li><a href="${item.href}"${current}>${item.label}</a></li>`;
+    }
+    /* The group lights up when the overview page or any of its children is the
+       page you are on, so the caret never hides where you are. */
+    const groupCurrent = item.children.some((c) => c.href === active);
+    const self = item.href === active ? ' aria-current="page"' : '';
+    const kids = item.children
+      .map((c) => `              <li><a href="${c.href}"${c.href === active ? ' aria-current="page"' : ''}>${c.label}</a></li>`)
+      .join('\n');
+    return `          <li class="drop${groupCurrent ? ' is-current' : ''}" data-drop>
+            <a href="${item.href}"${self}>${item.label}</a>
+            <button class="drop__toggle" type="button" data-drop-toggle aria-expanded="false" aria-controls="${item.id}" aria-label="Open ${item.label} menu">
+              <span class="drop__caret" aria-hidden="true"></span>
+            </button>
+            <ul class="drop__menu" id="${item.id}">
+${kids}
+            </ul>
+          </li>`;
   }).join('\n');
 
   return `  <a class="skip-link" href="#main">Skip to content</a>
@@ -131,13 +158,13 @@ function footer() {
         <p>A Gulf-based holding company building and scaling high-impact ventures across clean energy, financial innovation, and intelligent digital platforms.</p>
       </div>
       <div>
-        <h4>Ventures</h4>
+        <h2 class="footer__heading">Ventures</h2>
         <nav class="footer__links" aria-label="Ventures">
 ${ventureLinks}
         </nav>
       </div>
       <div>
-        <h4>Company</h4>
+        <h2 class="footer__heading">Company</h2>
         <nav class="footer__links" aria-label="Company">
           <a href="index.html">Home</a>
           <a href="about.html">About Us</a>
@@ -147,7 +174,7 @@ ${ventureLinks}
         </nav>
       </div>
       <div>
-        <h4>Get in touch</h4>
+        <h2 class="footer__heading">Get in touch</h2>
         <div class="footer__contact">
           <div>
             <span class="footer__label">Phone</span>
@@ -217,14 +244,18 @@ ${mobileCta()}
 
 const stars = '<span aria-hidden="true">*</span>';
 
-function ventureCards() {
+function ventureCards(level) {
+  /* On the homepage the cards sit under the "Five Ventures" h2, so they are
+     h3. On the companies page they ARE the page's content, directly under the
+     h1, so they take h2 — otherwise the outline jumps h1 -> h3. */
+  const h = level || 3;
   return VENTURES.map((v, i) => `        <article class="card venture reveal" data-delay="${i % 3}">
           <div class="venture__media">
             <img src="assets/img/${v.img}" alt="${v.name} — ${v.title}" loading="lazy" decoding="async">
           </div>
           <div class="venture__body">
             <p class="venture__kicker">${v.kicker}</p>
-            <h3 class="venture__title">${v.name}</h3>
+            <h${h} class="venture__title">${v.name}</h${h}>
             <p>${v.copy}</p>
             <div class="card__foot"><a class="link-arrow" href="${v.file}">Read More</a></div>
           </div>
@@ -505,7 +536,7 @@ const companiesBody = `${hero({
   <section class="section">
     <div class="container">
       <div class="grid grid-3">
-${ventureCards()}
+${ventureCards(2)}
       </div>
     </div>
   </section>`;

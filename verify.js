@@ -40,13 +40,29 @@ for (const p of PAGES) {
     if (!r.external && !r.ok) { brokenLinks++; badRefs.push(`${p} -> ${ref}`); }
   }
 
-  // every page must carry the same 10 nav links
-  const navMatch = html.match(/<ul class="topbar__menu" id="primary-menu">([\s\S]*?)<\/ul>/);
+  // Every page must carry the same nav: five top-level entries, with the five
+  // ventures nested under the Companies panel. Both sets are checked, so a
+  // dropped link fails here rather than silently disappearing from the site.
+  const navMatch = html.match(/<ul class="topbar__menu" id="primary-menu">([\s\S]*?)<\/ul>\s*<\/nav>/);
   if (!navMatch) { parseErrors.push(`${p}: nav menu not found`); continue; }
-  const navHrefs = [...navMatch[1].matchAll(/href="([^"]+)"/g)].map(x => x[1]);
-  const expected = ['index.html','about.html','inpipe-energy.html','companies.html','trust-flow.html','jyp.html','esaal.html','dari.html','saby.html','contact.html'];
+  const navBlock = navMatch[1];
+  const topBlock = navBlock.replace(/<ul class="drop__menu"[\s\S]*?<\/ul>/, '');
+  const navHrefs = [...topBlock.matchAll(/href="([^"]+)"/g)].map(x => x[1]);
+  const expected = ['index.html','about.html','inpipe-energy.html','companies.html','contact.html'];
   if (navHrefs.join(',') !== expected.join(',')) {
     parseErrors.push(`${p}: nav order mismatch -> ${navHrefs.join(',')}`);
+  }
+  const dropMatch = navBlock.match(/<ul class="drop__menu" id="[^"]+">([\s\S]*?)<\/ul>/);
+  if (!dropMatch) { parseErrors.push(`${p}: Companies panel missing from nav`); continue; }
+  const dropHrefs = [...dropMatch[1].matchAll(/href="([^"]+)"/g)].map(x => x[1]);
+  const expectedDrop = ['trust-flow.html','jyp.html','esaal.html','dari.html','saby.html'];
+  if (dropHrefs.join(',') !== expectedDrop.join(',')) {
+    parseErrors.push(`${p}: Companies panel mismatch -> ${dropHrefs.join(',')}`);
+  }
+  // The overview link and every venture must be present or the group is pointless.
+  const allNavHrefs = [...navBlock.matchAll(/href="([^"]+)"/g)].map(x => x[1]);
+  for (const need of [...expected, ...expectedDrop]) {
+    if (!allNavHrefs.includes(need)) parseErrors.push(`${p}: nav is missing ${need}`);
   }
 
   // canonical must use a clean slug

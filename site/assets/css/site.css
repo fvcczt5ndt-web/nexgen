@@ -17,7 +17,7 @@
    2.  Petrol (--dark) is reserved for statement bands, the CTA band, the
        footer, and the hero image scrim.
    3.  Mobile-first: base rules target 360-390px, scaling at 640 / 768 /
-       1024 / 1100.
+       1024 / 1240.
    ========================================================================== */
 
 /* --- 0. Fonts (self-hosted) ---------------------------------------------- */
@@ -121,7 +121,7 @@
   --dur-reveal:  620ms;
 }
 
-@media (max-width: 1099.98px) { :root { --topbar-h: 64px; } }
+@media (max-width: 939.98px) { :root { --topbar-h: 64px; } }
 @media (max-width: 420px)  { :root { --gutter: 18px; } }
 
 /* --- 2. Reset & base ----------------------------------------------------- */
@@ -458,12 +458,19 @@ main > .next + .section {
   z-index: 120;
   background: var(--dark);
   border-bottom: 1px solid var(--hairline-dark);
-  transition: box-shadow .3s var(--ease), background-color .3s var(--ease);
+  /* Hiding on the way down and returning on the way up is a transform, so the
+     bar keeps its own composited layer and never reflows the page. It also
+     makes .topbar the containing block for the drawer below, which is what
+     glues the drawer to the bar instead of to the viewport. */
+  transform: translateY(0);
+  transition: transform .28s var(--ease), box-shadow .3s var(--ease), background-color .3s var(--ease);
 }
+.topbar.is-hidden { transform: translateY(-101%); }
+/* No backdrop-filter here: it would make .topbar the containing block for its
+   fixed descendants and collapse the drawer. The bar is 97% opaque anyway, so
+   the blur was never doing visible work. */
 .topbar.is-stuck {
-  background: rgba(10, 18, 22, .94);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  background: rgba(10, 18, 22, .97);
   box-shadow: 0 12px 30px -22px rgba(0, 0, 0, .7);
 }
 /* The bar is dark and the page ground is not: let it bleed a little instead of
@@ -534,10 +541,15 @@ main > .next + .section {
 .topbar__toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
 .topbar__toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 
-/* Mobile: the whole nav becomes a slide-in panel (CTA lives inside it) */
+/* Mobile: the nav becomes a slide-in panel anchored to the bottom edge of the
+   bar. It is absolutely positioned rather than fixed so it stays glued to the
+   bar when the bar translates away, and so a transform or filter anywhere on
+   .topbar can never re-anchor it by accident. */
 .topbar__nav {
-  position: fixed;
-  inset: var(--topbar-h) 0 0 0;
+  position: absolute;
+  inset: 100% 0 auto 0;
+  height: calc(100vh - var(--topbar-h));
+  height: calc(100dvh - var(--topbar-h));
   display: flex;
   flex-direction: column;
   padding: var(--s4) var(--gutter) calc(var(--s5) + env(safe-area-inset-bottom, 0px));
@@ -576,19 +588,87 @@ main > .next + .section {
   border-radius: 50%;
 }
 
-.topbar__cta { margin-top: var(--s4); width: 100%; }
+/* --- 7a. Companies disclosure -------------------------------------------- */
+/* The group is a real link to the overview page plus a separate caret button
+   that owns the disclosure. Keeping the two apart means the label is always a
+   one-tap route to the overview, and opening the list never hijacks it. */
+.drop { display: flex; flex-wrap: wrap; align-items: center; }
+.drop > a { flex: 1 1 auto; }
+.drop__toggle {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: rgba(255, 255, 255, .66);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.drop__caret {
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform .25s var(--ease);
+}
+/* Drawer: the list is a nested block, open by default so every venture is
+   reachable without JS. The caret collapses it. */
+.drop__menu {
+  flex: 1 0 100%;
+  margin-left: 2px;
+  padding: 0 0 10px 12px;
+  border-left: 1px solid rgba(255, 255, 255, .12);
+}
+.drop__menu a {
+  min-height: 48px;
+  padding: 12px 2px;
+  font-size: var(--fs-body);
+  color: rgba(255, 255, 255, .72);
+}
+.drop.is-collapsed .drop__menu { display: none; }
+.drop.is-collapsed .drop__caret { transform: rotate(-45deg) translate(0, -2px); }
+.drop.is-current > a { color: #fff; }
+.drop.is-current .drop__caret { border-color: var(--teal-bright); }
+
+/* The CTA lives in the bar itself, not inside the drawer. It has to clear the
+   44px touch minimum and still fit a 64px row next to the brand and the
+   toggle, so it gets its own compact metrics rather than .btn's roomy ones. */
+.topbar__cta {
+  margin-top: 0;
+  width: auto;
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 16px;
+  white-space: nowrap;
+}
+/* 360px leaves about 120px for the button; tighten it rather than let the
+   label wrap onto a second line and grow past the bar. */
+@media (max-width: 379.98px) {
+  .topbar__cta { padding: 0 12px; letter-spacing: .02em; }
+}
 
 /* --- 7b. Desktop navigation ---------------------------------------------- */
-/* Ten primary items need real room; below 1100px the drawer is the honest
-   layout rather than a cramped row that clips behind the brand. */
-@media (min-width: 1100px) {
+/* Measured: with the ventures behind the Companies panel the row costs
+   brand + five labels + the button = ~847px of the 1200px container, so it
+   appears once a 940px viewport can seat it. Below that the drawer is the
+   honest layout rather than a row that folds labels onto two lines. */
+@media (min-width: 940px) {
   .topbar__toggle { display: none; }
 
   .topbar__nav {
     position: static;
     inset: auto;
+    height: auto;
     flex-direction: row;
-    align-items: center;
+    /* Stretch to the bar so the Companies panel can hang off the bar's own
+       bottom edge rather than off the 44px label row inside it. */
+    align-self: stretch;
+    align-items: stretch;
     gap: 6px;
     margin-left: auto;
     padding: 0;
@@ -598,18 +678,21 @@ main > .next + .section {
     visibility: visible;
   }
 
-  .topbar__menu { flex-direction: row; align-items: center; gap: 2px; }
-  .topbar__menu > li { border-bottom: 0; }
+  .topbar__menu { flex-direction: row; align-items: stretch; height: 100%; gap: 1px; }
+  .topbar__menu > li { border-bottom: 0; display: flex; align-items: center; }
 
   .topbar__menu a {
     position: relative;
     width: auto;
     min-height: 44px;
-    padding: 11px 12px;
+    padding: 11px 11px;
     font-size: var(--fs-label);
     font-weight: 500;
-    letter-spacing: .04em;
+    letter-spacing: .03em;
     text-transform: uppercase;
+    /* Never fold a label across two lines: a two-line row is the tell of a
+       template that was not measured. */
+    white-space: nowrap;
     color: rgba(255, 255, 255, .74);
   }
   @media (hover: hover) and (pointer: fine) {
@@ -631,6 +714,46 @@ main > .next + .section {
   @media (hover: hover) and (pointer: fine) {
     .topbar__menu a:hover::after { transform: scaleX(1); }
   }
+
+  /* Desktop: the group is the label + its own caret, and the list becomes a
+     panel below them. The group stretches to the full bar height so the
+     panel's 100% lands under the bar's bottom edge instead of over it. */
+  .drop { position: relative; align-self: stretch; flex-wrap: nowrap; }
+  .drop__toggle { width: 44px; height: 44px; color: rgba(255, 255, 255, .74); }
+  .drop.is-current .drop__toggle { color: #fff; }
+  .drop__menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 1;
+    flex: none;
+    min-width: 236px;
+    margin: 0;
+    padding: 8px;
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: var(--radius-lg);
+    background: var(--dark-2);
+    box-shadow: 0 28px 54px -24px rgba(0, 0, 0, .6);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity .2s var(--ease), transform .2s var(--ease), visibility .2s;
+  }
+  .drop.is-open .drop__menu { opacity: 1; visibility: visible; transform: none; }
+  .drop.is-open .drop__caret { transform: rotate(-135deg) translate(-2px, -2px); }
+  .drop__menu a {
+    min-height: 46px;
+    padding: 11px 12px;
+    border-radius: var(--radius);
+    font-size: var(--fs-label);
+    letter-spacing: .04em;
+    color: rgba(255, 255, 255, .74);
+  }
+  .drop__menu a::after { display: none; }
+  @media (hover: hover) and (pointer: fine) {
+    .drop__menu a:hover { background: rgba(255, 255, 255, .08); color: #fff; }
+  }
+  .drop__menu a[aria-current="page"] { background: rgba(95, 211, 207, .14); color: #fff; }
 
   .topbar__cta { margin-top: 0; margin-left: 10px; width: auto; min-height: 44px; padding: 12px 20px; }
 }
@@ -655,8 +778,8 @@ main > .next + .section {
 .js .mobile-cta { transform: translateY(115%); opacity: 0; visibility: hidden; }
 .js .mobile-cta.is-visible { transform: none; opacity: 1; visibility: visible; }
 
-@media (min-width: 1100px) { .mobile-cta { display: none; } }
-@media (max-width: 1099px) {
+@media (min-width: 940px) { .mobile-cta { display: none; } }
+@media (max-width: 939.98px) {
   /* Keep the bar clear of page content and the footer */
   body { padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
 }
@@ -1021,7 +1144,9 @@ main > .next + .section {
 }
 .footer__brand img { height: 44px; width: auto; margin-bottom: var(--s2); }
 .footer__brand p { font-size: .9375rem; max-width: 36ch; }
-.footer h4 {
+/* These are real h2s for the document outline, but visually they are small
+   uppercase labels. The class carries the look so the level can be honest. */
+.footer__heading {
   color: #fff;
   font-family: var(--font-sans);
   font-size: var(--fs-label);
@@ -1174,6 +1299,8 @@ main > .next + .section {
   .js .mobile-cta { transition: opacity .2s ease, visibility .2s; }
   .card, .btn, .contact-row, .advisor, .person__media img,
   .venture__media img, .link-arrow::after, .topbar__toggle span { transition: none !important; }
+  .topbar { transition: none !important; }
+  .drop__caret, .drop__menu { transition: none !important; }
   .btn:active { transform: none; }
 }
 

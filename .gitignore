@@ -11,3 +11,4 @@ LIVE-URL.txt
 
 # OS noise
 .DS_Store
+tools/preview-server.js

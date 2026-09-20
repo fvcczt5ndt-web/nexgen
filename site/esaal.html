@@ -43,12 +43,19 @@
           <li><a href="index.html">Home</a></li>
           <li><a href="about.html">About Us</a></li>
           <li><a href="inpipe-energy.html">InPipe Energy</a></li>
-          <li><a href="companies.html">Our Companies</a></li>
-          <li><a href="trust-flow.html">Trust Flow</a></li>
-          <li><a href="jyp.html">JYP</a></li>
-          <li><a href="esaal.html" aria-current="page">Esaal</a></li>
-          <li><a href="dari.html">Dari</a></li>
-          <li><a href="saby.html">SABY</a></li>
+          <li class="drop is-current" data-drop>
+            <a href="companies.html">Our Companies</a>
+            <button class="drop__toggle" type="button" data-drop-toggle aria-expanded="false" aria-controls="companies-menu" aria-label="Open Our Companies menu">
+              <span class="drop__caret" aria-hidden="true"></span>
+            </button>
+            <ul class="drop__menu" id="companies-menu">
+              <li><a href="trust-flow.html">Trust Flow</a></li>
+              <li><a href="jyp.html">JYP</a></li>
+              <li><a href="esaal.html" aria-current="page">Esaal</a></li>
+              <li><a href="dari.html">Dari</a></li>
+              <li><a href="saby.html">SABY</a></li>
+            </ul>
+          </li>
           <li><a href="contact.html">Contact Us</a></li>
         </ul>
       </nav>
@@ -213,7 +220,7 @@
         <p>A Gulf-based holding company building and scaling high-impact ventures across clean energy, financial innovation, and intelligent digital platforms.</p>
       </div>
       <div>
-        <h4>Ventures</h4>
+        <h2 class="footer__heading">Ventures</h2>
         <nav class="footer__links" aria-label="Ventures">
             <a href="trust-flow.html">Trust Flow</a>
             <a href="jyp.html">JYP</a>
@@ -223,7 +230,7 @@
         </nav>
       </div>
       <div>
-        <h4>Company</h4>
+        <h2 class="footer__heading">Company</h2>
         <nav class="footer__links" aria-label="Company">
           <a href="index.html">Home</a>
           <a href="about.html">About Us</a>
@@ -233,7 +240,7 @@
         </nav>
       </div>
       <div>
-        <h4>Get in touch</h4>
+        <h2 class="footer__heading">Get in touch</h2>
         <div class="footer__contact">
           <div>
             <span class="footer__label">Phone</span>
