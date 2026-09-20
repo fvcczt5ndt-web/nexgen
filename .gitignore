@@ -1,0 +1,13 @@
+# dependencies
+tools/node_modules/
+node_modules/
+
+# local-only artifacts
+LIVE-URL.txt
+*.log
+
+# local backups
+.backup-*/
+
+# OS noise
+.DS_Store

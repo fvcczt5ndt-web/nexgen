@@ -1,0 +1,101 @@
+Sample Page
+.is-topbar.fixed.static.dark,
+.is-topbar.fixed.static,
+.is-topbar.dark.lighttext.shrink,
+.is-topbar.shrink,
+.is-topbar.lighttext.shrink,
+.is-topbar.fixed.dark,
+.is-topbar.fixed,
+.is-topbar.dark.shrink {
+background-color:rgba(54, 54, 52, 1) !important;
+/* Update this style */
+.is-topbar-container {
+height: 50px;
+.is-topbar-logo img,
+.is-photo-profile {
+height: 50px;
+width: auto;
+vertical-align: middle;
+transition: all 0.3s;
+.is-section-navbar {
+height: calc(50px + 20px) !important;
+.is-topbar.fixed.static.dark .is-menu li ul,
+.is-topbar.fixed.static .is-menu li ul,
+.is-topbar.dark.lighttext .is-menu li ul,
+.is-topbar .is-menu li ul,
+.is-topbar.lighttext .is-menu li ul,
+.is-topbar.fixed.dark .is-menu li ul,
+.is-topbar.fixed .is-menu li ul,
+.is-topbar.dark .is-menu li ul{
+background-color:rgba(54, 54, 52, 1) !important;
+@media all and (max-width: 1024px) {
+.is-menu {
+background-color:rgba(54, 54, 52, 1);
+About Us
+Inpipe Energy
+Our Companies
+sayrafa
+jyp
+Fawtara
+Dari
+Saby
+contact us
+Building the Next Generation of Impact-Driven Ventures
+Contact Us
+About Us
+NEXGEN Holdings
+Building the Future of Clean Energy & Digital Innovation
+A Gulf-based holding company leading high-impact ventures in renewable energy, intelligent finance, data automation, and smart living technologies—delivering measurable results for governments, utilities, banks, and enterprises.
+Explore Clean Energy
+View Our Ventures
+WHO WE ARE?
+Innovation With Purpose. Impact With Scale.
+NexGen is a diversified holding company headquartered in the Gulf, focused on building ventures that deliver economic, environmental, and digital transformation. Our portfolio spans clean energy, financial technology, workforce solutions, smart living, and digital automation, each designed to solve real challenges and create real value.
+We partner with global technology leaders, regional institutions, and forward-thinking organizations to bring world-class solutions to the GCC.
+Learn More
+FLAGSHIP FOCUS: CLEAN ENERGY
+Clean Energy First — Transforming Water Pressure Into Renewable Power
+NexGen is the Exclusive Regional Partner of InPipe Energy (USA), bringing the HydroXS technology to the Gulf. HydroXS converts excess water pressure inside pipelines into clean electricity—helping utilities cut energy costs, extend asset life, and reduce emissions without altering existing operations.
+Learn More About InPipe
+OUR companies
+Beyond clean energy, NexGen builds a growing portfolio of digital ventures shaping the future of finance, workforce empowerment, data intelligence, and smart living.
+Sayrafa
+Corporate & Investor Onboarding AI
+A platform that accelerates onboarding for banks, investment firms, asset managers,& funds through AI-driven document processing, automated KYC/KYB, & intelligent compliance summaries.
+Read More
+JYP
+Smart Wallet for the GCC Workforce
+A multilingual salary and remittance wallet enabling low-cost international transfers, compliant payroll distribution, and seamless employer integration.
+Read More
+Fawtara
+Digital Receipts & Spending Intelligence
+An AI engine that converts receipts into structured, searchable financial data—powering insights for individuals, businesses, and retailers.
+Read More
+Dari
+AI-Powered Smart
+Living
+System
+A next-generation smart home and building platform that adapts to behavior, emotion, and daily routines—not just device commands.
+Read More
+SABY
+Modern Technology Studio
+NexGen’s dedicated software engineering arm specializing in AI development, digital transformation, and enterprise-grade platforms.
+Read More
+WHY NEXGEN
+Regional Presence & Local Insight
+Active across Bahrain, Kuwait, Saudi Arabia, and the wider GCC.
+Proven Global Partnerships
+Including InPipe Energy (USA) and strategic collaborations across finance and digital sectors.
+End-To-End Delivery
+From concept to deployment, NexGen leads technology, operations, and customer success across all ventures.
+Ready To Explore Partnership Opportunities Across Clean Energy Or Digital Innovation?
+Let’s build the future together.
+Contact Us
+Home
+About Us
+Our Companies
+Contact us
+PHONE:
++973 3660 0911
+GET IN TOUCH:
+© Copyright 2025 NEXGEN Holding
