@@ -20,9 +20,8 @@
 <meta name="twitter:image" content="https://nexgen.bh/assets/img/hero-about.webp">
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="favicon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Newsreader:wght@400;500;600&display=swap">
+<link rel="preload" href="assets/fonts/newsreader-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/instrument-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
 </head>
 <body>
@@ -57,8 +56,8 @@
     </div>
   </header>
 <main id="main">
-  <section class="hero">
-    <div class="hero__media"><img src="assets/img/hero-about.webp" alt="" fetchpriority="high" decoding="async"></div>
+  <section class="hero hero--photo">
+    <div class="hero__media"><img src="assets/img/hero-about.webp" alt="" fetchpriority="high" decoding="async" width="1280" height="720"></div>
     <div class="container hero__inner">
       <h1>About NexGen Holdings</h1>
       <p class="lead">A Gulf-based holding company building and scaling high-impact ventures across clean energy, financial innovation, and intelligent digital platforms.</p>
@@ -74,7 +73,7 @@
         <p>Rather than pursuing volume, NexGen follows a selective, high-conviction approach—focusing on ventures that align with regional priorities, regulatory environments, and real market demand across the GCC.</p>
       </div>
               <figure class="figure reveal">
-          <img src="assets/img/contact-visual.webp" alt="NexGen Holdings corporate visual" loading="lazy" decoding="async">
+          <img src="assets/img/contact-visual.webp" alt="NexGen Holdings corporate visual" loading="lazy" decoding="async" width="953" height="953">
         </figure>
     </div>
   </section>
@@ -145,7 +144,7 @@
         <p>NexGen is committed to building companies that stand the test of time—creating sustainable impact for our partners, our markets, and future generations.</p>
       </div>
       <figure class="figure reveal" data-delay="1">
-        <img src="assets/img/team-abdullah.webp" alt="Abdullah Sultan AlMutairi, Founder &amp; Chief Executive Officer of NexGen Holdings" loading="lazy" decoding="async">
+        <img src="assets/img/team-abdullah.webp" alt="Abdullah Sultan AlMutairi, Founder &amp; Chief Executive Officer of NexGen Holdings" loading="lazy" decoding="async" width="900" height="1094">
       </figure>
     </div>
   </section>
@@ -158,7 +157,7 @@
       </div>
       <div class="grid grid-2 mt-4">
         <article class="person reveal">
-          <div class="person__media"><img src="assets/img/team-omar.webp" alt="Omar Almutairi, Head Of Fintech" loading="lazy" decoding="async"></div>
+          <div class="person__media"><img src="assets/img/team-omar.webp" alt="Omar Almutairi, Head Of Fintech" loading="lazy" decoding="async" width="900" height="1094"></div>
           <div class="person__body">
             <h3 class="person__name">Omar Almutairi</h3>
             <p class="person__role">Head Of Fintech</p>
@@ -166,7 +165,7 @@
           </div>
         </article>
         <article class="person reveal" data-delay="1">
-          <div class="person__media"><img src="assets/img/team-jernej.webp" alt="Jernej Hercog, Head Of Renewable Energy" loading="lazy" decoding="async"></div>
+          <div class="person__media"><img src="assets/img/team-jernej.webp" alt="Jernej Hercog, Head Of Renewable Energy" loading="lazy" decoding="async" width="900" height="1094"></div>
           <div class="person__body">
             <h3 class="person__name">Jernej Hercog</h3>
             <p class="person__role">Head Of Renewable Energy</p>
@@ -180,21 +179,21 @@
       </div>
       <div class="grid grid-3 mt-4">
         <a class="advisor reveal" href="https://www.linkedin.com/in/abdullahmansouralenezi" target="_blank" rel="noopener">
-          <img src="assets/img/advisor-alenzi.webp" alt="Abdullah Alenzi" loading="lazy" decoding="async">
+          <img src="assets/img/advisor-alenzi.webp" alt="Abdullah Alenzi" loading="lazy" decoding="async" width="700" height="771">
           <span>
             <span class="advisor__name">Abdullah Alenzi</span>
             <span class="advisor__role">Founder &amp; CEO of JYB</span>
           </span>
         </a>
         <a class="advisor reveal" data-delay="1" href="https://www.linkedin.com/in/hanan-alsharah-67b9a01b9" target="_blank" rel="noopener">
-          <img src="assets/img/advisor-alsharah.webp" alt="Hanan Alsharah" loading="lazy" decoding="async">
+          <img src="assets/img/advisor-alsharah.webp" alt="Hanan Alsharah" loading="lazy" decoding="async" width="700" height="771">
           <span>
             <span class="advisor__name">HANAN ALSHARAH</span>
             <span class="advisor__role">Founder and CEO of Innotech</span>
           </span>
         </a>
         <a class="advisor reveal" data-delay="2" href="https://www.linkedin.com/in/moatassem-abdelhaleem" target="_blank" rel="noopener">
-          <img src="assets/img/advisor-moatassem.webp" alt="Moatassem Abdelhaleem" loading="lazy" decoding="async">
+          <img src="assets/img/advisor-moatassem.webp" alt="Moatassem Abdelhaleem" loading="lazy" decoding="async" width="700" height="778">
           <span>
             <span class="advisor__name">moatassem abdelhaleem</span>
             <span class="advisor__role">Founder &amp; CEO of Hexaflow</span>

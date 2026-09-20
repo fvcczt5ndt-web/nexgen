@@ -20,6 +20,32 @@
        1024 / 1100.
    ========================================================================== */
 
+/* --- 0. Fonts (self-hosted) ---------------------------------------------- */
+/* Served from this origin rather than fonts.googleapis.com: no third-party
+   round trip, no per-visitor request to Google, and — the reason this changed
+   — no font swap reflowing the hero once it arrives. Both faces are variable,
+   so one file covers 400-600. */
+@font-face {
+  font-family: "Newsreader";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("../fonts/newsreader-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("../fonts/instrument-sans-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 /* --- 1. Tokens ----------------------------------------------------------- */
 :root {
   /* Colour — petrol neutrals tinted toward the brand hue (the mark is
@@ -95,7 +121,7 @@
   --dur-reveal:  620ms;
 }
 
-@media (max-width: 1100px) { :root { --topbar-h: 64px; } }
+@media (max-width: 1099.98px) { :root { --topbar-h: 64px; } }
 @media (max-width: 420px)  { :root { --gutter: 18px; } }
 
 /* --- 2. Reset & base ----------------------------------------------------- */
@@ -264,10 +290,18 @@ main > .next + .section {
 /* Statement band. The generator emits .section--dark; this is the single
    place that paints it, so a dark section can never silently go transparent.
    .section--panel-dark/.panel-dark are kept as aliases for inset variants. */
+/* Statement bands arrive out of the page ground and return to it: the first
+   and last --pace of each band carry a paper fade, matching its own padding,
+   so no text ever sits on the transition. */
 .section--dark {
-  background-color: var(--dark);          /* opaque base under the gradient   */
+  background-color: var(--dark);          /* opaque base under the gradients  */
   background-image:
+    linear-gradient(180deg, rgba(244, 246, 246, 1) 0%, rgba(244, 246, 246, 0) 100%),
+    linear-gradient(180deg, rgba(244, 246, 246, 0) 0%, rgba(244, 246, 246, 1) 100%),
     radial-gradient(130% 120% at 8% 0%, #16262e 0%, var(--dark) 58%, #0a1318 100%);
+  background-repeat: no-repeat;
+  background-size: 100% var(--pace), 100% var(--pace), 100% 100%;
+  background-position: top, bottom, center;
   color: rgba(255, 255, 255, .84);
 }
 .section--dark h1, .section--dark h2, .section--dark h3, .section--dark h4 { color: #fff; }
@@ -305,6 +339,15 @@ main > .next + .section {
   grid-template-columns: minmax(0, 1fr);
   gap: var(--s5);
   align-items: center;
+}
+
+/* Editorial split: statement left, the reading column right. Used where a
+   section carries copy instead of an image, so the line length stays sane. */
+.split--editorial { align-items: start; }
+.split--editorial > div:first-child { max-width: 34ch; }
+.split--editorial > div:last-child > p { max-width: 62ch; }
+@media (min-width: 900px) {
+  .split--editorial { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--s6); }
 }
 
 .stack > * + * { margin-top: var(--s3); }
@@ -423,6 +466,19 @@ main > .next + .section {
   backdrop-filter: blur(10px);
   box-shadow: 0 12px 30px -22px rgba(0, 0, 0, .7);
 }
+/* The bar is dark and the page ground is not: let it bleed a little instead of
+   ending on a hard 1px line. Invisible over the hero, where both are dark. */
+.topbar::after {
+  content: "";
+  position: absolute;
+  inset: 100% 0 auto 0;
+  height: 20px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(15, 26, 32, .55) 0%, rgba(15, 26, 32, 0) 100%);
+  opacity: 0;
+  transition: opacity .3s var(--ease);
+}
+.topbar.is-stuck::after { opacity: 1; }
 
 .topbar__inner {
   display: flex;
@@ -454,6 +510,9 @@ main > .next + .section {
   margin-left: auto;
   width: 48px;
   height: 48px;
+  /* The topbar row is tight at 360px; without this the button is flex-shrunk
+     to 22px and the touch target falls well under 44px. */
+  flex: 0 0 auto;
   padding: 0;
   background: transparent;
   border: 1px solid rgba(255, 255, 255, .26);
@@ -616,22 +675,30 @@ main > .next + .section {
   isolation: isolate;
 }
 .hero--home { min-height: min(80vh, 740px); }
+/* Only photo heroes reserve room for the fade below their copy. */
+.hero--photo { padding-bottom: calc(var(--s7) + var(--s6)); }
 
 .hero__media { position: absolute; inset: 0; z-index: -2; }
 .hero__media img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 55%; }
 /* Scrim: heavy at the left where the type sits, lighter at the right so the
-   photograph still reads as a photograph. */
-.hero::after {
+   photograph still reads as a photograph. The last layer is the bridge: the
+   page ground fades in over the bottom of the hero, so near-black yields to
+   paper through one continuous value ramp instead of a cut. A plain fade of
+   --paper composites to a mathematically even ramp (a 246 to 24 travel has the
+   same step at every row), which is why there are no intermediate stops. */
+.hero--photo::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   background:
+    linear-gradient(180deg, rgba(244, 246, 246, 0) 0%, rgba(244, 246, 246, 1) 100%) bottom / 100% var(--s7) no-repeat,
     linear-gradient(180deg, rgba(10, 18, 22, .78) 0%, rgba(10, 18, 22, .52) 45%, rgba(10, 18, 22, .86) 100%),
     linear-gradient(90deg, rgba(8, 15, 19, .80) 0%, rgba(8, 15, 19, .22) 62%);
 }
-.hero--bright::after {
+.hero--photo.hero--bright::after {
   background:
+    linear-gradient(180deg, rgba(244, 246, 246, 0) 0%, rgba(244, 246, 246, 1) 100%) bottom / 100% var(--s7) no-repeat,
     linear-gradient(180deg, rgba(10, 18, 22, .70) 0%, rgba(10, 18, 22, .42) 45%, rgba(10, 18, 22, .80) 100%),
     linear-gradient(90deg, rgba(8, 15, 19, .72) 0%, rgba(8, 15, 19, .14) 62%);
 }
@@ -923,7 +990,14 @@ main > .next + .section {
 /* --- 14. CTA band + footer ----------------------------------------------- */
 .cta-band {
   position: relative;
-  background: var(--dark);
+  background-color: var(--dark);
+  /* Bridge: the band emerges from the page ground instead of butting into it.
+     Height matches .cta-band__inner padding so no copy sits on the transition. */
+  background-image:
+    linear-gradient(180deg, rgba(244, 246, 246, 1) 0%, rgba(244, 246, 246, 0) 100%);
+  background-repeat: no-repeat;
+  background-size: 100% var(--s6);
+  background-position: top;
   color: rgba(255, 255, 255, .86);
 }
 .cta-band h2 { color: #fff; margin: 0 0 6px; font-size: clamp(1.5rem, 3.4vw, 2.125rem); }
@@ -1047,19 +1121,8 @@ main > .next + .section {
 .figure img.figure__mark { width: 160px; }
 .figure__mark--lg { width: 200px; }
 
-/* Homepage image dock: two portraits, the second dropped for asymmetry. */
-.dock { display: grid; gap: var(--s3); }
-.dock img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: var(--radius-lg);
-  filter: saturate(.94) contrast(1.02);
-}
-@media (min-width: 640px) {
-  .dock { grid-template-columns: 1fr 1fr; align-items: start; }
-  .dock img:last-child { transform: translateY(var(--s4)); }
-}
+/* Homepage image dock removed: the two portraits carried no information the
+   copy did not already state. The section is an editorial split instead. */
 
 /* --- 17. Reveal on scroll (progressive enhancement) ---------------------- */
 /* One orchestrated entrance, opacity + transform only, capped stagger. */
@@ -1072,7 +1135,6 @@ main > .next + .section {
 .js .reveal[data-delay="1"] { transition-delay: .06s; }
 .js .reveal[data-delay="2"] { transition-delay: .12s; }
 .js .reveal[data-delay="3"] { transition-delay: .18s; }
-.js .dock.reveal { transition-delay: 0s; }
 
 /* --- 18. Responsive scale-up --------------------------------------------- */
 @media (min-width: 640px) {
@@ -1113,7 +1175,6 @@ main > .next + .section {
   .card, .btn, .contact-row, .advisor, .person__media img,
   .venture__media img, .link-arrow::after, .topbar__toggle span { transition: none !important; }
   .btn:active { transform: none; }
-  .dock img:last-child { transform: none; }
 }
 
 @media print {

@@ -195,9 +195,8 @@ function page({ slug, title, desc, active, head = '', body, ogImage = 'hero-home
 <meta name="twitter:image" content="${SITE}/assets/img/${ogImage}">
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="favicon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Newsreader:wght@400;500;600&display=swap">
+<link rel="preload" href="assets/fonts/newsreader-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/instrument-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
 ${head}</head>
 <body>
@@ -236,12 +235,16 @@ function hero({ image, mark, title, lead, eyebrow, actions = '', cls = '' }) {
   const media = image
     ? `    <div class="hero__media"><img src="assets/img/${image}" alt="" fetchpriority="high" decoding="async"></div>\n`
     : '';
+  /* hero--photo marks the heroes that carry a backdrop photograph. Only those
+     get the fade into the page ground; the compact petrol "plate" heroes hold
+     their own dark ground edge to edge. */
+  const photoCls = image ? ' hero--photo' : '';
   const markHtml = mark
     ? `      <img class="hero__mark" src="assets/img/${mark}" alt="" width="240" height="240">\n`
     : '';
   const eyebrowHtml = eyebrow ? `      <p class="eyebrow">${eyebrow}</p>\n` : '';
   const actionsHtml = actions ? `      <div class="btn-row hero__actions">${actions}</div>\n` : '';
-  return `  <section class="hero${cls}">
+  return `  <section class="hero${cls}${photoCls}">
 ${media}    <div class="container hero__inner">
 ${markHtml}${eyebrowHtml}      <h1>${title}</h1>
       <p class="lead">${lead}</p>
@@ -268,17 +271,15 @@ const homeBody = `${hero({
 })}
 
   <section class="section">
-    <div class="container split">
+    <div class="container split split--editorial">
       <div class="reveal">
         <h2>Innovation With Purpose. Impact With Scale.</h2>
         <p class="lead">NexGen is a diversified holding company headquartered in the Gulf, focused on building ventures that deliver economic, environmental, and digital transformation.</p>
+      </div>
+      <div class="reveal" data-delay="1">
         <p>Our portfolio spans clean energy, financial technology, workforce solutions, smart living, and digital automation, each designed to solve real challenges and create real value.</p>
         <p>We partner with global technology leaders, regional institutions, and forward-thinking organizations to bring world-class solutions to the GCC.</p>
         <div class="btn-row mt-3"><a class="btn btn--outline" href="about.html">Learn More</a></div>
-      </div>
-      <div class="dock reveal" data-delay="1">
-        <img src="assets/img/home-dock-1.webp" alt="NexGen Holdings corporate presentation visual" loading="lazy" decoding="async">
-        <img src="assets/img/home-dock-2.webp" alt="NexGen Holdings venture portfolio visual" loading="lazy" decoding="async">
       </div>
     </div>
   </section>
@@ -1125,6 +1126,48 @@ const JSONLD = `  <script type="application/ld+json">
   </script>
 `;
 
+/* --- Intrinsic image sizes -------------------------------------------------
+   Every <img> gets width/height so a lazy-loaded image reserves its box and the
+   page never reflows as it arrives (this was the visible "jump" on scroll). */
+function webpSize(file) {
+  const b = fs.readFileSync(file);
+  if (b.length < 30 || b.toString('ascii', 0, 4) !== 'RIFF' || b.toString('ascii', 8, 12) !== 'WEBP') return null;
+  const fmt = b.toString('ascii', 12, 16);
+  if (fmt === 'VP8X') {
+    return { w: 1 + (b[24] | (b[25] << 8) | (b[26] << 16)),
+             h: 1 + (b[27] | (b[28] << 8) | (b[29] << 16)) };
+  }
+  if (fmt === 'VP8 ') {
+    return { w: (b[26] | (b[27] << 8)) & 0x3fff, h: (b[28] | (b[29] << 8)) & 0x3fff };
+  }
+  if (fmt === 'VP8L') {
+    const bits = b[21] | (b[22] << 8) | (b[23] << 16) | (b[24] << 24);
+    return { w: 1 + (bits & 0x3fff), h: 1 + ((bits >> 14) & 0x3fff) };
+  }
+  return null;
+}
+
+const sizeCache = new Map();
+function intrinsic(src) {
+  if (sizeCache.has(src)) return sizeCache.get(src);
+  const file = path.join(OUT, src);
+  let dim = null;
+  if (fs.existsSync(file)) { try { dim = webpSize(file); } catch (e) { dim = null; } }
+  sizeCache.set(src, dim);
+  return dim;
+}
+
+function withIntrinsicSizes(html) {
+  return html.replace(/<img\b[^>]*>/g, (tag) => {
+    if (/\swidth=/.test(tag) && /\sheight=/.test(tag)) return tag;
+    const m = tag.match(/\ssrc="(assets\/img\/[^"]+)"/);
+    if (!m) return tag;
+    const dim = intrinsic(m[1]);
+    if (!dim) return tag;
+    return tag.slice(0, -1) + ` width="${dim.w}" height="${dim.h}">`;
+  });
+}
+
 for (const p of PAGES) {
   const html = page({
     slug: p.slug,
@@ -1135,8 +1178,9 @@ for (const p of PAGES) {
     ogImage: p.ogImage,
     head: p.home ? JSONLD : '',
   });
-  fs.writeFileSync(path.join(OUT, p.slug), html);
-  console.log('wrote', p.slug, (html.length / 1024).toFixed(1) + 'KB');
+  const out = withIntrinsicSizes(html);
+  fs.writeFileSync(path.join(OUT, p.slug), out);
+  console.log('wrote', p.slug, (out.length / 1024).toFixed(1) + 'KB');
 }
 
 /* robots.txt + sitemap.xml */

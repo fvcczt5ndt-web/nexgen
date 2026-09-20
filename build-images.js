@@ -18,8 +18,6 @@ const PLAN = [
   ['hero-inpipe.webp',      S('1766173560541_inpipe_energy_for_nexgen.pdf_3.webp'), 1920, 'hero'],
   ['inpipe-plant.webp',     S('1766084020662_inpipe_energy_for_nexgen.pdf_2.webp'), 1200, 'content'],
   ['inpipe-visual.webp',    S('1766174630830_elegant_corporate_business_style_zoom_virtual_background_7.webp'), 1200, 'content'],
-  ['home-dock-1.webp',      S('1766160776113_nexgen_profile_13.webp'), 1000, 'content'],
-  ['home-dock-2.webp',      S('1766161338245_nexgen_profile_14.webp'), 1000, 'content'],
   ['venture-why.webp',      S('1765899457233_nexgen_profile_7.webp'), 900, 'content'],
   ['venture-trust-flow.webp', S('1765898295901_nexgen_profile_3.webp'), 600, 'mark'],
   ['venture-jyp.webp',      S('1765898295547_nexgen_profile_5.webp'), 600, 'mark'],

@@ -20,9 +20,8 @@
 <meta name="twitter:image" content="https://nexgen.bh/assets/img/hero-home.webp">
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="favicon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Newsreader:wght@400;500;600&display=swap">
+<link rel="preload" href="assets/fonts/newsreader-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/instrument-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
   <script type="application/ld+json">
 {
@@ -84,8 +83,8 @@
     </div>
   </header>
 <main id="main">
-  <section class="hero hero--home">
-    <div class="hero__media"><img src="assets/img/hero-home.webp" alt="" fetchpriority="high" decoding="async"></div>
+  <section class="hero hero--home hero--photo">
+    <div class="hero__media"><img src="assets/img/hero-home.webp" alt="" fetchpriority="high" decoding="async" width="1280" height="720"></div>
     <div class="container hero__inner">
       <h1>Building the Next Generation of Impact-Driven Ventures</h1>
       <p class="lead">Building the Future of Clean Energy &amp; Digital Innovation — a Gulf-based holding company leading high-impact ventures in renewable energy, intelligent finance, data automation, and smart living technologies, delivering measurable results for governments, utilities, banks, and enterprises.</p>
@@ -95,17 +94,15 @@
   </section>
 
   <section class="section">
-    <div class="container split">
+    <div class="container split split--editorial">
       <div class="reveal">
         <h2>Innovation With Purpose. Impact With Scale.</h2>
         <p class="lead">NexGen is a diversified holding company headquartered in the Gulf, focused on building ventures that deliver economic, environmental, and digital transformation.</p>
+      </div>
+      <div class="reveal" data-delay="1">
         <p>Our portfolio spans clean energy, financial technology, workforce solutions, smart living, and digital automation, each designed to solve real challenges and create real value.</p>
         <p>We partner with global technology leaders, regional institutions, and forward-thinking organizations to bring world-class solutions to the GCC.</p>
         <div class="btn-row mt-3"><a class="btn btn--outline" href="about.html">Learn More</a></div>
-      </div>
-      <div class="dock reveal" data-delay="1">
-        <img src="assets/img/home-dock-1.webp" alt="NexGen Holdings corporate presentation visual" loading="lazy" decoding="async">
-        <img src="assets/img/home-dock-2.webp" alt="NexGen Holdings venture portfolio visual" loading="lazy" decoding="async">
       </div>
     </div>
   </section>
@@ -113,7 +110,7 @@
   <section class="section section--alt">
     <div class="container split">
               <figure class="figure reveal">
-          <img src="assets/img/inpipe-plant.webp" alt="HydroXS in-pipe hydropower technology" loading="lazy" decoding="async">
+          <img src="assets/img/inpipe-plant.webp" alt="HydroXS in-pipe hydropower technology" loading="lazy" decoding="async" width="1200" height="1235">
         </figure>
       <div class="reveal" data-delay="1">
         <h2>Clean Energy First — Transforming Water Pressure Into Renewable Power</h2>
@@ -134,7 +131,7 @@
       <div class="grid grid-3 mt-5">
         <article class="card venture reveal" data-delay="0">
           <div class="venture__media">
-            <img src="assets/img/venture-trust-flow.webp" alt="Trust Flow — Corporate & Investor Onboarding AI" loading="lazy" decoding="async">
+            <img src="assets/img/venture-trust-flow.webp" alt="Trust Flow — Corporate & Investor Onboarding AI" loading="lazy" decoding="async" width="600" height="600">
           </div>
           <div class="venture__body">
             <p class="venture__kicker">Fintech</p>
@@ -145,7 +142,7 @@
         </article>
         <article class="card venture reveal" data-delay="1">
           <div class="venture__media">
-            <img src="assets/img/venture-jyp.webp" alt="JYP — Smart Wallet for the GCC Workforce" loading="lazy" decoding="async">
+            <img src="assets/img/venture-jyp.webp" alt="JYP — Smart Wallet for the GCC Workforce" loading="lazy" decoding="async" width="600" height="600">
           </div>
           <div class="venture__body">
             <p class="venture__kicker">Workforce Payments</p>
@@ -156,7 +153,7 @@
         </article>
         <article class="card venture reveal" data-delay="2">
           <div class="venture__media">
-            <img src="assets/img/venture-esaal.webp" alt="Esaal — Digital Receipts & Spending Intelligence" loading="lazy" decoding="async">
+            <img src="assets/img/venture-esaal.webp" alt="Esaal — Digital Receipts & Spending Intelligence" loading="lazy" decoding="async" width="400" height="400">
           </div>
           <div class="venture__body">
             <p class="venture__kicker">In collaboration with Esaal</p>
@@ -167,7 +164,7 @@
         </article>
         <article class="card venture reveal" data-delay="0">
           <div class="venture__media">
-            <img src="assets/img/venture-dari.webp" alt="Dari — AI-Powered Smart Living System" loading="lazy" decoding="async">
+            <img src="assets/img/venture-dari.webp" alt="Dari — AI-Powered Smart Living System" loading="lazy" decoding="async" width="600" height="600">
           </div>
           <div class="venture__body">
             <p class="venture__kicker">Smart Living</p>
@@ -178,7 +175,7 @@
         </article>
         <article class="card venture reveal" data-delay="1">
           <div class="venture__media">
-            <img src="assets/img/venture-saby.webp" alt="SABY — Modern Technology Studio" loading="lazy" decoding="async">
+            <img src="assets/img/venture-saby.webp" alt="SABY — Modern Technology Studio" loading="lazy" decoding="async" width="600" height="600">
           </div>
           <div class="venture__body">
             <p class="venture__kicker">Technology Studio</p>

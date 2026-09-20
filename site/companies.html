@@ -20,9 +20,8 @@
 <meta name="twitter:image" content="https://nexgen.bh/assets/img/hero-about.webp">
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="favicon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Newsreader:wght@400;500;600&display=swap">
+<link rel="preload" href="assets/fonts/newsreader-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/instrument-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
 </head>
 <body>
@@ -57,8 +56,8 @@
     </div>
   </header>
 <main id="main">
-  <section class="hero">
-    <div class="hero__media"><img src="assets/img/hero-about.webp" alt="" fetchpriority="high" decoding="async"></div>
+  <section class="hero hero--photo">
+    <div class="hero__media"><img src="assets/img/hero-about.webp" alt="" fetchpriority="high" decoding="async" width="1280" height="720"></div>
     <div class="container hero__inner">
       <h1>Our Companies</h1>
       <p class="lead">Beyond clean energy, NexGen builds a growing portfolio of digital ventures shaping the future of finance, workforce empowerment, data intelligence, and smart living.</p>
@@ -70,7 +69,7 @@
       <div class="grid grid-3">
         <article class="card venture reveal" data-delay="0">
           <div class="venture__media">
-            <img src="assets/img/venture-trust-flow.webp" alt="Trust Flow — Corporate & Investor Onboarding AI" loading="lazy" decoding="async">
+            <img src="assets/img/venture-trust-flow.webp" alt="Trust Flow — Corporate & Investor Onboarding AI" loading="lazy" decoding="async" width="600" height="600">
           </div>
           <div class="venture__body">
             <p class="venture__kicker">Fintech</p>
@@ -81,7 +80,7 @@
         </article>
         <article class="card venture reveal" data-delay="1">
           <div class="venture__media">
-            <img src="assets/img/venture-jyp.webp" alt="JYP — Smart Wallet for the GCC Workforce" loading="lazy" decoding="async">
+            <img src="assets/img/venture-jyp.webp" alt="JYP — Smart Wallet for the GCC Workforce" loading="lazy" decoding="async" width="600" height="600">
           </div>
           <div class="venture__body">
             <p class="venture__kicker">Workforce Payments</p>
@@ -92,7 +91,7 @@
         </article>
         <article class="card venture reveal" data-delay="2">
           <div class="venture__media">
-            <img src="assets/img/venture-esaal.webp" alt="Esaal — Digital Receipts & Spending Intelligence" loading="lazy" decoding="async">
+            <img src="assets/img/venture-esaal.webp" alt="Esaal — Digital Receipts & Spending Intelligence" loading="lazy" decoding="async" width="400" height="400">
           </div>
           <div class="venture__body">
             <p class="venture__kicker">In collaboration with Esaal</p>
@@ -103,7 +102,7 @@
         </article>
         <article class="card venture reveal" data-delay="0">
           <div class="venture__media">
-            <img src="assets/img/venture-dari.webp" alt="Dari — AI-Powered Smart Living System" loading="lazy" decoding="async">
+            <img src="assets/img/venture-dari.webp" alt="Dari — AI-Powered Smart Living System" loading="lazy" decoding="async" width="600" height="600">
           </div>
           <div class="venture__body">
             <p class="venture__kicker">Smart Living</p>
@@ -114,7 +113,7 @@
         </article>
         <article class="card venture reveal" data-delay="1">
           <div class="venture__media">
-            <img src="assets/img/venture-saby.webp" alt="SABY — Modern Technology Studio" loading="lazy" decoding="async">
+            <img src="assets/img/venture-saby.webp" alt="SABY — Modern Technology Studio" loading="lazy" decoding="async" width="600" height="600">
           </div>
           <div class="venture__body">
             <p class="venture__kicker">Technology Studio</p>

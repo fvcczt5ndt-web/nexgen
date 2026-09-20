@@ -20,9 +20,8 @@
 <meta name="twitter:image" content="https://nexgen.bh/assets/img/hero-inpipe.webp">
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="favicon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Newsreader:wght@400;500;600&display=swap">
+<link rel="preload" href="assets/fonts/newsreader-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/instrument-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
 </head>
 <body>
@@ -57,8 +56,8 @@
     </div>
   </header>
 <main id="main">
-  <section class="hero hero--bright">
-    <div class="hero__media"><img src="assets/img/hero-inpipe.webp" alt="" fetchpriority="high" decoding="async"></div>
+  <section class="hero hero--bright hero--photo">
+    <div class="hero__media"><img src="assets/img/hero-inpipe.webp" alt="" fetchpriority="high" decoding="async" width="1280" height="720"></div>
     <div class="container hero__inner">
       <p class="eyebrow">InPipe Energy GCC</p>
       <h1>Turning Water Pressure Into Clean, Reliable Power</h1>
@@ -83,7 +82,7 @@
         </ul>
       </div>
               <figure class="figure reveal">
-          <img src="assets/img/inpipe-visual.webp" alt="Water infrastructure energy recovery" loading="lazy" decoding="async">
+          <img src="assets/img/inpipe-visual.webp" alt="Water infrastructure energy recovery" loading="lazy" decoding="async" width="1200" height="1371">
         </figure>
     </div>
   </section>
@@ -103,7 +102,7 @@
         </ul>
       </div>
               <figure class="figure reveal">
-          <img src="assets/img/inpipe-plant.webp" alt="HydroXS installed on a water pipeline" loading="lazy" decoding="async">
+          <img src="assets/img/inpipe-plant.webp" alt="HydroXS installed on a water pipeline" loading="lazy" decoding="async" width="1200" height="1235">
         </figure>
     </div>
   </section>
