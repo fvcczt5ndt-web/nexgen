@@ -37,7 +37,7 @@ const VENTURES = [
   {
     name: 'Trust Flow',
     file: 'trust-flow.html',
-    kicker: 'Fintech',
+    kicker: 'Corporate & Investor Onboarding AI',
     title: 'Corporate & Investor Onboarding AI',
     copy: 'A platform that accelerates onboarding for banks, investment firms, asset managers, & funds through AI-driven document processing, automated KYC/KYB, & intelligent compliance summaries.',
     img: 'venture-trust-flow.webp',
@@ -45,7 +45,7 @@ const VENTURES = [
   {
     name: 'Esaal',
     file: 'esaal.html',
-    kicker: 'In collaboration with Esaal',
+    kicker: 'Digital Receipts & Spending Intelligence',
     title: 'Digital Receipts & Spending Intelligence',
     copy: 'An AI engine that converts receipts into structured, searchable financial data—powering insights for individuals, businesses, and retailers.',
     img: 'venture-esaal.webp',
@@ -53,7 +53,7 @@ const VENTURES = [
   {
     name: 'Dari',
     file: 'dari.html',
-    kicker: 'Smart Living',
+    kicker: 'AI-Powered Smart Living System',
     title: 'AI-Powered Smart Living System',
     copy: 'A next-generation smart home and building platform that adapts to behavior, emotion, and daily routines—not just device commands.',
     img: 'venture-dari.webp',
@@ -61,11 +61,31 @@ const VENTURES = [
   {
     name: 'SABY',
     file: 'saby.html',
-    kicker: 'Technology Studio',
+    kicker: 'Modern Technology Studio',
     title: 'Modern Technology Studio',
     copy: 'NexGen’s dedicated software engineering arm specializing in AI development, digital transformation, and enterprise-grade platforms.',
     img: 'venture-saby.webp',
   },
+];
+
+/* InPipe is a company too; it is kept apart from VENTURES because the footer and
+   nav list it in their own place. */
+const INPIPE = {
+  name: 'InPipe Energy',
+  file: 'inpipe-energy.html',
+  kicker: 'HydroXS In-Pipe Hydropower',
+  title: 'HydroXS in-pipe hydropower',
+  copy: 'NexGen is the exclusive regional partner of InPipe Energy (USA), bringing HydroXS® technology to the Gulf—turning excess water pressure inside pipelines into clean electricity.',
+  img: 'inpipe-plant.webp',
+  round: true,
+};
+
+/* The three areas NexGen focuses on. Every company belongs to one primary area;
+   the site speaks in these names everywhere a sector is mentioned. */
+const PILLARS = [
+  { name: 'Renewable &amp; Clean Energy', blurb: 'Turning the energy already inside water infrastructure into clean, reliable power.', files: ['inpipe-energy.html'] },
+  { name: 'Digital Transformation', blurb: 'Replacing paper, manual work, and fragmented systems with connected digital platforms.', files: ['esaal.html', 'saby.html'] },
+  { name: 'Artificial Intelligence', blurb: 'Applying AI to documents, decisions, and daily life—from institutional compliance to smart homes.', files: ['trust-flow.html', 'dari.html'] },
 ];
 
 /* ---------------------------------------------------------------- partials */
@@ -143,7 +163,7 @@ function footer() {
     <div class="container footer__top">
       <div class="footer__brand">
         <img src="assets/img/logo.webp" alt="NEXGEN Holdings" width="46" height="52">
-        <p>A Gulf-based holding company building and scaling high-impact ventures across clean energy, financial innovation, and intelligent digital platforms.</p>
+        <p>A Gulf-based holding company building and scaling high-impact ventures across renewable &amp; clean energy, digital transformation, and artificial intelligence.</p>
       </div>
       <div>
         <h2 class="footer__heading">Ventures</h2>
@@ -231,39 +251,41 @@ ${footer()}
 
 const stars = '<span aria-hidden="true">*</span>';
 
-function ventureCards(level) {
-  /* On the homepage the cards sit under the "Four Ventures" h2, so they are
-     h3. On the companies page they ARE the page's content, directly under the
-     h1, so they take h2 — otherwise the outline jumps h1 -> h3. */
-  const h = level || 3;
-  return VENTURES.map((v, i) => `        <article class="card venture reveal" data-delay="${i % 3}">
-          <div class="venture__media">
-            <img src="assets/img/${v.img}" alt="${v.name} — ${v.title}" loading="lazy" decoding="async">
-          </div>
-          <div class="venture__body">
-            <p class="venture__kicker">${v.kicker}</p>
-            <h${h} class="venture__title">${v.name}</h${h}>
-            <p>${v.copy}</p>
-            <div class="card__foot"><a class="link-arrow" href="${v.file}">Read More</a></div>
-          </div>
-        </article>`).join('\n');
+function ventureCard(v, h, i, wide) {
+  const img = v.round
+    ? `<img class="venture__mark--round" src="assets/img/${v.img}" alt="${v.name} — ${v.title}" loading="lazy" decoding="async">`
+    : `<img src="assets/img/${v.img}" alt="${v.name} — ${v.title}" loading="lazy" decoding="async">`;
+  return `            <article class="card venture reveal${wide ? ' venture--wide' : ''}" data-delay="${i % 3}">
+              <div class="venture__media">
+                ${img}
+              </div>
+              <div class="venture__body">
+                <p class="venture__kicker">${v.kicker}</p>
+                <h${h} class="venture__title">${v.name}</h${h}>
+                <p>${v.copy}</p>
+                <div class="card__foot"><a class="link-arrow" href="${v.file}">Read More</a></div>
+              </div>
+            </article>`;
 }
 
-/* InPipe is a company too, so the Companies overview opens with it. It is a
-   wide card rather than a fifth cell in the grid: the flagship first, then the
-   four digital ventures beneath it. */
-function inpipeFeature() {
-  return `        <article class="card venture venture--wide reveal">
-          <div class="venture__media">
-            <img class="venture__mark--round" src="assets/img/inpipe-plant.webp" alt="InPipe Energy — HydroXS in-pipe hydropower" loading="lazy" decoding="async">
+/* Companies grouped under the three focus areas. headLevel is the pillar
+   heading; cards sit one level below it. */
+function pillarSections(headLevel, cardLevel) {
+  const all = [INPIPE, ...VENTURES];
+  return PILLARS.map((p, pi) => {
+    const items = p.files.map(f => all.find(v => v.file === f));
+    const cards = items.map((v, i) => ventureCard(v, cardLevel, i, items.length === 1)).join('\n');
+    return `        <div class="pillar">
+          <div class="pillar__head reveal">
+            <p class="pillar__num">0${pi + 1}</p>
+            <h${headLevel} class="pillar__title">${p.name}</h${headLevel}>
+            <p>${p.blurb}</p>
           </div>
-          <div class="venture__body">
-            <p class="venture__kicker">Clean Energy</p>
-            <h2 class="venture__title">InPipe Energy</h2>
-            <p>NexGen is the exclusive regional partner of InPipe Energy (USA), bringing HydroXS® technology to the Gulf—turning excess water pressure inside pipelines into clean electricity.</p>
-            <div class="card__foot"><a class="link-arrow" href="inpipe-energy.html">Read More</a></div>
+          <div class="pillar__cards${items.length > 1 ? ' pillar__cards--2' : ''}">
+${cards}
           </div>
-        </article>`;
+        </div>`;
+  }).join('\n');
 }
 
 /* Partner team. Every entry is InPipe's own people, presented as such: the
@@ -357,9 +379,9 @@ const homeBody = `${hero({
   image: 'hero-home.webp',
   imageSmall: 'hero-home-960.webp',
   title: 'Building the Next Generation of <span class="nowrap">Impact-Driven</span> Ventures',
-  lead: `Building the Future of Clean Energy &amp; Digital Innovation — a Gulf-based holding company leading high-impact ventures in renewable energy, intelligent finance, data automation, and smart living technologies, delivering measurable results for governments, utilities, banks, and enterprises.`,
-  actions: `<a class="btn btn--accent" href="inpipe-energy.html">Explore Clean Energy</a>
-        <a class="btn btn--onDark" href="companies.html">View Our Ventures</a>`,
+  lead: `A Gulf-based holding company building and scaling high-impact ventures in renewable &amp; clean energy, digital transformation, and artificial intelligence—for governments, utilities, banks, and enterprises across the GCC.`,
+  actions: `<a class="btn btn--accent" href="#focus-areas">Explore Our Focus Areas</a>
+        <a class="btn btn--onDark" href="companies.html">View Our Companies</a>`,
   cls: ' hero--home hero--split',
 })}
 
@@ -370,57 +392,22 @@ const homeBody = `${hero({
         <p class="lead">NexGen is a diversified holding company headquartered in the Gulf, focused on building ventures that deliver economic, environmental, and digital transformation.</p>
       </div>
       <div class="reveal" data-delay="1">
-        <p>Our portfolio spans clean energy, financial technology, smart living, and digital automation, each designed to solve real challenges and create real value.</p>
+        <p>Our portfolio spans three focus areas—renewable &amp; clean energy, digital transformation, and artificial intelligence—each designed to solve real challenges and create real value.</p>
         <p>We partner with global technology leaders, regional institutions, and forward-thinking organizations to bring world-class solutions to the GCC.</p>
         <div class="btn-row mt-3"><a class="btn btn--outline" href="about.html">Learn More</a></div>
       </div>
     </div>
   </section>
 
-  <section class="section section--alt">
-    <div class="container split">
-      ${splitImage('hero-inpipe-crop.webp', 'HydroXS in-pipe hydropower installation')}
-      <div class="reveal" data-delay="1">
-        <h2>Clean Energy First — Transforming Water Pressure Into Renewable Power</h2>
-        <p>NexGen is the Exclusive Regional Partner of InPipe Energy (USA), bringing the HydroXS technology to the Gulf.</p>
-        <p>HydroXS converts excess water pressure inside pipelines into clean electricity—helping utilities cut energy costs, extend asset life, and reduce emissions without altering existing operations.</p>
-        <div class="btn-row mt-3"><a class="btn btn--primary" href="inpipe-energy.html">Learn More About InPipe</a></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
+  <section class="section section--alt" id="focus-areas">
     <div class="container">
       <div class="center reveal intro">
-        <p class="eyebrow">Our companies</p>
-        <h2>Four Ventures Shaping the Future</h2>
-        <p class="lead">Beyond clean energy, NexGen builds a growing portfolio of digital ventures shaping the future of finance, data intelligence, and smart living.</p>
+        <p class="eyebrow">Our focus</p>
+        <h2>Three Focus Areas</h2>
+        <p class="lead">Every NexGen company is built within one of three areas.</p>
       </div>
-      <div class="grid grid-2 mt-5">
-${ventureCards()}
-      </div>
-    </div>
-  </section>
-
-  <section class="section section--alt">
-    <div class="container">
-      <div class="center reveal intro">
-        <p class="eyebrow">Why NexGen</p>
-        <h2>Built for Long-Term Relevance</h2>
-      </div>
-      <div class="grid grid-3 mt-4">
-        <article class="card reveal">
-          <h3>Regional Presence &amp; Local Insight</h3>
-          <p>Active across Bahrain, Kuwait, Saudi Arabia, and the wider GCC.</p>
-        </article>
-        <article class="card reveal" data-delay="1">
-          <h3>Proven Global Partnerships</h3>
-          <p>Including InPipe Energy (USA) and strategic collaborations across finance and digital sectors.</p>
-        </article>
-        <article class="card reveal" data-delay="2">
-          <h3>End-To-End Delivery</h3>
-          <p>From concept to deployment, NexGen leads technology, operations, and customer success across all ventures.</p>
-        </article>
+      <div class="pillars mt-4">
+${pillarSections(3, 4)}
       </div>
     </div>
   </section>`;
@@ -429,7 +416,7 @@ const aboutBody = `${hero({
   image: 'hero-about.webp',
   cls: ' hero--abstract',
   title: 'About NexGen Holdings',
-  lead: 'A Gulf-based holding company building and scaling high-impact ventures across clean energy, financial innovation, and intelligent digital platforms.',
+  lead: 'A Gulf-based holding company building and scaling high-impact ventures across renewable &amp; clean energy, digital transformation, and artificial intelligence.',
 })}
 
   <section class="section">
@@ -437,7 +424,7 @@ const aboutBody = `${hero({
       <div class="reveal">
         <h2>Building the Next Generation of <span class="nowrap">Impact-Driven</span> Ventures</h2>
         <p class="lead">NexGen Holdings is a diversified holding company headquartered in the Gulf, focused on creating, scaling, and operating ventures that deliver measurable economic, environmental, and technological impact.</p>
-        <p>We operate at the intersection of clean energy, financial technology, data intelligence, and smart living, transforming proven ideas into structured, market-ready businesses. NexGen combines strategic vision, regional insight, and disciplined execution to ensure every venture is built for long-term relevance and sustainable growth.</p>
+        <p>We operate across three focus areas—renewable &amp; clean energy, digital transformation, and artificial intelligence—transforming proven ideas into structured, market-ready businesses. NexGen combines strategic vision, regional insight, and disciplined execution to ensure every venture is built for long-term relevance and sustainable growth.</p>
         <p>Rather than pursuing volume, NexGen follows a selective, high-conviction approach—focusing on ventures that align with regional priorities, regulatory environments, and real market demand across the GCC.</p>
       </div>
       ${splitImage('contact-visual.webp', 'NexGen Holdings corporate visual')}
@@ -447,13 +434,12 @@ const aboutBody = `${hero({
   <section class="section section--alt">
     <div class="container">
       <div class="center reveal intro">
-        <p class="eyebrow">Why NexGen</p>
         <h2>Our Vision &amp; Mission</h2>
       </div>
       <div class="grid grid-2 mt-4">
         <article class="panel reveal">
           <h3>Our Vision</h3>
-          <p>To become the Gulf’s leading innovation holding—driving the transition toward sustainable energy, intelligent finance, and future-ready digital ecosystems.</p>
+          <p>To become the Gulf’s leading innovation holding—driving the transition toward sustainable energy, digital transformation, and AI-enabled ecosystems.</p>
         </article>
         <article class="panel reveal" data-delay="1">
           <h3>Our Mission</h3>
@@ -469,32 +455,14 @@ const aboutBody = `${hero({
         <p class="eyebrow">Our values</p>
         <h2>How We Work</h2>
       </div>
-      <div class="grid grid-3 mt-4">
-        <div class="value reveal">
-          <h3>Innovation</h3>
-          <p>We challenge conventional thinking and invest in forward-looking solutions.</p>
-        </div>
-        <div class="value reveal" data-delay="1">
-          <h3>Sustainability</h3>
-          <p>We prioritize long-term environmental and economic impact.</p>
-        </div>
-        <div class="value reveal" data-delay="2">
-          <h3>Integrity</h3>
-          <p>We operate with transparency, accountability, and trust.</p>
-        </div>
-        <div class="value reveal">
-          <h3>Partnership</h3>
-          <p>We grow through meaningful collaboration with global and regional partners.</p>
-        </div>
-        <div class="value reveal" data-delay="1">
-          <h3>Excellence</h3>
-          <p>We hold ourselves to the highest standards of execution and delivery.</p>
-        </div>
-        <div class="value reveal" data-delay="2">
-          <h3>Impact</h3>
-          <p>We focus on measurable outcomes that create real value.</p>
-        </div>
-      </div>
+      <ul class="chips chips--center mt-4 reveal">
+        <li>Innovation</li>
+        <li>Sustainability</li>
+        <li>Integrity</li>
+        <li>Partnership</li>
+        <li>Excellence</li>
+        <li>Impact</li>
+      </ul>
     </div>
   </section>
 
@@ -554,14 +522,14 @@ const aboutBody = `${hero({
         <a class="advisor reveal" data-delay="1" href="https://www.linkedin.com/in/hanan-alsharah-67b9a01b9" target="_blank" rel="noopener">
           <img src="assets/img/advisor-alsharah.webp" alt="Hanan Alsharah" loading="lazy" decoding="async">
           <span>
-            <span class="advisor__name">HANAN ALSHARAH</span>
+            <span class="advisor__name">Hanan Alsharah</span>
             <span class="advisor__role">Founder and CEO of Innotech</span>
           </span>
         </a>
         <a class="advisor reveal" data-delay="2" href="https://www.linkedin.com/in/moatassem-abdelhaleem" target="_blank" rel="noopener">
           <img src="assets/img/advisor-moatassem.webp" alt="Moatassem Abdelhaleem" loading="lazy" decoding="async">
           <span>
-            <span class="advisor__name">moatassem abdelhaleem</span>
+            <span class="advisor__name">Moatassem Abdelhaleem</span>
             <span class="advisor__role">Founder &amp; CEO of Hexaflow</span>
           </span>
         </a>
@@ -574,16 +542,16 @@ const aboutBody = `${hero({
       <div class="reveal">
         <p class="eyebrow">Partnerships</p>
         <h2>Strategic Partnerships &amp; Investment Interest</h2>
-        <p>NexGen selectively engages with strategic partners, institutional investors, and family offices that share our vision for sustainable growth and high-impact innovation across clean energy and digital ventures.</p>
+        <p>NexGen selectively engages with strategic partners, institutional investors, and family offices that share our vision for sustainable growth and high-impact innovation across renewable energy, digital transformation, and AI.</p>
         <p>We do not pursue open fundraising or public investment offerings. All partnership and investment discussions are evaluated privately and aligned with NexGen’s strategic roadmap, governance standards, and long-term objectives.</p>
         <p>Organizations interested in exploring strategic alignment with NexGen are invited to submit a confidential inquiry.</p>
         <div class="btn-row mt-3"><a class="btn btn--primary" href="contact.html">Express Strategic Interest</a></div>
       </div>
       <div class="reveal" data-delay="1">
         <h2>Looking Forward</h2>
-        <p>NexGen continues to expand its portfolio with future ventures aligned with sustainability, intelligent infrastructure, and digital transformation. Our platform is designed to evolve—welcoming new opportunities that strengthen the NexGen ecosystem while preserving focus, quality, and strategic intent.</p>
+        <p>NexGen continues to expand its portfolio with future ventures aligned with renewable energy, digital transformation, and AI. Our platform is designed to evolve—welcoming new opportunities that strengthen the NexGen ecosystem while preserving focus, quality, and strategic intent.</p>
         <h3 class="mt-4">Partner With NexGen</h3>
-        <p>Whether you represent a government entity, enterprise, financial institution, or strategic partner, NexGen welcomes conversations that shape the future of clean energy and intelligent digital innovation.</p>
+        <p>Whether you represent a government entity, enterprise, financial institution, or strategic partner, NexGen welcomes conversations that shape the future of renewable energy, digital transformation, and AI.</p>
       </div>
     </div>
   </section>`;
@@ -592,14 +560,13 @@ const companiesBody = `${hero({
   image: 'hero-about.webp',
   cls: ' hero--abstract',
   title: 'Our Companies',
-  lead: 'From clean energy to finance, data intelligence, and smart living, NexGen builds and partners across a focused portfolio of companies.',
+  lead: 'Five companies across three focus areas: renewable &amp; clean energy, digital transformation, and artificial intelligence.',
 })}
 
   <section class="section">
     <div class="container">
-${inpipeFeature()}
-      <div class="grid grid-2 mt-3">
-${ventureCards(2)}
+      <div class="pillars">
+${pillarSections(2, 3)}
       </div>
     </div>
   </section>`;
@@ -607,7 +574,7 @@ ${ventureCards(2)}
 const inpipeBody = `${hero({
   image: 'hero-inpipe.webp',
   imageStacked: 'hero-inpipe-crop.webp',
-  eyebrow: 'InPipe Energy GCC',
+  eyebrow: 'Renewable &amp; Clean Energy',
   title: 'Turning Water Pressure Into Clean, Reliable Power',
   lead: 'NexGen is the exclusive regional partner bringing HydroXS® technology to the Gulf—enabling utilities, municipalities, and large facilities to recover energy, reduce emissions, and improve operational efficiency.',
   actions: `<a class="btn btn--accent" href="contact.html">Request Site Assessment</a>`,
@@ -642,7 +609,6 @@ const inpipeBody = `${hero({
           <li>No change in water operations</li>
           <li>Predictable renewable power (day &amp; night)</li>
           <li>Works with gravity, pumping, regulator sites</li>
-          <li>Ideal for utilities, cooling networks, industrial systems, and RO desalination</li>
           <li>Supports national sustainability and Net Zero targets</li>
         </ul>
         <h3 class="mt-4">HydroXS Specifications</h3>
@@ -754,21 +720,12 @@ ${teamCards(INPIPE_TEAM)}
 
 const trustFlowBody = `${hero({
   mark: 'venture-trust-flow.webp',
-  eyebrow: 'Corporate &amp; Investor Onboarding AI',
+  eyebrow: 'Artificial Intelligence',
   title: 'Trust Flow',
   lead: 'Intelligent onboarding for banks &amp; investment firms — a unified AI platform that accelerates onboarding, elevates compliance accuracy, and streamlines documentation for banks, corporate clients, investment firms, funds, and asset managers.',
   actions: `<a class="btn btn--accent" href="contact.html">Request a Demo</a>`,
   ...ventureHeroOpts('trust-flow'),
 })}
-
-  <section class="section">
-    <div class="container">
-      <div class="center reveal intro--wide">
-        <h2>Intelligent Onboarding for Banks &amp; Investment Firms</h2>
-        <p class="lead">Every file arrives complete, sourced, and audit-ready — without an analyst retyping a single document.</p>
-      </div>
-    </div>
-  </section>
 
   <section class="section section--alt">
     <div class="container split">
@@ -788,6 +745,7 @@ const trustFlowBody = `${hero({
       <div class="reveal" data-delay="1">
         <h2>The Solution</h2>
         <p><strong>Trust Flow</strong> automates the entire onboarding process with AI, ensuring fast, accurate, and complete files.</p>
+        <p>Every file arrives complete, sourced, and audit-ready—without an analyst retyping a single document.</p>
         <h3 class="mt-4">What It Includes</h3>
         <ul class="checklist">
           <li>AI document extraction</li>
@@ -805,8 +763,8 @@ const trustFlowBody = `${hero({
   <section class="section">
     <div class="container split">
       <div class="reveal">
-        <h2>Who Trust Flow Serves</h2>
-        <ul class="checklist">
+        <h2>Who It Serves</h2>
+        <ul class="chips">
           <li>Banks</li>
           <li>Investment Firms &amp; Asset Managers</li>
           <li>Private Equity &amp; Venture Capital Funds</li>
@@ -816,7 +774,7 @@ const trustFlowBody = `${hero({
         </ul>
       </div>
       <div class="reveal" data-delay="1">
-        <h2>Value For Institutions</h2>
+        <h2>What Institutions Gain</h2>
         <ul class="checklist">
           <li>Cost optimization</li>
           <li>Faster onboarding</li>
@@ -831,7 +789,7 @@ const trustFlowBody = `${hero({
 
 const esaalBody = `${hero({
   mark: 'venture-esaal.webp',
-  eyebrow: 'In collaboration with Esaal',
+  eyebrow: 'Digital Transformation',
   title: 'Esaal',
   lead: 'Digital receipts &amp; spending intelligence — in collaboration with Esaal, NexGen brings a Plug-n-Play digital receipt platform to the GCC, replacing paper receipts with real-time data.',
   actions: `<a class="btn btn--accent" href="contact.html">Partner With Us</a>
@@ -952,19 +910,13 @@ const esaalBody = `${hero({
           <li>Accurate records for businesses</li>
           <li>Deep insights for retailers</li>
         </ul>
-        <h3 class="mt-4">Capture Every Purchase</h3>
-        <ol class="steps mt-2">
-          <li class="step"><div><h3>Tap into Convenience: Get the App</h3><p>Hit download through the App Store, Google Play or App Gallery.</p></div></li>
-          <li class="step"><div><h3>Quick Sign-Up: Your Number or UAE PASS, Your Choice</h3><p>A simple touch, a swift sign-up, and you’re in.</p></div></li>
-          <li class="step"><div><h3>Embrace the Ease: Enjoy the Esaal Edge</h3><p>Step into a world of effortless e-billing and seamless transactions.</p></div></li>
-        </ol>
         <div class="btn-row mt-4">
           <a class="btn btn--primary" href="https://apps.apple.com/ae/app/esaal/id6444912096" target="_blank" rel="noopener">Get the App</a>
         </div>
       </div>
       <figure class="figure figure--plate reveal" data-delay="1">
         <img src="assets/img/venture-esaal.webp" alt="Esaal app icon" loading="lazy" decoding="async" class="figure__mark figure__mark--lg">
-        <figcaption>Esaal — the new, smarter way to E-receipt. In collaboration with Esaal.</figcaption>
+        <figcaption>Esaal — the new, smarter way to E-receipt.</figcaption>
       </figure>
     </div>
   </section>
@@ -990,7 +942,7 @@ ${ESAAL_ADVISORS.map(([n, d]) => `          <li><strong>${n}</strong><span>${d}<
 
 const dariBody = `${hero({
   mark: 'venture-dari.webp',
-  eyebrow: 'Smart Living',
+  eyebrow: 'Artificial Intelligence',
   title: 'Dari',
   lead: 'AI Smart Living — a home and building ecosystem that understands behavior, emotion, and lifestyle.',
   actions: `<a class="btn btn--accent" href="contact.html">Partner With Us</a>`,
@@ -1043,7 +995,7 @@ const dariBody = `${hero({
 
 const sabyBody = `${hero({
   mark: 'venture-saby.webp',
-  eyebrow: 'Technology Studio',
+  eyebrow: 'Digital Transformation',
   title: 'SABY',
   lead: 'Modern technology studio — software engineering, AI development, digital transformation, and enterprise platforms.',
   actions: `<a class="btn btn--accent" href="contact.html">Partner With Us</a>`,
@@ -1085,7 +1037,7 @@ const sabyBody = `${hero({
 
 const contactBody = `${hero({
   title: 'Contact Us',
-  lead: 'Whether you represent a government entity, enterprise, financial institution, or strategic partner, NexGen welcomes conversations that shape the future of clean energy and intelligent digital innovation.',
+  lead: 'Whether you represent a government entity, enterprise, financial institution, or strategic partner, NexGen welcomes conversations that shape the future of renewable energy, digital transformation, and AI.',
   cls: ' hero--plate',
 })}
 
@@ -1121,25 +1073,25 @@ const contactBody = `${hero({
   <section class="section section--alt">
     <div class="container">
       <div class="center reveal intro--wide">
-        <p class="eyebrow">Where we operate</p>
-        <h2>Regional Presence &amp; Local Insight</h2>
-        <p class="lead">Active across Bahrain, Kuwait, Saudi Arabia, and the wider GCC.</p>
+        <p class="eyebrow">Our focus</p>
+        <h2>Where We Work</h2>
+        <p class="lead">Talk to us about any of NexGen’s three focus areas.</p>
       </div>
       <div class="grid grid-3 mt-4">
         <article class="card reveal">
-          <h3>Clean Energy</h3>
+          <h3>Renewable &amp; Clean Energy</h3>
           <p>HydroXS in-pipe hydropower with InPipe Energy (USA) for utilities, municipalities, and large facilities.</p>
-          <div class="card__foot"><a class="link-arrow" href="inpipe-energy.html">InPipe Energy</a></div>
+          <div class="card__foot card__foot--links"><a class="link-arrow" href="inpipe-energy.html">InPipe Energy</a></div>
         </article>
         <article class="card reveal" data-delay="1">
-          <h3>Digital Ventures</h3>
-          <p>Trust Flow, Esaal, Dari, and SABY — finance, digital receipts, smart living, and engineering.</p>
-          <div class="card__foot"><a class="link-arrow" href="companies.html">Our Companies</a></div>
+          <h3>Digital Transformation</h3>
+          <p>Digital receipts and connected platforms, and an engineering studio to build them.</p>
+          <div class="card__foot card__foot--links"><a class="link-arrow" href="esaal.html">Esaal</a><a class="link-arrow" href="saby.html">SABY</a></div>
         </article>
         <article class="card reveal" data-delay="2">
-          <h3>Strategic Partnerships</h3>
-          <p>Including InPipe Energy (USA) and strategic collaborations across finance and digital sectors.</p>
-          <div class="card__foot"><a class="link-arrow" href="about.html">About Us</a></div>
+          <h3>Artificial Intelligence</h3>
+          <p>AI for institutional onboarding and compliance, and for homes that understand their people.</p>
+          <div class="card__foot card__foot--links"><a class="link-arrow" href="trust-flow.html">Trust Flow</a><a class="link-arrow" href="dari.html">Dari</a></div>
         </article>
       </div>
     </div>
@@ -1148,15 +1100,15 @@ const contactBody = `${hero({
 /* --------------------------------------------------------------- write out */
 
 const PAGES = [
-  { slug: 'index.html', active: 'index.html', title: 'NEXGEN Holdings — Clean Energy & Digital Innovation in the GCC', desc: 'NEXGEN Holdings is a Gulf-based holding company building high-impact ventures in clean energy, fintech, digital receipts, and smart living across the GCC.', body: homeBody, ogImage: 'hero-home.webp', home: true , cta: { title: 'Let’s build the future together.', text: 'Ready to explore partnership opportunities across clean energy or digital innovation?', label: 'Start a Conversation' } },
-  { slug: 'about.html', active: 'about.html', title: 'About Us — NEXGEN Holdings', desc: 'NEXGEN Holdings builds and scales ventures across clean energy, financial innovation, and intelligent digital platforms — our vision, mission, values, and leadership.', body: aboutBody, ogImage: 'hero-about.webp' , cta: { label: 'Express Strategic Interest', band: false } },
-  { slug: 'companies.html', active: 'companies.html', title: 'Our Companies — NEXGEN Holdings', desc: 'Explore the NEXGEN Holdings portfolio: InPipe Energy, Trust Flow, Esaal, Dari, and SABY — clean energy, finance, digital receipts, and smart living.', body: companiesBody, ogImage: 'hero-about.webp' , cta: { title: 'Not sure which venture fits?', text: 'Tell us what you are working on and we will point you to the right team.', label: 'Start a Conversation' } },
+  { slug: 'index.html', active: 'index.html', title: 'NEXGEN Holdings — Renewable Energy, Digital Transformation & AI in the GCC', desc: 'NEXGEN Holdings is a Gulf-based holding company building high-impact ventures in renewable & clean energy, digital transformation, and artificial intelligence across the GCC.', body: homeBody, ogImage: 'hero-home.webp', home: true , cta: { title: 'Let’s build the future together.', text: 'Ready to explore partnership opportunities in renewable energy, digital transformation, or AI?', label: 'Start a Conversation' } },
+  { slug: 'about.html', active: 'about.html', title: 'About Us — NEXGEN Holdings', desc: 'NEXGEN Holdings builds and scales ventures across renewable & clean energy, digital transformation, and artificial intelligence — our vision, mission, values, and leadership.', body: aboutBody, ogImage: 'hero-about.webp' , cta: { label: 'Express Strategic Interest', band: false } },
+  { slug: 'companies.html', active: 'companies.html', title: 'Our Companies — NEXGEN Holdings', desc: 'Explore the NEXGEN Holdings portfolio across renewable & clean energy, digital transformation, and artificial intelligence: InPipe Energy, Esaal, SABY, Trust Flow, and Dari.', body: companiesBody, ogImage: 'hero-about.webp' , cta: { title: 'Not sure which company fits?', text: 'Tell us what you are working on and we will point you to the right team.', label: 'Start a Conversation' } },
   { slug: 'inpipe-energy.html', active: 'inpipe-energy.html', title: 'InPipe Energy — HydroXS In-Pipe Hydropower | NEXGEN Holdings', desc: 'NEXGEN is the exclusive regional partner of InPipe Energy (USA), bringing HydroXS technology to the Gulf to turn excess water pressure into clean, reliable power.', body: inpipeBody, ogImage: 'hero-inpipe.webp' , cta: { title: 'Bring HydroXS to your network.', text: 'Share the details of your site and our team will follow up.', label: 'Request Site Assessment' } },
   { slug: 'trust-flow.html', active: 'trust-flow.html', title: 'Trust Flow — Corporate & Investor Onboarding AI | NEXGEN Holdings', desc: 'Trust Flow automates onboarding for banks, investment firms, funds, and asset managers with AI document extraction, automated KYC/KYB, and compliance workflows.', body: trustFlowBody, ogImage: 'venture-trust-flow.webp' , cta: { title: 'See Trust Flow on your own onboarding.', text: 'Request a demo for your bank, fund, or investment firm.', label: 'Request a Demo' } , theme: 'trust-flow' },
   { slug: 'esaal.html', active: 'esaal.html', title: 'Esaal — Digital Receipts & Spending Intelligence | NEXGEN Holdings', desc: 'In collaboration with Esaal, NEXGEN brings Plug-n-Play digital receipts to the GCC — real-time customer profiling, campaign measurement, and no extra hardware.', body: esaalBody, ogImage: 'venture-esaal.webp' , cta: { title: 'Bring digital receipts to your customers.', text: 'Talk to us about a Plug-n-Play rollout across your stores.', label: 'Partner With Us' } , theme: 'esaal' },
   { slug: 'dari.html', active: 'dari.html', title: 'Dari — AI-Powered Smart Living System | NEXGEN Holdings', desc: 'Dari is a human-centric smart home and building platform that adapts to behavior, emotion, and daily routines using behavioral and emotional AI.', body: dariBody, ogImage: 'venture-dari.webp' , cta: { title: 'Shape the next generation of smart living.', text: 'Explore a partnership around Dari.', label: 'Partner With Us' } , theme: 'dari' },
   { slug: 'saby.html', active: 'saby.html', title: 'SABY — Modern Technology Studio | NEXGEN Holdings', desc: 'SABY is NexGen’s dedicated software engineering studio delivering AI development, digital transformation, and enterprise-grade platforms for the region.', body: sabyBody, ogImage: 'venture-saby.webp' , cta: { title: 'Have something to build?', text: 'Talk to our engineering studio about AI and digital transformation.', label: 'Partner With Us' } , theme: 'saby' },
-  { slug: 'contact.html', active: 'contact.html', title: 'Contact Us — NEXGEN Holdings', desc: 'Contact NEXGEN Holdings for partnerships, ventures, and clean energy assessments. Phone +973 3660 0911, email info@nexgen.bh.', body: contactBody, ogImage: 'contact-visual.webp', noCta: true },
+  { slug: 'contact.html', active: 'contact.html', title: 'Contact Us — NEXGEN Holdings', desc: 'Contact NEXGEN Holdings for partnerships, ventures, and site assessments. Phone +973 3660 0911, email info@nexgen.bh.', body: contactBody, ogImage: 'contact-visual.webp', noCta: true },
 ];
 
 const JSONLD = `  <script type="application/ld+json">
@@ -1169,7 +1121,7 @@ const JSONLD = `  <script type="application/ld+json">
   "telephone": "+97336600911",
   "logo": "${SITE}/assets/img/logo.webp",
   "image": "${SITE}/assets/img/hero-home.webp",
-  "description": "NEXGEN Holdings is a Gulf-based holding company building high-impact ventures in clean energy, intelligent finance, data automation, and smart living technologies.",
+  "description": "NEXGEN Holdings is a Gulf-based holding company building high-impact ventures in renewable and clean energy, digital transformation, and artificial intelligence.",
   "sameAs": [
     "${LINKEDIN}"
   ],
