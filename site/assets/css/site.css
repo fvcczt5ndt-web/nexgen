@@ -344,12 +344,17 @@ main > .next + .section {
 /* Editorial split: statement left, the reading column right. Used where a
    section carries copy instead of an image, so the line length stays sane. */
 .split--editorial { align-items: start; }
+/* Two text columns share a top edge. Centring is for an image beside copy; when
+   both sides are copy it only pushes the shorter column down by the difference.
+   Browsers without :has() keep the centred fallback above. */
+.split:not(:has(figure)) { align-items: start; }
 .split--editorial > div:first-child { max-width: 34ch; }
 .split--editorial > div:last-child > p { max-width: 62ch; }
 @media (min-width: 900px) {
   .split--editorial { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--s6); }
 }
 
+.nowrap { white-space: nowrap; }
 .stack > * + * { margin-top: var(--s3); }
 .center { text-align: center; }
 .center p, .center .lead { margin-inline: auto; }
@@ -654,7 +659,7 @@ main > .next + .section {
 
 /* --- 7b. Desktop navigation ---------------------------------------------- */
 /* Measured: with the ventures behind the Companies panel the row costs
-   brand + five labels + the button = ~847px of the 1200px container, so it
+   brand + the labels + the button fit well inside the 1200px container, so it
    appears once a 940px viewport can seat it. Below that the drawer is the
    honest layout rather than a row that folds labels onto two lines. */
 @media (min-width: 940px) {
@@ -850,6 +855,23 @@ main > .next + .section {
     linear-gradient(180deg, rgba(244, 246, 246, 0) 0%, rgba(244, 246, 246, 1) 100%) bottom / 100% var(--s7) no-repeat,
     linear-gradient(180deg, rgba(10, 18, 22, .70) 0%, rgba(10, 18, 22, .42) 45%, rgba(10, 18, 22, .80) 100%),
     linear-gradient(90deg, rgba(8, 15, 19, .72) 0%, rgba(8, 15, 19, .14) 62%);
+}
+
+/* InPipe hero: the source photo is a partner slide with its own headline and
+   presenter caption baked into the left half. The scrim goes near-opaque under
+   the copy and only opens on the right, where the equipment is, so the two
+   sets of type never compete. */
+.hero--photo.hero--inpipe::after {
+  background:
+    linear-gradient(180deg, rgba(244, 246, 246, 0) 0%, rgba(244, 246, 246, 1) 100%) bottom / 100% var(--s7) no-repeat,
+    linear-gradient(180deg, rgba(10, 18, 22, .55) 0%, rgba(10, 18, 22, .20) 45%, rgba(10, 18, 22, .70) 100%),
+    linear-gradient(90deg, rgb(8, 15, 19) 0%, rgb(8, 15, 19) 50%, rgba(8, 15, 19, .30) 80%, rgba(8, 15, 19, .12) 100%);
+}
+.hero--inpipe .hero__media img { object-position: 78% 55%; }
+@media (max-width: 899.98px) {
+  /* One column of copy across the whole width: there is no open side to leave
+     clear, so the photo steps aside and the hero keeps its solid ground. */
+  .hero--inpipe .hero__media { display: none; }
 }
 
 /* Venture hero: a compact petrol plate. No decorative grid, no empty void. */

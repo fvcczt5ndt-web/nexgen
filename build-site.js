@@ -10,28 +10,27 @@ const PHONE = '+973 3660 0911';
 const PHONE_HREF = 'tel:+97336600911';
 const EMAIL = 'info@nexgen.bh';
 const LINKEDIN = 'https://www.linkedin.com/company/nexgen-holdings/';
-const FOOTER_COPY = '© Copyright 2025 NEXGEN Holding';
+const FOOTER_COPY = `© Copyright ${new Date().getFullYear()} NEXGEN Holding`;
 
 const NAV = [
   { label: 'Home', href: 'index.html' },
   { label: 'About Us', href: 'about.html' },
-  { label: 'InPipe Energy', href: 'inpipe-energy.html' },
-  /* The five ventures live behind the section they belong to, so the row stays
-     readable instead of becoming a list of ten. The parent is a real link to
-     the overview page, and a separate caret button owns the disclosure. */
+  /* Every company sits behind one "Companies" group, so the bar stays short
+     instead of naming each one. The label is a real link to the overview page
+     and a separate caret button owns the disclosure. Contact is not a nav item:
+     the accent button at the end of the bar is the single way in. */
   {
-    label: 'Our Companies',
+    label: 'Companies',
     href: 'companies.html',
     id: 'companies-menu',
     children: [
+      { label: 'InPipe Energy', href: 'inpipe-energy.html' },
       { label: 'Trust Flow', href: 'trust-flow.html' },
-      { label: 'JYP', href: 'jyp.html' },
       { label: 'Esaal', href: 'esaal.html' },
       { label: 'Dari', href: 'dari.html' },
       { label: 'SABY', href: 'saby.html' },
     ],
   },
-  { label: 'Contact Us', href: 'contact.html' },
 ];
 
 const VENTURES = [
@@ -42,14 +41,6 @@ const VENTURES = [
     title: 'Corporate & Investor Onboarding AI',
     copy: 'A platform that accelerates onboarding for banks, investment firms, asset managers, & funds through AI-driven document processing, automated KYC/KYB, & intelligent compliance summaries.',
     img: 'venture-trust-flow.webp',
-  },
-  {
-    name: 'JYP',
-    file: 'jyp.html',
-    kicker: 'Workforce Payments',
-    title: 'Smart Wallet for the GCC Workforce',
-    copy: 'A multilingual salary and remittance wallet enabling low-cost international transfers, compliant payroll distribution, and seamless employer integration.',
-    img: 'venture-jyp.webp',
   },
   {
     name: 'Esaal',
@@ -121,7 +112,7 @@ ${kids}
 ${items}
         </ul>
       </nav>
-      <a class="btn btn--accent topbar__cta" href="contact.html">Contact Us</a>
+      <a class="btn btn--accent topbar__cta" href="contact.html"${active === 'contact.html' ? ' aria-current="page"' : ''}>Contact Us</a>
     </div>
   </header>`;
 }
@@ -169,7 +160,7 @@ ${ventureLinks}
           <a href="index.html">Home</a>
           <a href="about.html">About Us</a>
           <a href="inpipe-energy.html">InPipe Energy</a>
-          <a href="companies.html">Our Companies</a>
+          <a href="companies.html">Companies</a>
           <a href="contact.html">Contact Us</a>
         </nav>
       </div>
@@ -198,7 +189,7 @@ ${ventureLinks}
   </footer>`;
 }
 
-function page({ slug, title, desc, active, head = '', body, ogImage = 'hero-home.webp' }) {
+function page({ slug, title, desc, active, head = '', body, ogImage = 'hero-home.webp', noCta = false }) {
   const canonical = slug === 'index.html' ? `${SITE}/` : `${SITE}/${slug}`;
   return `<!DOCTYPE html>
 <html lang="en">
@@ -231,7 +222,7 @@ ${topbar(active)}
 <main id="main">
 ${body}
 </main>
-${ctaBand()}
+${noCta ? '' : ctaBand()}
 ${footer()}
 ${mobileCta()}
 <script src="assets/js/site.js" defer></script>
@@ -245,7 +236,7 @@ ${mobileCta()}
 const stars = '<span aria-hidden="true">*</span>';
 
 function ventureCards(level) {
-  /* On the homepage the cards sit under the "Five Ventures" h2, so they are
+  /* On the homepage the cards sit under the "Four Ventures" h2, so they are
      h3. On the companies page they ARE the page's content, directly under the
      h1, so they take h2 — otherwise the outline jumps h1 -> h3. */
   const h = level || 3;
@@ -294,7 +285,7 @@ function splitImage(src, alt, opts = {}) {
 
 const homeBody = `${hero({
   image: 'hero-home.webp',
-  title: 'Building the Next Generation of Impact-Driven Ventures',
+  title: 'Building the Next Generation of <span class="nowrap">Impact-Driven</span> Ventures',
   lead: `Building the Future of Clean Energy &amp; Digital Innovation — a Gulf-based holding company leading high-impact ventures in renewable energy, intelligent finance, data automation, and smart living technologies, delivering measurable results for governments, utilities, banks, and enterprises.`,
   actions: `<a class="btn btn--accent" href="inpipe-energy.html">Explore Clean Energy</a>
         <a class="btn btn--onDark" href="companies.html">View Our Ventures</a>`,
@@ -308,7 +299,7 @@ const homeBody = `${hero({
         <p class="lead">NexGen is a diversified holding company headquartered in the Gulf, focused on building ventures that deliver economic, environmental, and digital transformation.</p>
       </div>
       <div class="reveal" data-delay="1">
-        <p>Our portfolio spans clean energy, financial technology, workforce solutions, smart living, and digital automation, each designed to solve real challenges and create real value.</p>
+        <p>Our portfolio spans clean energy, financial technology, smart living, and digital automation, each designed to solve real challenges and create real value.</p>
         <p>We partner with global technology leaders, regional institutions, and forward-thinking organizations to bring world-class solutions to the GCC.</p>
         <div class="btn-row mt-3"><a class="btn btn--outline" href="about.html">Learn More</a></div>
       </div>
@@ -331,10 +322,10 @@ const homeBody = `${hero({
     <div class="container">
       <div class="center reveal intro">
         <p class="eyebrow">Our companies</p>
-        <h2>Five Ventures Shaping the Future</h2>
-        <p class="lead">Beyond clean energy, NexGen builds a growing portfolio of digital ventures shaping the future of finance, workforce empowerment, data intelligence, and smart living.</p>
+        <h2>Four Ventures Shaping the Future</h2>
+        <p class="lead">Beyond clean energy, NexGen builds a growing portfolio of digital ventures shaping the future of finance, data intelligence, and smart living.</p>
       </div>
-      <div class="grid grid-3 mt-5">
+      <div class="grid grid-2 mt-5">
 ${ventureCards()}
       </div>
     </div>
@@ -372,7 +363,7 @@ const aboutBody = `${hero({
   <section class="section">
     <div class="container split split--reverse">
       <div class="reveal">
-        <h2>Building the Next Generation of Impact-Driven Ventures</h2>
+        <h2>Building the Next Generation of <span class="nowrap">Impact-Driven</span> Ventures</h2>
         <p class="lead">NexGen Holdings is a diversified holding company headquartered in the Gulf, focused on creating, scaling, and operating ventures that deliver measurable economic, environmental, and technological impact.</p>
         <p>We operate at the intersection of clean energy, financial technology, data intelligence, and smart living, transforming proven ideas into structured, market-ready businesses. NexGen combines strategic vision, regional insight, and disciplined execution to ensure every venture is built for long-term relevance and sustainable growth.</p>
         <p>Rather than pursuing volume, NexGen follows a selective, high-conviction approach—focusing on ventures that align with regional priorities, regulatory environments, and real market demand across the GCC.</p>
@@ -464,7 +455,7 @@ const aboutBody = `${hero({
           <div class="person__body">
             <h3 class="person__name">Omar Almutairi</h3>
             <p class="person__role">Head Of Fintech</p>
-            <p class="person__note">Oversees NexGen’s financial technology portfolio, including digital onboarding platforms, compliance solutions, workforce payment systems, and financial infrastructure serving banks, investment firms, and enterprises.</p>
+            <p class="person__note">Oversees NexGen’s financial technology portfolio, including digital onboarding platforms, compliance solutions, and financial infrastructure serving banks, investment firms, and enterprises.</p>
           </div>
         </article>
         <article class="person reveal" data-delay="1">
@@ -517,7 +508,6 @@ const aboutBody = `${hero({
         <div class="btn-row mt-3"><a class="btn btn--primary" href="contact.html">Express Strategic Interest</a></div>
       </div>
       <div class="reveal" data-delay="1">
-        </p>
         <h2>Looking Forward</h2>
         <p>NexGen continues to expand its portfolio with future ventures aligned with sustainability, intelligent infrastructure, and digital transformation. Our platform is designed to evolve—welcoming new opportunities that strengthen the NexGen ecosystem while preserving focus, quality, and strategic intent.</p>
         <h3 class="mt-4">Partner With NexGen</h3>
@@ -530,12 +520,12 @@ const aboutBody = `${hero({
 const companiesBody = `${hero({
   image: 'hero-about.webp',
   title: 'Our Companies',
-  lead: 'Beyond clean energy, NexGen builds a growing portfolio of digital ventures shaping the future of finance, workforce empowerment, data intelligence, and smart living.',
+  lead: 'Beyond clean energy, NexGen builds a growing portfolio of digital ventures shaping the future of finance, data intelligence, and smart living.',
 })}
 
   <section class="section">
     <div class="container">
-      <div class="grid grid-3">
+      <div class="grid grid-2">
 ${ventureCards(2)}
       </div>
     </div>
@@ -547,13 +537,12 @@ const inpipeBody = `${hero({
   title: 'Turning Water Pressure Into Clean, Reliable Power',
   lead: 'NexGen is the exclusive regional partner bringing HydroXS® technology to the Gulf—enabling utilities, municipalities, and large facilities to recover energy, reduce emissions, and improve operational efficiency.',
   actions: `<a class="btn btn--accent" href="contact.html">Request Site Assessment</a>`,
-  cls: ' hero--bright',
+  cls: ' hero--bright hero--inpipe',
 })}
 
   <section class="section">
     <div class="container split">
       <div class="reveal">
-        </p>
         <h2>The Challenge</h2>
         <p>Water delivery across the GCC consumes massive electricity. At pressure-control points, this energy is traditionally wasted as heat, driving up operating costs and carbon emissions.</p>
         <p>Utilities need solutions that:</p>
@@ -590,7 +579,6 @@ const inpipeBody = `${hero({
   <section class="section section--dark">
     <div class="container">
       <div class="center reveal intro">
-        </p>
         <h2>Real Results</h2>
         <p class="lead">Examples from existing deployments:</p>
       </div>
@@ -618,7 +606,6 @@ const inpipeBody = `${hero({
   <section class="section">
     <div class="container split">
       <div class="reveal">
-        </p>
         <h2>GCC Use Cases</h2>
         <p>HydroXS is an ideal fit for:</p>
         <ul class="checklist">
@@ -666,7 +653,6 @@ const trustFlowBody = `${hero({
   <section class="section section--alt">
     <div class="container split">
       <div class="reveal">
-        </p>
         <h2>The Challenge</h2>
         <p>Financial institutions waste time and resources on:</p>
         <ul class="checklist">
@@ -680,7 +666,6 @@ const trustFlowBody = `${hero({
         <p class="mt-3">These bottlenecks delay revenue, frustrate clients, and increase operational costs.</p>
       </div>
       <div class="reveal" data-delay="1">
-        </p>
         <h2>The Solution</h2>
         <p><strong>Trust Flow</strong> automates the entire onboarding process with AI, ensuring fast, accurate, and complete files.</p>
         <h3 class="mt-4">What It Includes</h3>
@@ -728,83 +713,6 @@ const trustFlowBody = `${hero({
     </div>
   </section>`;
 
-const jypBody = `${hero({
-  mark: 'venture-jyp.webp',
-  eyebrow: 'Workforce Payments',
-  title: 'JYP',
-  lead: 'Smart wallet for the GCC workforce — a secure, multilingual wallet for salary distribution, low-cost remittances, and seamless employer integration.',
-  actions: `<a class="btn btn--accent" href="contact.html">Partner With Us</a>`,
-  cls: ' hero--plate hero--home',
-})}
-
-  <section class="section">
-    <div class="container">
-      <div class="center reveal intro--wide">
-        <h2>Smart Wallet For The GCC Workforce</h2>
-        <p class="lead">Salaries reach workers the same day, and the money they send home costs a fraction of a bank transfer.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="section section--alt">
-    <div class="container split">
-      <div class="reveal">
-        </p>
-        <h2>The Problem</h2>
-        <p>Financial institutions waste time and resources on:</p>
-        <ul class="checklist">
-          <li>Cash-heavy payroll</li>
-          <li>High transfer fees</li>
-          <li>Limited access to financial services</li>
-          <li>Compliance complexity (WPS requirements)</li>
-        </ul>
-      </div>
-      <div class="reveal" data-delay="1">
-        </p>
-        <h2>The Solution</h2>
-        <p><strong>JYP</strong> provides employers and workers with a modern financial platform that reduces costs, increases transparency, and improves access.</p>
-        <h3 class="mt-4">Features</h3>
-        <ul class="checklist">
-          <li>Digital salary payments</li>
-          <li>Wallet-to-wallet transfers</li>
-          <li>Low-cost international remittances</li>
-          <li>Employer dashboard</li>
-          <li>Multi-language support</li>
-          <li>Identity verification</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="container">
-      <div class="grid grid-2">
-        <div class="panel reveal">
-          </p>
-          <h3>Value For Employers</h3>
-          <ul class="checklist">
-            <li>Full compliance</li>
-            <li>Transparent reporting</li>
-            <li>No cash handling</li>
-          </ul>
-        </div>
-        <div class="panel reveal" data-delay="1">
-          </p>
-          <h3>Value For Workers</h3>
-          <ul class="checklist">
-            <li>Cheaper remittances</li>
-            <li>Faster salaries</li>
-            <li>Easy access to financial tools</li>
-          </ul>
-        </div>
-      </div>
-      <div class="btn-row center-actions">
-        <a class="btn btn--primary" href="contact.html">Schedule a Strategy Call</a>
-        <a class="btn btn--outline" href="contact.html">Contact Us</a>
-      </div>
-    </div>
-  </section>`;
-
 const esaalBody = `${hero({
   mark: 'venture-esaal.webp',
   eyebrow: 'In collaboration with Esaal',
@@ -827,9 +735,8 @@ const esaalBody = `${hero({
   <section class="section section--alt">
     <div class="container split">
       <div class="reveal">
-        </p>
         <h2>The Problem</h2>
-        <p>Financial institutions waste time and resources on:</p>
+        <p>Consumers, businesses, and retailers lose time and value to:</p>
         <ul class="checklist">
           <li>Lost receipts</li>
           <li>Manual reconciliation</li>
@@ -838,7 +745,6 @@ const esaalBody = `${hero({
         </ul>
       </div>
       <div class="reveal" data-delay="1">
-        </p>
         <h2>The Solution</h2>
         <p><strong>Esaal</strong> turns every receipt—paper, email, POS—into clean, structured financial data instantly.</p>
         <h3 class="mt-4">Features</h3>
@@ -918,7 +824,6 @@ const esaalBody = `${hero({
   <section class="section">
     <div class="container split">
       <div class="reveal">
-        </p>
         <h2>Value</h2>
         <ul class="checklist">
           <li>Clear spending for individuals</li>
@@ -964,12 +869,10 @@ const dariBody = `${hero({
   <section class="section section--alt">
     <div class="container split">
       <div class="reveal">
-        </p>
         <h2>The Problem</h2>
         <p>Traditional smart home systems are device-based and reactive. They don’t understand people.</p>
       </div>
       <div class="reveal" data-delay="1">
-        </p>
         <h2>The Solution</h2>
         <p><strong>Dari</strong> creates human-centric automation using behavioral and emotional AI.</p>
         <h3 class="mt-4">Features</h3>
@@ -987,7 +890,6 @@ const dariBody = `${hero({
   <section class="section">
     <div class="container">
       <div class="center reveal intro">
-        </p>
         <h2>Value</h2>
       </div>
       <div class="grid grid-4 mt-4">
@@ -1015,12 +917,10 @@ const sabyBody = `${hero({
   <section class="section">
     <div class="container split">
       <div class="reveal">
-        </p>
         <h2>Who We Are</h2>
         <p>SABY is NexGen’s dedicated studio delivering modern, scalable digital solutions for the region.</p>
       </div>
       <div class="reveal" data-delay="1">
-        </p>
         <h2>Expertise</h2>
         <ul class="checklist">
           <li>AI &amp; automation</li>
@@ -1101,7 +1001,7 @@ const contactBody = `${hero({
         </article>
         <article class="card reveal" data-delay="1">
           <h3>Digital Ventures</h3>
-          <p>Trust Flow, JYP, Esaal, Dari, and SABY — finance, workforce payments, digital receipts, smart living, and engineering.</p>
+          <p>Trust Flow, Esaal, Dari, and SABY — finance, digital receipts, smart living, and engineering.</p>
           <div class="card__foot"><a class="link-arrow" href="companies.html">Our Companies</a></div>
         </article>
         <article class="card reveal" data-delay="2">
@@ -1116,16 +1016,15 @@ const contactBody = `${hero({
 /* --------------------------------------------------------------- write out */
 
 const PAGES = [
-  { slug: 'index.html', active: 'index.html', title: 'NEXGEN Holdings — Clean Energy & Digital Innovation in the GCC', desc: 'NEXGEN Holdings is a Gulf-based holding company building high-impact ventures in clean energy, fintech, workforce payments, digital receipts, and smart living across the GCC.', body: homeBody, ogImage: 'hero-home.webp', home: true },
+  { slug: 'index.html', active: 'index.html', title: 'NEXGEN Holdings — Clean Energy & Digital Innovation in the GCC', desc: 'NEXGEN Holdings is a Gulf-based holding company building high-impact ventures in clean energy, fintech, digital receipts, and smart living across the GCC.', body: homeBody, ogImage: 'hero-home.webp', home: true },
   { slug: 'about.html', active: 'about.html', title: 'About Us — NEXGEN Holdings', desc: 'NEXGEN Holdings builds and scales ventures across clean energy, financial innovation, and intelligent digital platforms — our vision, mission, values, and leadership.', body: aboutBody, ogImage: 'hero-about.webp' },
-  { slug: 'companies.html', active: 'companies.html', title: 'Our Companies — NEXGEN Holdings', desc: 'Explore the NEXGEN Holdings portfolio: Trust Flow, JYP, Esaal, Dari, and SABY — five ventures shaping finance, workforce payments, digital receipts, and smart living.', body: companiesBody, ogImage: 'hero-about.webp' },
+  { slug: 'companies.html', active: 'companies.html', title: 'Our Companies — NEXGEN Holdings', desc: 'Explore the NEXGEN Holdings portfolio: Trust Flow, Esaal, Dari, and SABY — four ventures shaping finance, digital receipts, and smart living.', body: companiesBody, ogImage: 'hero-about.webp' },
   { slug: 'inpipe-energy.html', active: 'inpipe-energy.html', title: 'InPipe Energy — HydroXS In-Pipe Hydropower | NEXGEN Holdings', desc: 'NEXGEN is the exclusive regional partner of InPipe Energy (USA), bringing HydroXS technology to the Gulf to turn excess water pressure into clean, reliable power.', body: inpipeBody, ogImage: 'hero-inpipe.webp' },
   { slug: 'trust-flow.html', active: 'trust-flow.html', title: 'Trust Flow — Corporate & Investor Onboarding AI | NEXGEN Holdings', desc: 'Trust Flow automates onboarding for banks, investment firms, funds, and asset managers with AI document extraction, automated KYC/KYB, and compliance workflows.', body: trustFlowBody, ogImage: 'venture-trust-flow.webp' },
-  { slug: 'jyp.html', active: 'jyp.html', title: 'JYP — Smart Wallet for the GCC Workforce | NEXGEN Holdings', desc: 'JYP is a secure, multilingual salary and remittance wallet for the GCC: digital payroll, low-cost international transfers, and seamless employer integration.', body: jypBody, ogImage: 'venture-jyp.webp' },
   { slug: 'esaal.html', active: 'esaal.html', title: 'Esaal — Digital Receipts & Spending Intelligence | NEXGEN Holdings', desc: 'In collaboration with Esaal, NEXGEN brings Plug-n-Play digital receipts to the GCC — real-time customer profiling, campaign measurement, and no extra hardware.', body: esaalBody, ogImage: 'venture-esaal.webp' },
   { slug: 'dari.html', active: 'dari.html', title: 'Dari — AI-Powered Smart Living System | NEXGEN Holdings', desc: 'Dari is a human-centric smart home and building platform that adapts to behavior, emotion, and daily routines using behavioral and emotional AI.', body: dariBody, ogImage: 'venture-dari.webp' },
   { slug: 'saby.html', active: 'saby.html', title: 'SABY — Modern Technology Studio | NEXGEN Holdings', desc: 'SABY is NexGen’s dedicated software engineering studio delivering AI development, digital transformation, and enterprise-grade platforms for the region.', body: sabyBody, ogImage: 'venture-saby.webp' },
-  { slug: 'contact.html', active: 'contact.html', title: 'Contact Us — NEXGEN Holdings', desc: 'Contact NEXGEN Holdings for partnerships, ventures, and clean energy assessments. Phone +973 3660 0911, email info@nexgen.bh.', body: contactBody, ogImage: 'contact-visual.webp' },
+  { slug: 'contact.html', active: 'contact.html', title: 'Contact Us — NEXGEN Holdings', desc: 'Contact NEXGEN Holdings for partnerships, ventures, and clean energy assessments. Phone +973 3660 0911, email info@nexgen.bh.', body: contactBody, ogImage: 'contact-visual.webp', noCta: true },
 ];
 
 const JSONLD = `  <script type="application/ld+json">
@@ -1207,6 +1106,7 @@ for (const p of PAGES) {
     active: p.active,
     body: p.body,
     ogImage: p.ogImage,
+    noCta: !!p.noCta,
     head: p.home ? JSONLD : '',
   });
   const out = withIntrinsicSizes(html);

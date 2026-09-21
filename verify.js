@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const SITE = '/home/opc/.openclaw/workspace/nexgen/site';
-const PAGES = ['index.html','about.html','companies.html','inpipe-energy.html','trust-flow.html','jyp.html','esaal.html','saby.html','dari.html','contact.html'];
+const PAGES = ['index.html','about.html','companies.html','inpipe-energy.html','trust-flow.html','esaal.html','saby.html','dari.html','contact.html'];
 
 let brokenLinks = 0, badRefs = [], samplePage = 0, parseErrors = [];
 const allRefs = [];
@@ -40,22 +40,22 @@ for (const p of PAGES) {
     if (!r.external && !r.ok) { brokenLinks++; badRefs.push(`${p} -> ${ref}`); }
   }
 
-  // Every page must carry the same nav: five top-level entries, with the five
-  // ventures nested under the Companies panel. Both sets are checked, so a
+  // Every page must carry the same nav: three top-level entries, with every
+  // company nested under the Companies panel. Both sets are checked, so a
   // dropped link fails here rather than silently disappearing from the site.
   const navMatch = html.match(/<ul class="topbar__menu" id="primary-menu">([\s\S]*?)<\/ul>\s*<\/nav>/);
   if (!navMatch) { parseErrors.push(`${p}: nav menu not found`); continue; }
   const navBlock = navMatch[1];
   const topBlock = navBlock.replace(/<ul class="drop__menu"[\s\S]*?<\/ul>/, '');
   const navHrefs = [...topBlock.matchAll(/href="([^"]+)"/g)].map(x => x[1]);
-  const expected = ['index.html','about.html','inpipe-energy.html','companies.html','contact.html'];
+  const expected = ['index.html','about.html','companies.html'];
   if (navHrefs.join(',') !== expected.join(',')) {
     parseErrors.push(`${p}: nav order mismatch -> ${navHrefs.join(',')}`);
   }
   const dropMatch = navBlock.match(/<ul class="drop__menu" id="[^"]+">([\s\S]*?)<\/ul>/);
   if (!dropMatch) { parseErrors.push(`${p}: Companies panel missing from nav`); continue; }
   const dropHrefs = [...dropMatch[1].matchAll(/href="([^"]+)"/g)].map(x => x[1]);
-  const expectedDrop = ['trust-flow.html','jyp.html','esaal.html','dari.html','saby.html'];
+  const expectedDrop = ['inpipe-energy.html','trust-flow.html','esaal.html','dari.html','saby.html'];
   if (dropHrefs.join(',') !== expectedDrop.join(',')) {
     parseErrors.push(`${p}: Companies panel mismatch -> ${dropHrefs.join(',')}`);
   }
@@ -106,7 +106,7 @@ const sm = fs.readFileSync(path.join(SITE, 'sitemap.xml'), 'utf8');
 const smUrls = [...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map(x => x[1]);
 console.log('\nsitemap urls:', smUrls.length);
 smUrls.forEach(u => console.log('  ', u));
-if (smUrls.length !== 10) parseErrors.push(`sitemap has ${smUrls.length} urls (expected 10)`);
+if (smUrls.length !== 9) parseErrors.push(`sitemap has ${smUrls.length} urls (expected 9)`);
 const rb = fs.readFileSync(path.join(SITE, 'robots.txt'), 'utf8');
 if (!/Sitemap:/.test(rb)) parseErrors.push('robots.txt missing Sitemap line');
 

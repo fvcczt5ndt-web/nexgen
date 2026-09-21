@@ -20,7 +20,6 @@ const PLAN = [
   ['inpipe-visual.webp',    S('1766174630830_elegant_corporate_business_style_zoom_virtual_background_7.webp'), 1200, 'content'],
   ['venture-why.webp',      S('1765899457233_nexgen_profile_7.webp'), 900, 'content'],
   ['venture-trust-flow.webp', S('1765898295901_nexgen_profile_3.webp'), 600, 'mark'],
-  ['venture-jyp.webp',      S('1765898295547_nexgen_profile_5.webp'), 600, 'mark'],
   ['venture-dari.webp',     S('1765898296093_nexgen_profile_2.webp'), 600, 'mark'],
   ['venture-saby.webp',     S('1765898293300_nexgen_profile_1.png'), 600, 'mark'],
   ['venture-esaal.webp',    ESAAL, 600, 'mark'],

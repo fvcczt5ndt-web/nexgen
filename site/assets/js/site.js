@@ -67,8 +67,8 @@
 
   /* --- Companies disclosure ------------------------------------------------
      The group is a link plus a caret button. On desktop the caret opens a
-     panel below; in the drawer it collapses a list that is expanded by
-     default, so the links work with no JS at all. */
+     panel below; in the drawer it folds a list that starts folded once JS runs
+     and stays open without it, so the links work with no JS at all. */
   var drops = Array.prototype.slice.call(doc.querySelectorAll('[data-drop]'));
 
   drops.forEach(function (wrap) {
@@ -113,6 +113,10 @@
         ? (dropOpen() ? 'true' : 'false')
         : (dropCollapsed() ? 'false' : 'true'));
     };
+    /* In the drawer the list starts folded so the menu reads Home, About,
+       Companies. It is only folded here, not in the markup, so a visitor with
+       scripting off still gets every company link. */
+    if (!isDesktop()) setCollapsed(true);
     syncCaret();
     dropSyncers.push(syncCaret);
 
@@ -123,7 +127,9 @@
       if (nowDesktop === wasDesktop) return;
       wasDesktop = nowDesktop;
       setDrop(false);
-      setCollapsed(false);
+      /* Desktop shows the panel via .is-open, so nothing may stay folded there;
+         the drawer folds again on the way back down. */
+      setCollapsed(!nowDesktop);
       syncCaret();
     });
   });
