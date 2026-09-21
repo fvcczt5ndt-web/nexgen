@@ -527,10 +527,10 @@ const aboutBody = `${hero({
       </div>
       <div class="grid grid-3 mt-4">
         <a class="advisor reveal" href="https://www.linkedin.com/in/abdullahmansouralenezi" target="_blank" rel="noopener">
-          <img src="assets/img/advisor-alenzi.webp" alt="Abdullah Alenzi" loading="lazy" decoding="async">
+          <img src="assets/img/advisor-alenzi.webp" alt="Abdullah Alenezi" loading="lazy" decoding="async">
           <span>
-            <span class="advisor__name">Abdullah Alenzi</span>
-            <span class="advisor__role">Founder &amp; CEO of JYB</span>
+            <span class="advisor__name">Abdullah Alenezi</span>
+            <span class="advisor__role">Shadow Executive · C-Suite Advisory</span>
           </span>
         </a>
         <a class="advisor reveal" data-delay="1" href="https://www.linkedin.com/in/hanan-alsharah-67b9a01b9" target="_blank" rel="noopener">
@@ -626,6 +626,13 @@ const inpipeBody = `${hero({
           <li>Ideal for utilities, cooling networks, industrial systems, and RO desalination</li>
           <li>Supports national sustainability and Net Zero targets</li>
         </ul>
+        <h3 class="mt-4">HydroXS Specifications</h3>
+        <ul class="checklist">
+          <li>Scalable from 10 kW to 2 MW</li>
+          <li>Installs in pipe diameters of 4-110 inches <span class="nowrap">(5-280 cm)</span></li>
+          <li>Made in the USA</li>
+          <li>Patent issued, with additional patents pending</li>
+        </ul>
       </div>
       ${splitImage('inpipe-plant.webp', 'HydroXS installed on a water pipeline')}
     </div>
@@ -639,21 +646,48 @@ const inpipeBody = `${hero({
       </div>
       <div class="stats reveal mt-4">
         <div class="stat">
-          <p class="stat__value">200,000</p>
-          <p class="stat__label">kWh annually from a single site (up to)</p>
+          <p class="stat__value">89,000<sup>+</sup></p>
+          <p class="stat__label">Hours of fleet runtime</p>
         </div>
         <div class="stat">
-          <p class="stat__value">&gt;97<sup>%</sup></p>
-          <p class="stat__label">High system uptime</p>
+          <p class="stat__value">99<sup>%</sup></p>
+          <p class="stat__label">Fleet availability</p>
         </div>
         <div class="stat">
-          <p class="stat__value">CO₂</p>
-          <p class="stat__label">Reductions lasting decades</p>
+          <p class="stat__value">97.9<sup>%</sup></p>
+          <p class="stat__label">Lowest per-site availability</p>
         </div>
         <div class="stat">
-          <p class="stat__value">24/7</p>
-          <p class="stat__label">Electricity used for pumps, lighting, EV chargers, and grid support</p>
+          <p class="stat__value">99.9<sup>%</sup></p>
+          <p class="stat__label">Highest per-site availability</p>
         </div>
+      </div>
+      <div class="stats reveal mt-3">
+        <div class="stat">
+          <p class="stat__value">30 kW</p>
+          <p><strong>Hillsboro Water, Oregon</strong></p>
+          <p>About 200,000 kWh per year<br>1,400 tons CO₂ offset<br>Commissioned September 2020</p>
+          <p>Output net-metered, used for stadium lighting, EV charging and concessions.</p>
+        </div>
+        <div class="stat">
+          <p class="stat__value">22 kW</p>
+          <p><strong>Skagit PUD pumping facility</strong></p>
+          <p>About 104,000 kWh per year<br>728 tons CO₂ offset over its lifetime<br>Commissioned July 2021</p>
+        </div>
+        <div class="stat">
+          <p class="stat__value">30 kW</p>
+          <p><strong>EBMUD (East Bay Municipal Utility District) pump facility</strong></p>
+          <p>150,000 kWh per year<br>1,050 tons CO₂ offset<br>Commissioned September 2023</p>
+          <p>InPipe owns, operates and maintains the structure.</p>
+        </div>
+        <div class="stat">
+          <p class="stat__value">56 kW</p>
+          <p><strong>Aurora Water regulator replacement</strong></p>
+          <p>255,000 kWh per year<br>3,023 tons CO₂ offset<br>Commissioned October 2024</p>
+        </div>
+      </div>
+      <div class="center mt-3">
+        <p class="cred__note">Source: InPipe Energy company profile, 2025.</p>
       </div>
     </div>
   </section>
@@ -804,13 +838,19 @@ const esaalBody = `${hero({
     <div class="container split">
       <div class="reveal">
         <h2>The Problem</h2>
-        <p>Consumers, businesses, and retailers lose time and value to:</p>
+        <p>Businesses lose time and value to:</p>
         <ul class="checklist">
-          <li>Lost receipts</li>
-          <li>Manual reconciliation</li>
-          <li>Lack of spending clarity</li>
-          <li>No structured financial data</li>
+          <li>Lack of digitisation in invoicing processes</li>
+          <li>Manual policy-compliance checks that consume staff time</li>
+          <li>Customer profiling through data enrichment is very difficult</li>
+          <li>Paper-receipt data that teams cannot put to use</li>
+          <li>Limited tools for tax compliance and transparency in the UAE</li>
         </ul>
+        <div class="panel reveal mt-4">
+          <p class="stat__value">25<sup>%</sup></p>
+          <p>Paper receipts leave 25% of businesses out of pocket by up to $10,000.</p>
+          <p class="cred__note">Source: Esaal company profile.</p>
+        </div>
       </div>
       <div class="reveal" data-delay="1">
         <h2>The Solution</h2>
