@@ -36,6 +36,15 @@ const PLAN = [
   ['contact-visual.webp',   S('1765985907616_nexgen_profile_11.webp'), 1200, 'content'],
 ];
 
+// Venture hero photographs: picked up automatically once source/images/hero-<slug>-v1.(jpg|png) exists.
+for (const slug of ['trust-flow', 'esaal', 'dari', 'saby']) {
+  const f = ['jpg', 'png'].map(e => S(`hero-${slug}-v1.${e}`)).find(fs.existsSync);
+  if (f) {
+    PLAN.push([`hero-${slug}.webp`, f, 1920, 'hero']);
+    PLAN.push([`hero-${slug}-960.webp`, f, 960, 'hero']);
+  }
+}
+
 async function encode(file, width, quality, extract) {
   let pipe = sharp(file, { failOn: 'none' }).rotate();
   if (extract) pipe = pipe.extract(extract);

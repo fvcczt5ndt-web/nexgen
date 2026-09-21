@@ -112,31 +112,41 @@ ${kids}
 ${items}
         </ul>
       </nav>
-      <a class="btn btn--accent topbar__cta" href="contact.html"${active === 'contact.html' ? ' aria-current="page"' : ''}>Contact Us</a>
+      <a class="btn btn--quiet topbar__cta" href="contact.html"${active === 'contact.html' ? ' aria-current="page"' : ''}>Contact</a>
     </div>
   </header>`;
 }
 
-function ctaBand() {
+/* One closing call to action per page, worded for the page it closes: the same
+   action the hero offers, said once more where a reader who has finished the
+   page is deciding what to do next. Phone is a quiet text alternative. */
+function ctaBand(cta) {
   return `  <section class="cta-band">
-    <div class="container cta-band__inner">
-      <div>
-        <h2>Let’s build the future together.</h2>
-        <p>Ready to explore partnership opportunities across clean energy or digital innovation?</p>
-      </div>
-      <div class="cta-band__actions">
-        <a class="btn btn--accent" href="contact.html">Contact Us</a>
+    <div class="container">
+      <div class="cta-band__inner">
+        <div class="cta-band__copy">
+          <h2>${cta.title}</h2>
+          <p>${cta.text}</p>
+        </div>
+        <div class="cta-band__actions">
+          <a class="btn btn--primary" href="contact.html">${cta.label}</a>
+          <a class="cta-band__alt" href="${PHONE_HREF}">or call ${PHONE}</a>
+        </div>
       </div>
     </div>
   </section>`;
 }
 
-/* Mobile-only sticky action bar. Hidden in CSS until the hero scrolls away;
-   site.js toggles .is-visible, and it stays visible if JS never runs. */
-function mobileCta() {
+/* Mobile-only action, and only for a reader who has shown intent: site.js
+   reveals it past the halfway point of the page, hides it again once the
+   closing block is on screen, and a dismissal is remembered for the session.
+   Without JavaScript it never appears. */
+function mobileCta(label) {
   return `  <div class="mobile-cta" data-mobile-cta>
-    <a class="btn btn--primary" href="contact.html">Contact Us</a>
-    <a class="btn btn--accent" href="${PHONE_HREF}">${PHONE}</a>
+    <a class="btn btn--primary" href="contact.html">${label}</a>
+    <button class="mobile-cta__close" type="button" data-mobile-cta-close aria-label="Dismiss">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
   </div>`;
 }
 
@@ -189,7 +199,7 @@ ${ventureLinks}
   </footer>`;
 }
 
-function page({ slug, title, desc, active, head = '', body, ogImage = 'hero-home.webp', noCta = false }) {
+function page({ slug, title, desc, active, head = '', body, ogImage = 'hero-home.webp', noCta = false, cta = null }) {
   const canonical = slug === 'index.html' ? `${SITE}/` : `${SITE}/${slug}`;
   return `<!DOCTYPE html>
 <html lang="en">
@@ -222,9 +232,9 @@ ${topbar(active)}
 <main id="main">
 ${body}
 </main>
-${noCta ? '' : ctaBand()}
+${noCta || !cta || cta.band === false ? '' : ctaBand(cta)}
 ${footer()}
-${mobileCta()}
+${noCta || !cta ? '' : mobileCta(cta.label)}
 <script src="assets/js/site.js" defer></script>
 </body>
 </html>
@@ -337,6 +347,17 @@ ${actionsHtml}    </div>
   </section>`;
 }
 
+/* A venture page opens like the homepage: copy and logo tile on the ground, a
+   photograph open on the right (a band under the copy on small screens). The
+   photograph is optional so a page never ships an empty frame: without
+   assets/img/hero-<slug>.webp it keeps the compact petrol plate. */
+function ventureHeroOpts(slug) {
+  const big = `hero-${slug}.webp`;
+  const small = `hero-${slug}-960.webp`;
+  if (!fs.existsSync(path.join(OUT, 'assets', 'img', big))) return { cls: ' hero--plate hero--home' };
+  return { image: big, imageSmall: fs.existsSync(path.join(OUT, 'assets', 'img', small)) ? small : undefined, cls: ' hero--home hero--split hero--venture' };
+}
+
 function splitImage(src, alt, opts = {}) {
   const cls = opts.reverse ? ' figure reveal' : ' figure reveal';
   return `        <figure class="${cls.trim()}">
@@ -372,7 +393,7 @@ const homeBody = `${hero({
 
   <section class="section section--alt">
     <div class="container split">
-      ${splitImage('inpipe-plant.webp', 'HydroXS in-pipe hydropower technology')}
+      ${splitImage('hero-inpipe-crop.webp', 'HydroXS in-pipe hydropower installation')}
       <div class="reveal" data-delay="1">
         <h2>Clean Energy First — Transforming Water Pressure Into Renewable Power</h2>
         <p>NexGen is the Exclusive Regional Partner of InPipe Energy (USA), bringing the HydroXS technology to the Gulf.</p>
@@ -577,7 +598,6 @@ const aboutBody = `${hero({
         <p>NexGen continues to expand its portfolio with future ventures aligned with sustainability, intelligent infrastructure, and digital transformation. Our platform is designed to evolve—welcoming new opportunities that strengthen the NexGen ecosystem while preserving focus, quality, and strategic intent.</p>
         <h3 class="mt-4">Partner With NexGen</h3>
         <p>Whether you represent a government entity, enterprise, financial institution, or strategic partner, NexGen welcomes conversations that shape the future of clean energy and intelligent digital innovation.</p>
-        <div class="btn-row mt-3"><a class="btn btn--outline" href="contact.html">Contact Us</a></div>
       </div>
     </div>
   </section>`;
@@ -729,7 +749,6 @@ const inpipeBody = `${hero({
           <li class="step"><div><h3>Procurement &amp; Installation</h3></div></li>
           <li class="step"><div><h3>Commissioning &amp; Monitoring</h3></div></li>
         </ol>
-        <div class="btn-row mt-4"><a class="btn btn--primary" href="contact.html">Request Engineering Assessment</a></div>
       </div>
     </div>
   </section>
@@ -753,7 +772,7 @@ const trustFlowBody = `${hero({
   title: 'Trust Flow',
   lead: 'Intelligent onboarding for banks &amp; investment firms — a unified AI platform that accelerates onboarding, elevates compliance accuracy, and streamlines documentation for banks, corporate clients, investment firms, funds, and asset managers.',
   actions: `<a class="btn btn--accent" href="contact.html">Request a Demo</a>`,
-  cls: ' hero--plate hero--home',
+  ...ventureHeroOpts('trust-flow'),
 })}
 
   <section class="section">
@@ -820,10 +839,6 @@ const trustFlowBody = `${hero({
           <li>Standardized risk evaluation</li>
           <li>Reduced operational workload</li>
         </ul>
-        <div class="btn-row mt-4">
-          <a class="btn btn--primary" href="contact.html">Schedule a Strategy Call</a>
-          <a class="btn btn--outline" href="contact.html">Contact Us</a>
-        </div>
       </div>
     </div>
   </section>`;
@@ -835,7 +850,7 @@ const esaalBody = `${hero({
   lead: 'Digital receipts &amp; spending intelligence — in collaboration with Esaal, NexGen brings a Plug-n-Play digital receipt platform to the GCC, replacing paper receipts with real-time data.',
   actions: `<a class="btn btn--accent" href="contact.html">Partner With Us</a>
         <a class="btn btn--onDark" href="https://www.esaal.co/" target="_blank" rel="noopener">Visit esaal.co</a>`,
-  cls: ' hero--plate hero--home',
+  ...ventureHeroOpts('esaal'),
 })}
 
   <section class="section">
@@ -958,8 +973,7 @@ const esaalBody = `${hero({
           <li class="step"><div><h3>Embrace the Ease: Enjoy the Esaal Edge</h3><p>Step into a world of effortless e-billing and seamless transactions.</p></div></li>
         </ol>
         <div class="btn-row mt-4">
-          <a class="btn btn--primary" href="contact.html">Contact Us</a>
-          <a class="btn btn--outline" href="https://apps.apple.com/ae/app/esaal/id6444912096" target="_blank" rel="noopener">App Store</a>
+          <a class="btn btn--primary" href="https://apps.apple.com/ae/app/esaal/id6444912096" target="_blank" rel="noopener">Get the App</a>
         </div>
       </div>
       <figure class="figure figure--plate reveal" data-delay="1">
@@ -994,7 +1008,7 @@ const dariBody = `${hero({
   title: 'Dari',
   lead: 'AI Smart Living — a home and building ecosystem that understands behavior, emotion, and lifestyle.',
   actions: `<a class="btn btn--accent" href="contact.html">Partner With Us</a>`,
-  cls: ' hero--plate hero--home',
+  ...ventureHeroOpts('dari'),
 })}
 
   <section class="section">
@@ -1038,10 +1052,6 @@ const dariBody = `${hero({
         <div class="value reveal" data-delay="2"><h3>Safety</h3></div>
         <div class="value reveal" data-delay="3"><h3>Premium living experience</h3></div>
       </div>
-      <div class="btn-row center-actions">
-        <a class="btn btn--primary" href="contact.html">Schedule a Strategy Call</a>
-        <a class="btn btn--outline" href="contact.html">Contact Us</a>
-      </div>
     </div>
   </section>`;
 
@@ -1051,7 +1061,7 @@ const sabyBody = `${hero({
   title: 'SABY',
   lead: 'Modern technology studio — software engineering, AI development, digital transformation, and enterprise platforms.',
   actions: `<a class="btn btn--accent" href="contact.html">Partner With Us</a>`,
-  cls: ' hero--plate hero--home',
+  ...ventureHeroOpts('saby'),
 })}
 
   <section class="section">
@@ -1083,10 +1093,6 @@ const sabyBody = `${hero({
         <article class="card reveal"><h3>Modern engineering practices</h3></article>
         <article class="card reveal" data-delay="1"><h3>Fast delivery cycles</h3></article>
         <article class="card reveal" data-delay="2"><h3>Enterprise-grade execution</h3></article>
-      </div>
-      <div class="btn-row center-actions">
-        <a class="btn btn--primary" href="contact.html">Schedule a Strategy Call</a>
-        <a class="btn btn--outline" href="contact.html">Contact Us</a>
       </div>
     </div>
   </section>`;
@@ -1156,14 +1162,14 @@ const contactBody = `${hero({
 /* --------------------------------------------------------------- write out */
 
 const PAGES = [
-  { slug: 'index.html', active: 'index.html', title: 'NEXGEN Holdings — Clean Energy & Digital Innovation in the GCC', desc: 'NEXGEN Holdings is a Gulf-based holding company building high-impact ventures in clean energy, fintech, digital receipts, and smart living across the GCC.', body: homeBody, ogImage: 'hero-home.webp', home: true },
-  { slug: 'about.html', active: 'about.html', title: 'About Us — NEXGEN Holdings', desc: 'NEXGEN Holdings builds and scales ventures across clean energy, financial innovation, and intelligent digital platforms — our vision, mission, values, and leadership.', body: aboutBody, ogImage: 'hero-about.webp' },
-  { slug: 'companies.html', active: 'companies.html', title: 'Our Companies — NEXGEN Holdings', desc: 'Explore the NEXGEN Holdings portfolio: InPipe Energy, Trust Flow, Esaal, Dari, and SABY — clean energy, finance, digital receipts, and smart living.', body: companiesBody, ogImage: 'hero-about.webp' },
-  { slug: 'inpipe-energy.html', active: 'inpipe-energy.html', title: 'InPipe Energy — HydroXS In-Pipe Hydropower | NEXGEN Holdings', desc: 'NEXGEN is the exclusive regional partner of InPipe Energy (USA), bringing HydroXS technology to the Gulf to turn excess water pressure into clean, reliable power.', body: inpipeBody, ogImage: 'hero-inpipe.webp' },
-  { slug: 'trust-flow.html', active: 'trust-flow.html', title: 'Trust Flow — Corporate & Investor Onboarding AI | NEXGEN Holdings', desc: 'Trust Flow automates onboarding for banks, investment firms, funds, and asset managers with AI document extraction, automated KYC/KYB, and compliance workflows.', body: trustFlowBody, ogImage: 'venture-trust-flow.webp' },
-  { slug: 'esaal.html', active: 'esaal.html', title: 'Esaal — Digital Receipts & Spending Intelligence | NEXGEN Holdings', desc: 'In collaboration with Esaal, NEXGEN brings Plug-n-Play digital receipts to the GCC — real-time customer profiling, campaign measurement, and no extra hardware.', body: esaalBody, ogImage: 'venture-esaal.webp' },
-  { slug: 'dari.html', active: 'dari.html', title: 'Dari — AI-Powered Smart Living System | NEXGEN Holdings', desc: 'Dari is a human-centric smart home and building platform that adapts to behavior, emotion, and daily routines using behavioral and emotional AI.', body: dariBody, ogImage: 'venture-dari.webp' },
-  { slug: 'saby.html', active: 'saby.html', title: 'SABY — Modern Technology Studio | NEXGEN Holdings', desc: 'SABY is NexGen’s dedicated software engineering studio delivering AI development, digital transformation, and enterprise-grade platforms for the region.', body: sabyBody, ogImage: 'venture-saby.webp' },
+  { slug: 'index.html', active: 'index.html', title: 'NEXGEN Holdings — Clean Energy & Digital Innovation in the GCC', desc: 'NEXGEN Holdings is a Gulf-based holding company building high-impact ventures in clean energy, fintech, digital receipts, and smart living across the GCC.', body: homeBody, ogImage: 'hero-home.webp', home: true , cta: { title: 'Let’s build the future together.', text: 'Ready to explore partnership opportunities across clean energy or digital innovation?', label: 'Start a Conversation' } },
+  { slug: 'about.html', active: 'about.html', title: 'About Us — NEXGEN Holdings', desc: 'NEXGEN Holdings builds and scales ventures across clean energy, financial innovation, and intelligent digital platforms — our vision, mission, values, and leadership.', body: aboutBody, ogImage: 'hero-about.webp' , cta: { label: 'Express Strategic Interest', band: false } },
+  { slug: 'companies.html', active: 'companies.html', title: 'Our Companies — NEXGEN Holdings', desc: 'Explore the NEXGEN Holdings portfolio: InPipe Energy, Trust Flow, Esaal, Dari, and SABY — clean energy, finance, digital receipts, and smart living.', body: companiesBody, ogImage: 'hero-about.webp' , cta: { title: 'Not sure which venture fits?', text: 'Tell us what you are working on and we will point you to the right team.', label: 'Start a Conversation' } },
+  { slug: 'inpipe-energy.html', active: 'inpipe-energy.html', title: 'InPipe Energy — HydroXS In-Pipe Hydropower | NEXGEN Holdings', desc: 'NEXGEN is the exclusive regional partner of InPipe Energy (USA), bringing HydroXS technology to the Gulf to turn excess water pressure into clean, reliable power.', body: inpipeBody, ogImage: 'hero-inpipe.webp' , cta: { title: 'Bring HydroXS to your network.', text: 'Share the details of your site and our team will follow up.', label: 'Request Site Assessment' } },
+  { slug: 'trust-flow.html', active: 'trust-flow.html', title: 'Trust Flow — Corporate & Investor Onboarding AI | NEXGEN Holdings', desc: 'Trust Flow automates onboarding for banks, investment firms, funds, and asset managers with AI document extraction, automated KYC/KYB, and compliance workflows.', body: trustFlowBody, ogImage: 'venture-trust-flow.webp' , cta: { title: 'See Trust Flow on your own onboarding.', text: 'Request a demo for your bank, fund, or investment firm.', label: 'Request a Demo' } },
+  { slug: 'esaal.html', active: 'esaal.html', title: 'Esaal — Digital Receipts & Spending Intelligence | NEXGEN Holdings', desc: 'In collaboration with Esaal, NEXGEN brings Plug-n-Play digital receipts to the GCC — real-time customer profiling, campaign measurement, and no extra hardware.', body: esaalBody, ogImage: 'venture-esaal.webp' , cta: { title: 'Bring digital receipts to your customers.', text: 'Talk to us about a Plug-n-Play rollout across your stores.', label: 'Partner With Us' } },
+  { slug: 'dari.html', active: 'dari.html', title: 'Dari — AI-Powered Smart Living System | NEXGEN Holdings', desc: 'Dari is a human-centric smart home and building platform that adapts to behavior, emotion, and daily routines using behavioral and emotional AI.', body: dariBody, ogImage: 'venture-dari.webp' , cta: { title: 'Shape the next generation of smart living.', text: 'Explore a partnership around Dari.', label: 'Partner With Us' } },
+  { slug: 'saby.html', active: 'saby.html', title: 'SABY — Modern Technology Studio | NEXGEN Holdings', desc: 'SABY is NexGen’s dedicated software engineering studio delivering AI development, digital transformation, and enterprise-grade platforms for the region.', body: sabyBody, ogImage: 'venture-saby.webp' , cta: { title: 'Have something to build?', text: 'Talk to our engineering studio about AI and digital transformation.', label: 'Partner With Us' } },
   { slug: 'contact.html', active: 'contact.html', title: 'Contact Us — NEXGEN Holdings', desc: 'Contact NEXGEN Holdings for partnerships, ventures, and clean energy assessments. Phone +973 3660 0911, email info@nexgen.bh.', body: contactBody, ogImage: 'contact-visual.webp', noCta: true },
 ];
 
@@ -1247,6 +1253,7 @@ for (const p of PAGES) {
     body: p.body,
     ogImage: p.ogImage,
     noCta: !!p.noCta,
+    cta: p.cta || null,
     head: p.home ? JSONLD : '',
   });
   const out = withIntrinsicSizes(html);

@@ -207,22 +207,40 @@
     }, { passive: true });
   }
 
-  /* --- Mobile sticky action bar (appears once the hero scrolls away) ----- */
+  /* --- Mobile action (intent-based) --------------------------------------
+     Appears only once the reader is past the halfway point of the page, steps
+     aside when the closing block comes into view, and stays dismissed for the
+     rest of the session. */
   var ctaBar = doc.querySelector('[data-mobile-cta]');
-  var hero = doc.querySelector('.hero');
 
   if (ctaBar) {
-    if (hero && 'IntersectionObserver' in window) {
-      var heroObserver = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          var past = !entry.isIntersecting && entry.boundingClientRect.top < 0;
-          ctaBar.classList.toggle('is-visible', past);
-        });
-      }, { threshold: 0 });
-      heroObserver.observe(hero);
-    } else {
-      ctaBar.classList.add('is-visible');
+    var ctaClose = ctaBar.querySelector('[data-mobile-cta-close]');
+    var ctaEnd = doc.querySelector('.cta-band') || doc.querySelector('.footer');
+    var ctaOff = false;
+    var ctaTicking = false;
+    try { ctaOff = window.sessionStorage.getItem('nx-cta-off') === '1'; } catch (e) {}
+
+    var syncCta = function () {
+      ctaTicking = false;
+      if (ctaOff) { ctaBar.classList.remove('is-visible'); return; }
+      var depth = (window.pageYOffset + window.innerHeight) / doc.documentElement.scrollHeight;
+      var endInView = ctaEnd ? ctaEnd.getBoundingClientRect().top < window.innerHeight : false;
+      ctaBar.classList.toggle('is-visible', depth >= 0.5 && !endInView);
+    };
+
+    if (ctaClose) {
+      ctaClose.addEventListener('click', function () {
+        ctaOff = true;
+        try { window.sessionStorage.setItem('nx-cta-off', '1'); } catch (e) {}
+        ctaBar.classList.remove('is-visible');
+      });
     }
+    window.addEventListener('scroll', function () {
+      if (ctaTicking) return;
+      ctaTicking = true;
+      window.requestAnimationFrame(syncCta);
+    }, { passive: true });
+    syncCta();
   }
 
   /* --- Reveal on scroll -------------------------------------------------- */
