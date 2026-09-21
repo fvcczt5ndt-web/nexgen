@@ -1518,6 +1518,15 @@ main > .next + .section {
   --teal-bright: #6fd8f2;
   --teal-ink: #08647e;
 }
+/* Trust Flow's own mark is a green-teal only four degrees off the NexGen accent,
+   which would read as a mistake rather than a sibling. Pushing it into green at
+   the same lightness and saturation keeps the family coherent while giving the
+   company its own colour: 25 degrees clear of NexGen, 37 from Esaal. */
+.theme-trust-flow {
+  --teal: #2a9d69;
+  --teal-bright: #5fd39f;
+  --teal-ink: #0a623a;
+}
 
 /* Venture heroes: the company's logo tile sits above the title, left-aligned. */
 .hero--venture .hero__mark {
@@ -1536,6 +1545,9 @@ main > .next + .section {
 /* Esaal's photograph carries its detail in the right three quarters; this pan
    keeps that while leaving the quieter left edge under the scrim. */
 .hero--esaal .hero__media img { object-position: 88% 50%; }
+/* Trust Flow's frame carries its subject in the right 43-99%; the narrow band
+   pans that far right so the whole subject survives the 4:3 crop. */
+.hero--trust-flow .hero__media img { object-position: 100% 50%; }
 @media (max-width: 639.98px) {
   .hero--venture .hero__mark { width: 72px; height: 72px; padding: 9px; border-radius: 18px; margin-bottom: var(--s2); }
 }
