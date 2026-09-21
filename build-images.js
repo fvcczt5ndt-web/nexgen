@@ -9,20 +9,24 @@ const OUT = '/home/opc/.openclaw/workspace/nexgen/site/assets/img';
 
 const S = (n) => path.join(SRC, n);
 const ESAAL = '/home/opc/.openclaw/workspace/nexgen/source/esaal/esaal-appicon.png';
-const HERO_HOME = '/tmp/ngsrc/hero-home.png';
+const HERO_HOME = '/home/opc/.openclaw/workspace/nexgen/source/images/hero-home-v2.jpg';
+const MARK = (n) => '/home/opc/.openclaw/workspace/nexgen/source/marks/' + n;
 
 // name, source, maxWidth, kind
 const PLAN = [
   ['hero-home.webp',        HERO_HOME,  1920, 'hero'],
+  ['hero-home-960.webp',    HERO_HOME,  960,  'hero'],
   ['hero-about.webp',       S('1766170156047_elegant_corporate_business_style_zoom_virtual_background_6.png'), 1920, 'hero'],
   ['hero-inpipe.webp',      S('1766173560541_inpipe_energy_for_nexgen.pdf_3.webp'), 1920, 'hero'],
+  // Right side of the InPipe slide only (equipment + logo, no baked-in headline): used for the stacked hero band.
+  ['hero-inpipe-crop.webp', S('1766173560541_inpipe_energy_for_nexgen.pdf_3.webp'), 1000, 'hero', { left: 678, top: 176, width: 602, height: 481 }],
   ['inpipe-plant.webp',     S('1766084020662_inpipe_energy_for_nexgen.pdf_2.webp'), 1200, 'content'],
   ['inpipe-visual.webp',    S('1766174630830_elegant_corporate_business_style_zoom_virtual_background_7.webp'), 1200, 'content'],
   ['venture-why.webp',      S('1765899457233_nexgen_profile_7.webp'), 900, 'content'],
-  ['venture-trust-flow.webp', S('1765898295901_nexgen_profile_3.webp'), 600, 'mark'],
-  ['venture-dari.webp',     S('1765898296093_nexgen_profile_2.webp'), 600, 'mark'],
-  ['venture-saby.webp',     S('1765898293300_nexgen_profile_1.png'), 600, 'mark'],
-  ['venture-esaal.webp',    ESAAL, 600, 'mark'],
+  ['venture-trust-flow.webp', MARK('venture-trust-flow-clean.png'), 480, 'mark'],
+  ['venture-dari.webp',     MARK('venture-dari-clean.png'), 480, 'mark'],
+  ['venture-saby.webp',     MARK('venture-saby-clean.png'), 480, 'mark'],
+  ['venture-esaal.webp',    MARK('venture-esaal-clean.png'), 480, 'mark'],
   ['team-abdullah.webp',    S('1765903483458_nexgen_profile_9.webp'), 900, 'content'],
   ['team-omar.webp',        S('1765904277616_nexgen_profile_10.webp'), 900, 'content'],
   ['team-jernej.webp',      S('1765903486740_nexgen_profile_8.webp'), 900, 'content'],
@@ -32,9 +36,10 @@ const PLAN = [
   ['contact-visual.webp',   S('1765985907616_nexgen_profile_11.webp'), 1200, 'content'],
 ];
 
-async function encode(file, width, quality) {
+async function encode(file, width, quality, extract) {
   let pipe = sharp(file, { failOn: 'none' }).rotate();
-  const meta = await pipe.metadata();
+  if (extract) pipe = pipe.extract(extract);
+  const meta = extract ? { width: extract.width } : await pipe.metadata();
   if (meta.width > width) pipe = pipe.resize({ width, withoutEnlargement: true });
   return pipe.webp({ quality, effort: 5, smartSubsample: true }).toBuffer();
 }
@@ -42,13 +47,13 @@ async function encode(file, width, quality) {
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
   const report = [];
-  for (const [name, file, width, kind] of PLAN) {
+  for (const [name, file, width, kind, extract] of PLAN) {
     const q = kind === 'mark' ? 82 : 78;
-    let buf = await encode(file, width, q);
+    let buf = await encode(file, width, q, extract);
     let quality = q;
     while (buf.length > 150 * 1024 && quality > 55) {
       quality -= 8;
-      buf = await encode(file, width, quality);
+      buf = await encode(file, width, quality, extract);
     }
     fs.writeFileSync(path.join(OUT, name), buf);
     const before = fs.statSync(file).size;

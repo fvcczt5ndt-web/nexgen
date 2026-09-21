@@ -868,11 +868,7 @@ main > .next + .section {
     linear-gradient(90deg, rgb(8, 15, 19) 0%, rgb(8, 15, 19) 50%, rgba(8, 15, 19, .30) 80%, rgba(8, 15, 19, .12) 100%);
 }
 .hero--inpipe .hero__media img { object-position: 78% 55%; }
-@media (max-width: 899.98px) {
-  /* One column of copy across the whole width: there is no open side to leave
-     clear, so the photo steps aside and the hero keeps its solid ground. */
-  .hero--inpipe .hero__media { display: none; }
-}
+/* Below the desktop breakpoint every photo hero stacks: see section 20. */
 
 /* Venture hero: a compact petrol plate. No decorative grid, no empty void. */
 .hero--plate {
@@ -888,9 +884,12 @@ main > .next + .section {
   display: block;
   width: 100px;
   height: 100px;
+  padding: 12px;
   object-fit: contain;
+  background: #fff;
+  border-radius: 26px;
   margin: 0 auto var(--s3);
-  filter: drop-shadow(0 16px 30px rgba(0, 0, 0, .5));
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .14), 0 18px 34px -12px rgba(0, 0, 0, .6);
 }
 .hero--plate .btn-row { justify-content: center; }
 @media (min-width: 700px) {
@@ -926,7 +925,9 @@ main > .next + .section {
 .card p { color: var(--body); }
 .card__foot { margin-top: auto; padding-top: var(--s3); }
 
-/* Venture card — mark sits on a petrol plate so the light-toned marks read. */
+/* Venture card — the mark is a white tile on a pale plate. The artwork is the
+   bare logo (its badge rings and dark box were removed), so the tile carries
+   the depth and every company reads at the same weight. */
 .venture { padding: 0; overflow: hidden; position: relative; }
 .venture__media {
   display: flex;
@@ -934,18 +935,19 @@ main > .next + .section {
   justify-content: center;
   padding: var(--s4) var(--s3);
   min-height: 176px;
-  background-color: var(--dark);          /* opaque base under the gradient   */
-  background-image:
-    radial-gradient(110% 130% at 50% 0%, #1b2c35 0%, var(--dark) 62%, #0b141a 100%);
+  background-color: #e8efef;              /* opaque base under the gradient   */
+  background-image: linear-gradient(180deg, #edf3f3 0%, #e1eaea 100%);
   border-bottom: 1px solid var(--hairline);
 }
 .venture__media img {
-  width: auto;
-  max-height: 112px;
+  width: 104px;
+  height: 104px;
   max-width: 100%;
+  padding: 12px;
   object-fit: contain;
-  border-radius: 10px;
-  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, .45));
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 1px 0 rgba(16, 26, 31, .06), 0 16px 28px -16px rgba(16, 40, 46, .45);
   transition: transform .35s var(--ease);
 }
 @media (hover: hover) and (pointer: fine) {
@@ -980,7 +982,15 @@ main > .next + .section {
 .card__foot .link-arrow { min-height: 44px; }
 
 /* Wide venture card: the mark plate beside the copy on desktop. */
-.venture__mark--round { width: 112px; height: 112px; max-height: none; object-fit: cover; border-radius: 50%; }
+.venture__media img.venture__mark--round {
+  width: 112px;
+  height: 112px;
+  padding: 0;
+  object-fit: cover;
+  background: #0d0e10;                    /* the InPipe badge is its own black disc */
+  border-radius: 50%;
+  box-shadow: 0 0 0 5px #fff, 0 16px 28px -14px rgba(16, 40, 46, .5);
+}
 @media (min-width: 900px) {
   .venture--wide { flex-direction: row; }
   .venture--wide .venture__media { flex: 0 0 34%; min-height: 0; border-bottom: 0; border-right: 1px solid var(--hairline); }
@@ -1370,7 +1380,8 @@ main > .next + .section {
   .cta-band__inner { flex-direction: row; align-items: center; justify-content: space-between; }
   .next__inner { flex-direction: row; align-items: flex-end; justify-content: space-between; }
   .venture__media { min-height: 200px; }
-  .venture__media img { max-height: 128px; }
+  .venture__media img { width: 112px; height: 112px; }
+  .venture__media img.venture__mark--round { width: 124px; height: 124px; }
 }
 
 @media (min-width: 768px) {
@@ -1433,15 +1444,15 @@ main > .next + .section {
   .hero, .hero--home { min-height: 0; padding-block: var(--s5); }
   .hero--photo { padding-bottom: calc(var(--s5) + var(--s6)); }
   .hero--plate { padding-block: 40px; }
-  .hero--plate .hero__mark { width: 72px; height: 72px; margin-bottom: var(--s2); }
+  .hero--plate .hero__mark { width: 76px; height: 76px; padding: 9px; border-radius: 20px; margin-bottom: var(--s2); }
   .hero__actions { margin-top: var(--s3); }
 
   /* Cards and panels */
   .card, .panel { padding: var(--s3); }
   .venture { padding: 0; }
-  .venture__media { min-height: 112px; padding: var(--s3); }
-  .venture__media img { max-height: 72px; }
-  .venture__mark--round { width: 76px; height: 76px; }
+  .venture__media { min-height: 136px; padding: var(--s3); }
+  .venture__media img { width: 88px; height: 88px; padding: 10px; border-radius: 20px; }
+  .venture__media img.venture__mark--round { width: 88px; height: 88px; padding: 0; }
   .step { padding: var(--s2) 0; }
   .contact-row { padding: var(--s2) var(--s3); }
   .contact-row__value { font-size: 1.25rem; }
@@ -1468,4 +1479,76 @@ main > .next + .section {
     padding-block: var(--s5) var(--s4);
   }
   .footer__brand, .footer__top > div:last-child { grid-column: 1 / -1; }
+}
+
+/* --- 20. Photo heroes on every screen --------------------------------------
+   One rule for the whole site: a photograph is never hidden and never sits
+   behind the copy on a narrow screen. Below 1100px the copy takes the dark
+   ground on top and the photograph runs full width as a band directly under
+   it, blending up out of the ground and down into the page. On wide screens
+   the homepage splits: copy on the ground, photograph open on the right. */
+@media (max-width: 1099.98px) {
+  .hero.hero--photo {
+    flex-direction: column;
+    align-items: stretch;
+    min-height: 0;
+    padding: 0;
+  }
+  .hero.hero--photo .hero__inner {
+    order: 1;
+    width: 100%;
+    max-width: none;
+    padding-block: var(--s5) var(--s4);
+  }
+  .hero.hero--photo .hero__inner > * { max-width: 42rem; }
+  .hero.hero--photo h1 { font-size: clamp(2.125rem, 3.4vw + 1rem, 3.25rem); }
+  .hero.hero--photo .hero__media {
+    order: 2;
+    position: relative;
+    inset: auto;
+    z-index: 0;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    max-height: 460px;
+  }
+  .hero__media picture { display: contents; }
+  .hero.hero--inpipe .hero__media img { object-position: 50% 62%; }
+  /* The abstract backdrop is a mood, not a subject: a slimmer band, darkened to
+     the same depth the wide hero gets from its scrim. */
+  .hero.hero--abstract .hero__media { aspect-ratio: 2 / 1; }
+  .hero.hero--abstract .hero__media img { filter: brightness(.5) contrast(1.08); }
+  /* Top edge of the band dissolves into the copy's ground. */
+  .hero.hero--photo .hero__media::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 42%;
+    z-index: 1;
+    background: linear-gradient(180deg, var(--dark) 0%, rgba(15, 26, 32, 0) 100%);
+  }
+  /* Bottom edge hands over to the page: the same value ramp as the wide hero. */
+  .hero.hero--photo::after,
+  .hero.hero--photo.hero--bright::after,
+  .hero.hero--photo.hero--inpipe::after {
+    background: linear-gradient(180deg, rgba(244, 246, 246, 0) 0%, rgba(244, 246, 246, 1) 100%) bottom / 100% var(--s6) no-repeat;
+  }
+}
+@media (max-width: 639.98px) {
+  .hero.hero--photo .hero__inner { padding-block: var(--s4) var(--s3); }
+  .hero.hero--photo .hero__media { aspect-ratio: 4 / 3; }
+  .hero.hero--abstract .hero__media { aspect-ratio: 2 / 1; }
+}
+
+@media (min-width: 1100px) {
+  .hero--split .hero__media { inset: 0 0 0 auto; width: 66%; }
+  .hero--split .hero__media img { object-position: 62% 50%; }
+  .hero--split .hero__inner { max-width: 37rem; margin-inline: max(0px, calc((100% - var(--container)) / 2)) auto; }
+  .hero--split h1 { font-size: clamp(2.5rem, 2.6vw + 1.1rem, 3.5rem); }
+  .hero--split .lead { font-size: 1.125rem; max-width: 34rem; }
+  .hero--photo.hero--split::after {
+    background:
+      linear-gradient(180deg, rgba(244, 246, 246, 0) 0%, rgba(244, 246, 246, 1) 100%) bottom / 100% var(--s7) no-repeat,
+      linear-gradient(180deg, rgba(10, 18, 22, .35) 0%, rgba(10, 18, 22, 0) 28%),
+      linear-gradient(90deg, var(--dark) 0%, var(--dark) 34%, rgba(15, 26, 32, .55) 44%, rgba(15, 26, 32, 0) 62%);
+  }
 }

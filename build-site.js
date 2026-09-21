@@ -307,9 +307,18 @@ function teamCards(team) {
         </article>`).join('\n');
 }
 
-function hero({ image, mark, title, lead, eyebrow, actions = '', cls = '' }) {
+function hero({ image, imageSmall, imageStacked, mark, title, lead, eyebrow, actions = '', cls = '' }) {
+  /* imageSmall: a 960w rendition for phones; the wide one serves large screens. */
+  const srcset = imageSmall
+    ? ` srcset="assets/img/${imageSmall} 960w, assets/img/${image} 1920w" sizes="(max-width: 1099px) 100vw, 66vw" width="1920" height="1080"`
+    : '';
+  const imgTag = `<img src="assets/img/${image}"${srcset} alt="" fetchpriority="high" decoding="async">`;
+  /* imageStacked: a tighter crop swapped in where the hero stacks (< 1100px). */
+  const picture = imageStacked
+    ? `<picture><source media="(max-width: 1099px)" srcset="assets/img/${imageStacked}">${imgTag}</picture>`
+    : imgTag;
   const media = image
-    ? `    <div class="hero__media"><img src="assets/img/${image}" alt="" fetchpriority="high" decoding="async"></div>\n`
+    ? `    <div class="hero__media">${picture}</div>\n`
     : '';
   /* hero--photo marks the heroes that carry a backdrop photograph. Only those
      get the fade into the page ground; the compact petrol "plate" heroes hold
@@ -339,11 +348,12 @@ function splitImage(src, alt, opts = {}) {
 
 const homeBody = `${hero({
   image: 'hero-home.webp',
+  imageSmall: 'hero-home-960.webp',
   title: 'Building the Next Generation of <span class="nowrap">Impact-Driven</span> Ventures',
   lead: `Building the Future of Clean Energy &amp; Digital Innovation — a Gulf-based holding company leading high-impact ventures in renewable energy, intelligent finance, data automation, and smart living technologies, delivering measurable results for governments, utilities, banks, and enterprises.`,
   actions: `<a class="btn btn--accent" href="inpipe-energy.html">Explore Clean Energy</a>
         <a class="btn btn--onDark" href="companies.html">View Our Ventures</a>`,
-  cls: ' hero--home',
+  cls: ' hero--home hero--split',
 })}
 
   <section class="section">
@@ -410,6 +420,7 @@ ${ventureCards()}
 
 const aboutBody = `${hero({
   image: 'hero-about.webp',
+  cls: ' hero--abstract',
   title: 'About NexGen Holdings',
   lead: 'A Gulf-based holding company building and scaling high-impact ventures across clean energy, financial innovation, and intelligent digital platforms.',
 })}
@@ -573,6 +584,7 @@ const aboutBody = `${hero({
 
 const companiesBody = `${hero({
   image: 'hero-about.webp',
+  cls: ' hero--abstract',
   title: 'Our Companies',
   lead: 'From clean energy to finance, data intelligence, and smart living, NexGen builds and partners across a focused portfolio of companies.',
 })}
@@ -588,6 +600,7 @@ ${ventureCards(2)}
 
 const inpipeBody = `${hero({
   image: 'hero-inpipe.webp',
+  imageStacked: 'hero-inpipe-crop.webp',
   eyebrow: 'InPipe Energy GCC',
   title: 'Turning Water Pressure Into Clean, Reliable Power',
   lead: 'NexGen is the exclusive regional partner bringing HydroXS® technology to the Gulf—enabling utilities, municipalities, and large facilities to recover energy, reduce emissions, and improve operational efficiency.',
