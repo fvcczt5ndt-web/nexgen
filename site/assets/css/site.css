@@ -1510,6 +1510,14 @@ main > .next + .section {
   --teal-bright: #7cc6f5;
   --teal-ink: #0b5d94;
 }
+/* Esaal's mark is a cyan disc, so the accent leans to aqua rather than Dari's
+   sky blue: a clear 13-degree step in hue keeps the two siblings apart on
+   sight. */
+.theme-esaal {
+  --teal: #16a8c6;
+  --teal-bright: #6fd8f2;
+  --teal-ink: #08647e;
+}
 
 /* Venture heroes: the company's logo tile sits above the title, left-aligned. */
 .hero--venture .hero__mark {
@@ -1525,6 +1533,9 @@ main > .next + .section {
 }
 .hero--saby .hero__media img { object-position: 86% 50%; }
 .hero--dari .hero__media img { object-position: 92% 50%; }
+/* Esaal's photograph carries its detail in the right three quarters; this pan
+   keeps that while leaving the quieter left edge under the scrim. */
+.hero--esaal .hero__media img { object-position: 88% 50%; }
 @media (max-width: 639.98px) {
   .hero--venture .hero__mark { width: 72px; height: 72px; padding: 9px; border-radius: 18px; margin-bottom: var(--s2); }
 }
