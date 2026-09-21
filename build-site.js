@@ -284,8 +284,23 @@ const INPIPE_TEAM = [
   { file: 'inpipe-dickinson.webp', name: 'Mary Ann Dickinson', role: 'Industry Advisor · Alliance for Water Efficiency' },
 ];
 
-function teamCards() {
-  return INPIPE_TEAM.map((m, i) => `        <article class="teammate reveal" data-delay="${i % 4}">
+/* Esaal's own leadership, same treatment as the InPipe group. Photos come from
+   Esaal's company profile. Advisors have no portrait in the source, so they are
+   listed by name only rather than padded with a stock face. */
+const ESAAL_TEAM = [
+  { file: 'esaal-reem.webp',     name: 'Reem Musabbah', role: 'CEO &amp; Founder' },
+  { file: 'esaal-alhassan.webp', name: 'AlHassan A.',   role: 'CTO' },
+  { file: 'esaal-anas.webp',     name: 'Anas Ali',      role: 'COO &amp; Co-founder' },
+];
+
+const ESAAL_ADVISORS = [
+  ['Mohamed Roushdy, MBA', 'Fintech · Open Banking · Digital Transformation'],
+  ['Sreela Sreenarayanan', 'Commercial Operations · Pricing &amp; Financials'],
+  ['Ashutosh Ashish', 'Digital Banking · Onboarding · Digital Channels'],
+];
+
+function teamCards(team) {
+  return team.map((m, i) => `        <article class="teammate reveal" data-delay="${i % 4}">
           <img src="assets/img/${m.file}" alt="${m.name}" loading="lazy" decoding="async">
           <h3 class="teammate__name">${m.name}</h3>
           <p class="teammate__role">${m.role}</p>
@@ -680,7 +695,7 @@ const inpipeBody = `${hero({
         <p class="lead">The people behind HydroXS®, built on decades in water and clean energy.</p>
       </div>
       <div class="team-grid mt-4">
-${teamCards()}
+${teamCards(INPIPE_TEAM)}
       </div>
     </div>
   </section>`;
@@ -898,6 +913,25 @@ const esaalBody = `${hero({
         <img src="assets/img/venture-esaal.webp" alt="Esaal app icon" loading="lazy" decoding="async" class="figure__mark figure__mark--lg">
         <figcaption>Esaal — the new, smarter way to E-receipt. In collaboration with Esaal.</figcaption>
       </figure>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="center reveal intro">
+        <p class="eyebrow">Our venture partner</p>
+        <h2>The Esaal Team</h2>
+        <p class="lead">Esaal builds and runs the receipts platform. NEXGEN brings it to the Gulf.</p>
+      </div>
+      <div class="team-grid team-grid--trio mt-4">
+${teamCards(ESAAL_TEAM)}
+      </div>
+      <div class="team-advisors reveal">
+        <h3 class="team-advisors__title">Advisors</h3>
+        <ul class="team-advisors__list">
+${ESAAL_ADVISORS.map(([n, d]) => `          <li><strong>${n}</strong><span>${d}</span></li>`).join('\n')}
+        </ul>
+      </div>
     </div>
   </section>`;
 

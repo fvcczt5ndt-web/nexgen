@@ -1092,6 +1092,24 @@ main > .next + .section {
   .team-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s5) var(--s3); }
   .teammate img { width: 104px; height: 104px; }
 }
+/* A three-person group should not stretch across four columns; it stays
+   centred so the trio keeps the same portrait size as larger grids. */
+.team-grid--trio { max-width: 46rem; margin-inline: auto; }
+@media (min-width: 640px) {
+  .team-grid--trio { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* Advisors with no portrait in the source: named, not given a stock face. */
+.team-advisors { max-width: 46rem; margin: var(--s5) auto 0; text-align: center; }
+.team-advisors__title {
+  font-family: var(--font-sans); font-size: .8125rem; font-weight: 600;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+  margin: 0 0 var(--s3);
+}
+.team-advisors__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s2); }
+.team-advisors__list li { display: grid; gap: 2px; }
+.team-advisors__list strong { font-size: .9375rem; font-weight: 600; }
+.team-advisors__list span { font-size: .875rem; line-height: 1.4; color: var(--muted); }
 
 /* --- 11. Stats / credential band ----------------------------------------- */
 .stats {
