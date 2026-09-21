@@ -120,8 +120,8 @@ ${items}
 /* One closing call to action per page, worded for the page it closes: the same
    action the hero offers, said once more where a reader who has finished the
    page is deciding what to do next. Phone is a quiet text alternative. */
-function ctaBand(cta) {
-  return `  <section class="cta-band">
+function ctaBand(cta, theme = '') {
+  return `  <section class="cta-band${theme ? ` theme-${theme}` : ''}">
     <div class="container">
       <div class="cta-band__inner">
         <div class="cta-band__copy">
@@ -141,8 +141,8 @@ function ctaBand(cta) {
    reveals it past the halfway point of the page, hides it again once the
    closing block is on screen, and a dismissal is remembered for the session.
    Without JavaScript it never appears. */
-function mobileCta(label) {
-  return `  <div class="mobile-cta" data-mobile-cta>
+function mobileCta(label, theme = '') {
+  return `  <div class="mobile-cta${theme ? ` theme-${theme}` : ''}" data-mobile-cta>
     <a class="btn btn--primary" href="contact.html">${label}</a>
     <button class="mobile-cta__close" type="button" data-mobile-cta-close aria-label="Dismiss">
       <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -199,7 +199,7 @@ ${ventureLinks}
   </footer>`;
 }
 
-function page({ slug, title, desc, active, head = '', body, ogImage = 'hero-home.webp', noCta = false, cta = null }) {
+function page({ slug, title, desc, active, head = '', body, ogImage = 'hero-home.webp', noCta = false, cta = null, theme = '' }) {
   const canonical = slug === 'index.html' ? `${SITE}/` : `${SITE}/${slug}`;
   return `<!DOCTYPE html>
 <html lang="en">
@@ -229,12 +229,12 @@ function page({ slug, title, desc, active, head = '', body, ogImage = 'hero-home
 ${head}</head>
 <body>
 ${topbar(active)}
-<main id="main">
+<main id="main"${theme ? ` class="theme-${theme}"` : ''}>
 ${body}
 </main>
-${noCta || !cta || cta.band === false ? '' : ctaBand(cta)}
+${noCta || !cta || cta.band === false ? '' : ctaBand(cta, theme)}
 ${footer()}
-${noCta || !cta ? '' : mobileCta(cta.label)}
+${noCta || !cta ? '' : mobileCta(cta.label, theme)}
 <script src="assets/js/site.js" defer></script>
 </body>
 </html>
@@ -355,7 +355,7 @@ function ventureHeroOpts(slug) {
   const big = `hero-${slug}.webp`;
   const small = `hero-${slug}-960.webp`;
   if (!fs.existsSync(path.join(OUT, 'assets', 'img', big))) return { cls: ' hero--plate hero--home' };
-  return { image: big, imageSmall: fs.existsSync(path.join(OUT, 'assets', 'img', small)) ? small : undefined, cls: ' hero--home hero--split hero--venture' };
+  return { image: big, imageSmall: fs.existsSync(path.join(OUT, 'assets', 'img', small)) ? small : undefined, cls: ` hero--home hero--split hero--venture hero--${slug}` };
 }
 
 function splitImage(src, alt, opts = {}) {
@@ -1169,7 +1169,7 @@ const PAGES = [
   { slug: 'trust-flow.html', active: 'trust-flow.html', title: 'Trust Flow — Corporate & Investor Onboarding AI | NEXGEN Holdings', desc: 'Trust Flow automates onboarding for banks, investment firms, funds, and asset managers with AI document extraction, automated KYC/KYB, and compliance workflows.', body: trustFlowBody, ogImage: 'venture-trust-flow.webp' , cta: { title: 'See Trust Flow on your own onboarding.', text: 'Request a demo for your bank, fund, or investment firm.', label: 'Request a Demo' } },
   { slug: 'esaal.html', active: 'esaal.html', title: 'Esaal — Digital Receipts & Spending Intelligence | NEXGEN Holdings', desc: 'In collaboration with Esaal, NEXGEN brings Plug-n-Play digital receipts to the GCC — real-time customer profiling, campaign measurement, and no extra hardware.', body: esaalBody, ogImage: 'venture-esaal.webp' , cta: { title: 'Bring digital receipts to your customers.', text: 'Talk to us about a Plug-n-Play rollout across your stores.', label: 'Partner With Us' } },
   { slug: 'dari.html', active: 'dari.html', title: 'Dari — AI-Powered Smart Living System | NEXGEN Holdings', desc: 'Dari is a human-centric smart home and building platform that adapts to behavior, emotion, and daily routines using behavioral and emotional AI.', body: dariBody, ogImage: 'venture-dari.webp' , cta: { title: 'Shape the next generation of smart living.', text: 'Explore a partnership around Dari.', label: 'Partner With Us' } },
-  { slug: 'saby.html', active: 'saby.html', title: 'SABY — Modern Technology Studio | NEXGEN Holdings', desc: 'SABY is NexGen’s dedicated software engineering studio delivering AI development, digital transformation, and enterprise-grade platforms for the region.', body: sabyBody, ogImage: 'venture-saby.webp' , cta: { title: 'Have something to build?', text: 'Talk to our engineering studio about AI and digital transformation.', label: 'Partner With Us' } },
+  { slug: 'saby.html', active: 'saby.html', title: 'SABY — Modern Technology Studio | NEXGEN Holdings', desc: 'SABY is NexGen’s dedicated software engineering studio delivering AI development, digital transformation, and enterprise-grade platforms for the region.', body: sabyBody, ogImage: 'venture-saby.webp' , cta: { title: 'Have something to build?', text: 'Talk to our engineering studio about AI and digital transformation.', label: 'Partner With Us' } , theme: 'saby' },
   { slug: 'contact.html', active: 'contact.html', title: 'Contact Us — NEXGEN Holdings', desc: 'Contact NEXGEN Holdings for partnerships, ventures, and clean energy assessments. Phone +973 3660 0911, email info@nexgen.bh.', body: contactBody, ogImage: 'contact-visual.webp', noCta: true },
 ];
 
@@ -1254,6 +1254,7 @@ for (const p of PAGES) {
     ogImage: p.ogImage,
     noCta: !!p.noCta,
     cta: p.cta || null,
+    theme: p.theme || '',
     head: p.home ? JSONLD : '',
   });
   const out = withIntrinsicSizes(html);

@@ -1497,6 +1497,15 @@ main > .next + .section {
   .footer__brand, .footer__top > div:last-child { grid-column: 1 / -1; }
 }
 
+/* Company themes. A venture keeps the NexGen system (type, spacing, cards,
+   layout, the dark ground) and changes only the accent, so it reads as its own
+   company inside the same family. The nav and footer stay NexGen teal. */
+.theme-saby {
+  --teal: #9d86f5;          /* fills under dark labels  */
+  --teal-bright: #b9a8ff;   /* accent on dark grounds   */
+  --teal-ink: #4a3aa8;      /* accent text on paper     */
+}
+
 /* Venture heroes: the company's logo tile sits above the title, left-aligned. */
 .hero--venture .hero__mark {
   display: block;
@@ -1507,8 +1516,9 @@ main > .next + .section {
   background: #fff;
   border-radius: 22px;
   margin: 0 0 var(--s3);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, .14), 0 16px 30px -12px rgba(0, 0, 0, .55);
+  box-shadow: 0 0 0 2px var(--teal), 0 16px 30px -12px rgba(0, 0, 0, .55);
 }
+.hero--saby .hero__media img { object-position: 86% 50%; }
 @media (max-width: 639.98px) {
   .hero--venture .hero__mark { width: 72px; height: 72px; padding: 9px; border-radius: 18px; margin-bottom: var(--s2); }
 }
@@ -1573,6 +1583,15 @@ main > .next + .section {
 
 @media (min-width: 1100px) {
   .hero--split .hero__media { inset: 0 0 0 auto; width: 66%; }
+  /* A breath of the company accent rising from the lower left of the ground. */
+  .hero--venture::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(50% 58% at 4% 76%, color-mix(in srgb, var(--teal) 20%, transparent), transparent 72%);
+  }
   .hero--split .hero__media img { object-position: 62% 50%; }
   .hero--split .hero__inner { max-width: 37rem; margin-inline: max(0px, calc((100% - var(--container)) / 2)) auto; }
   .hero--split h1 { font-size: clamp(2.5rem, 2.6vw + 1.1rem, 3.5rem); }
