@@ -253,6 +253,23 @@ function ventureCards(level) {
         </article>`).join('\n');
 }
 
+/* InPipe is a company too, so the Companies overview opens with it. It is a
+   wide card rather than a fifth cell in the grid: the flagship first, then the
+   four digital ventures beneath it. */
+function inpipeFeature() {
+  return `        <article class="card venture venture--wide reveal">
+          <div class="venture__media">
+            <img class="venture__mark--round" src="assets/img/inpipe-plant.webp" alt="InPipe Energy — HydroXS in-pipe hydropower" loading="lazy" decoding="async">
+          </div>
+          <div class="venture__body">
+            <p class="venture__kicker">Clean Energy</p>
+            <h2 class="venture__title">InPipe Energy</h2>
+            <p>NexGen is the exclusive regional partner of InPipe Energy (USA), bringing HydroXS® technology to the Gulf—turning excess water pressure inside pipelines into clean electricity.</p>
+            <div class="card__foot"><a class="link-arrow" href="inpipe-energy.html">Read More</a></div>
+          </div>
+        </article>`;
+}
+
 function hero({ image, mark, title, lead, eyebrow, actions = '', cls = '' }) {
   const media = image
     ? `    <div class="hero__media"><img src="assets/img/${image}" alt="" fetchpriority="high" decoding="async"></div>\n`
@@ -520,12 +537,13 @@ const aboutBody = `${hero({
 const companiesBody = `${hero({
   image: 'hero-about.webp',
   title: 'Our Companies',
-  lead: 'Beyond clean energy, NexGen builds a growing portfolio of digital ventures shaping the future of finance, data intelligence, and smart living.',
+  lead: 'From clean energy to finance, data intelligence, and smart living, NexGen builds and partners across a focused portfolio of companies.',
 })}
 
   <section class="section">
     <div class="container">
-      <div class="grid grid-2">
+${inpipeFeature()}
+      <div class="grid grid-2 mt-3">
 ${ventureCards(2)}
       </div>
     </div>
@@ -1018,7 +1036,7 @@ const contactBody = `${hero({
 const PAGES = [
   { slug: 'index.html', active: 'index.html', title: 'NEXGEN Holdings — Clean Energy & Digital Innovation in the GCC', desc: 'NEXGEN Holdings is a Gulf-based holding company building high-impact ventures in clean energy, fintech, digital receipts, and smart living across the GCC.', body: homeBody, ogImage: 'hero-home.webp', home: true },
   { slug: 'about.html', active: 'about.html', title: 'About Us — NEXGEN Holdings', desc: 'NEXGEN Holdings builds and scales ventures across clean energy, financial innovation, and intelligent digital platforms — our vision, mission, values, and leadership.', body: aboutBody, ogImage: 'hero-about.webp' },
-  { slug: 'companies.html', active: 'companies.html', title: 'Our Companies — NEXGEN Holdings', desc: 'Explore the NEXGEN Holdings portfolio: Trust Flow, Esaal, Dari, and SABY — four ventures shaping finance, digital receipts, and smart living.', body: companiesBody, ogImage: 'hero-about.webp' },
+  { slug: 'companies.html', active: 'companies.html', title: 'Our Companies — NEXGEN Holdings', desc: 'Explore the NEXGEN Holdings portfolio: InPipe Energy, Trust Flow, Esaal, Dari, and SABY — clean energy, finance, digital receipts, and smart living.', body: companiesBody, ogImage: 'hero-about.webp' },
   { slug: 'inpipe-energy.html', active: 'inpipe-energy.html', title: 'InPipe Energy — HydroXS In-Pipe Hydropower | NEXGEN Holdings', desc: 'NEXGEN is the exclusive regional partner of InPipe Energy (USA), bringing HydroXS technology to the Gulf to turn excess water pressure into clean, reliable power.', body: inpipeBody, ogImage: 'hero-inpipe.webp' },
   { slug: 'trust-flow.html', active: 'trust-flow.html', title: 'Trust Flow — Corporate & Investor Onboarding AI | NEXGEN Holdings', desc: 'Trust Flow automates onboarding for banks, investment firms, funds, and asset managers with AI document extraction, automated KYC/KYB, and compliance workflows.', body: trustFlowBody, ogImage: 'venture-trust-flow.webp' },
   { slug: 'esaal.html', active: 'esaal.html', title: 'Esaal — Digital Receipts & Spending Intelligence | NEXGEN Holdings', desc: 'In collaboration with Esaal, NEXGEN brings Plug-n-Play digital receipts to the GCC — real-time customer profiling, campaign measurement, and no extra hardware.', body: esaalBody, ogImage: 'venture-esaal.webp' },

@@ -974,9 +974,19 @@ main > .next + .section {
   letter-spacing: -.01em;
   margin-bottom: 6px;
 }
+.venture__kicker + .venture__title { margin-top: 0; }
 .venture__body p { font-size: 1rem; margin-bottom: 10px; }
 .venture__body .card__foot { padding-top: var(--s2); }
 .card__foot .link-arrow { min-height: 44px; }
+
+/* Wide venture card: the mark plate beside the copy on desktop. */
+.venture__mark--round { width: 112px; height: 112px; max-height: none; object-fit: cover; border-radius: 50%; }
+@media (min-width: 900px) {
+  .venture--wide { flex-direction: row; }
+  .venture--wide .venture__media { flex: 0 0 34%; min-height: 0; border-bottom: 0; border-right: 1px solid var(--hairline); }
+  .venture--wide .venture__body { justify-content: center; padding: var(--s4); }
+  .venture--wide .venture__body p { max-width: 60ch; }
+}
 
 .feature { padding: var(--s3) 0; border-top: 1px solid var(--hairline); }
 .feature h3 { font-size: var(--fs-h4); margin-bottom: 6px; }
@@ -1356,4 +1366,68 @@ main > .next + .section {
   .topbar, .mobile-cta, .cta-band, .footer__bottom { display: none; }
   body { background: #fff; color: #000; }
   .js .reveal { opacity: 1 !important; transform: none !important; }
+}
+
+/* --- 19. Compact mobile ---------------------------------------------------
+   Below 640px a page is read one screen at a time, so the whole scale tightens
+   together: the spacing tokens, the type ladder, and the components that were
+   sized in absolute pixels. Nothing is removed; the same content simply takes
+   fewer screens. Body text stays at 16px and every target keeps its 44px. */
+@media (max-width: 639.98px) {
+  :root {
+    --pace: 40px;
+    --s3: 20px; --s4: 26px; --s5: 34px; --s6: 44px; --s7: 56px;
+    --fs-body: 1rem;
+    --fs-lead: 1.0625rem;
+    --fs-h3: 1.1875rem;
+    --fs-h2: 1.5rem;
+    --fs-h1: 1.875rem;
+    --fs-hero: 2.125rem;
+    --lh-body: 1.55;
+  }
+
+  p:not(.eyebrow) + h2, p:not(.eyebrow) + h3,
+  ul + h2, ul + h3, ol + h2, ol + h3,
+  .grid + h2, .figure + h3, .stats + h2 { margin-top: 1.2em; }
+  .checklist { gap: 8px; }
+
+  /* Heroes: no viewport-height floor, less air above and below the copy. */
+  .hero, .hero--home { min-height: 0; padding-block: var(--s5); }
+  .hero--photo { padding-bottom: calc(var(--s5) + var(--s6)); }
+  .hero--plate { padding-block: 40px; }
+  .hero--plate .hero__mark { width: 72px; height: 72px; margin-bottom: var(--s2); }
+  .hero__actions { margin-top: var(--s3); }
+
+  /* Cards and panels */
+  .card, .panel { padding: var(--s3); }
+  .venture { padding: 0; }
+  .venture__media { min-height: 112px; padding: var(--s3); }
+  .venture__media img { max-height: 72px; }
+  .venture__mark--round { width: 76px; height: 76px; }
+  .step { padding: var(--s2) 0; }
+  .contact-row { padding: var(--s2) var(--s3); }
+  .contact-row__value { font-size: 1.25rem; }
+
+  /* Portraits and decorative marks: a square crop instead of a tall portrait,
+     and the round marks capped so they stop filling the whole screen. */
+  .person__media img { aspect-ratio: 1 / 1; }
+  .split > .figure:not(:has(img[src*="team-"])) { max-width: 230px; margin-inline: auto; }
+  .split > .figure:has(img[src*="team-"]) { max-width: 320px; margin-inline: auto; }
+  .figure img[src*="team-"] { aspect-ratio: 1 / 1; object-fit: cover; object-position: 50% 24%; }
+
+  /* Figures read better two across than four stacked. */
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stat { padding: var(--s3) var(--s2); }
+  .stat__value { font-size: 1.75rem; }
+  .stat__label { font-size: .875rem; }
+
+  /* Call-to-action band and footer */
+  .cta-band__inner { padding-block: var(--s5); }
+  .cta-band h2 { font-size: 1.375rem; }
+  .footer__top {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--s4) var(--s3);
+    padding-block: var(--s5) var(--s4);
+  }
+  .footer__brand, .footer__top > div:last-child { grid-column: 1 / -1; }
 }
