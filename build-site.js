@@ -270,6 +270,28 @@ function inpipeFeature() {
         </article>`;
 }
 
+/* Partner team. Every entry is InPipe's own people, presented as such: the
+   section says whose team it is, and the photos keep one grayscale treatment so
+   nine different source photographs read as a set. */
+const INPIPE_TEAM = [
+  { file: 'inpipe-semler.webp',    name: 'Gregg Semler',       role: 'CEO &amp; Founder' },
+  { file: 'inpipe-frost.webp',     name: 'David Frost',        role: 'Business Development' },
+  { file: 'inpipe-klann.webp',     name: 'Richard Klann',      role: 'Vice President, Finance' },
+  { file: 'inpipe-conner.webp',    name: 'Mickey Conner',      role: 'Director, Engineering' },
+  { file: 'inpipe-robinson.webp',  name: 'John Robinson',      role: 'Operations Manager' },
+  { file: 'inpipe-perrin.webp',    name: 'Kyle Perrin',        role: 'Sales Manager' },
+  { file: 'inpipe-morrison.webp',  name: 'Chris Morrison',     role: 'Industry Advisor · Morrison Water' },
+  { file: 'inpipe-dickinson.webp', name: 'Mary Ann Dickinson', role: 'Industry Advisor · Alliance for Water Efficiency' },
+];
+
+function teamCards() {
+  return INPIPE_TEAM.map((m, i) => `        <article class="teammate reveal" data-delay="${i % 4}">
+          <img src="assets/img/${m.file}" alt="${m.name}" loading="lazy" decoding="async">
+          <h3 class="teammate__name">${m.name}</h3>
+          <p class="teammate__role">${m.role}</p>
+        </article>`).join('\n');
+}
+
 function hero({ image, mark, title, lead, eyebrow, actions = '', cls = '' }) {
   const media = image
     ? `    <div class="hero__media"><img src="assets/img/${image}" alt="" fetchpriority="high" decoding="async"></div>\n`
@@ -646,6 +668,19 @@ const inpipeBody = `${hero({
           <li class="step"><div><h3>Commissioning &amp; Monitoring</h3></div></li>
         </ol>
         <div class="btn-row mt-4"><a class="btn btn--primary" href="contact.html">Request Engineering Assessment</a></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="center reveal intro">
+        <p class="eyebrow">Our technology partner</p>
+        <h2>The InPipe Energy Team</h2>
+        <p class="lead">The people behind HydroXS®, built on decades in water and clean energy.</p>
+      </div>
+      <div class="team-grid mt-4">
+${teamCards()}
       </div>
     </div>
   </section>`;

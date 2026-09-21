@@ -1073,6 +1073,26 @@ main > .next + .section {
   .advisor:hover .advisor__name { color: var(--teal-ink); }
 }
 
+/* Partner team: a compact grid of round portraits. Grayscale is applied here
+   so every source photograph, whatever its colour, sits in one family. */
+.team-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s4) var(--s2); }
+.teammate { text-align: center; }
+.teammate img {
+  width: 84px;
+  height: 84px;
+  margin: 0 auto var(--s2);
+  border-radius: 50%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.04);
+  box-shadow: 0 0 0 3px var(--panel), 0 0 0 4px var(--line);
+}
+.teammate__name { font-family: var(--font-display); font-size: 1.0625rem; font-weight: 600; margin: 0 0 2px; }
+.teammate__role { margin: 0 auto; max-width: 22ch; font-size: .875rem; line-height: 1.4; color: var(--muted); }
+@media (min-width: 640px) {
+  .team-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s5) var(--s3); }
+  .teammate img { width: 104px; height: 104px; }
+}
+
 /* --- 11. Stats / credential band ----------------------------------------- */
 .stats {
   display: grid;
