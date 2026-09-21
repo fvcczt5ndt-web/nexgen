@@ -137,19 +137,6 @@ function ctaBand(cta, theme = '') {
   </section>`;
 }
 
-/* Mobile-only action, and only for a reader who has shown intent: site.js
-   reveals it past the halfway point of the page, hides it again once the
-   closing block is on screen, and a dismissal is remembered for the session.
-   Without JavaScript it never appears. */
-function mobileCta(label, theme = '') {
-  return `  <div class="mobile-cta${theme ? ` theme-${theme}` : ''}" data-mobile-cta>
-    <a class="btn btn--primary" href="contact.html">${label}</a>
-    <button class="mobile-cta__close" type="button" data-mobile-cta-close aria-label="Dismiss">
-      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-    </button>
-  </div>`;
-}
-
 function footer() {
   const ventureLinks = VENTURES.map(v => `            <a href="${v.file}">${v.name}</a>`).join('\n');
   return `  <footer class="footer">
@@ -234,7 +221,6 @@ ${body}
 </main>
 ${noCta || !cta || cta.band === false ? '' : ctaBand(cta, theme)}
 ${footer()}
-${noCta || !cta ? '' : mobileCta(cta.label, theme)}
 <script src="assets/js/site.js" defer></script>
 </body>
 </html>
