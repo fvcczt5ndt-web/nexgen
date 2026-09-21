@@ -1505,6 +1505,11 @@ main > .next + .section {
   --teal-bright: #b9a8ff;   /* accent on dark grounds   */
   --teal-ink: #4a3aa8;      /* accent text on paper     */
 }
+.theme-dari {
+  --teal: #4fb0ea;
+  --teal-bright: #7cc6f5;
+  --teal-ink: #0b5d94;
+}
 
 /* Venture heroes: the company's logo tile sits above the title, left-aligned. */
 .hero--venture .hero__mark {
@@ -1519,6 +1524,7 @@ main > .next + .section {
   box-shadow: 0 0 0 2px var(--teal), 0 16px 30px -12px rgba(0, 0, 0, .55);
 }
 .hero--saby .hero__media img { object-position: 86% 50%; }
+.hero--dari .hero__media img { object-position: 92% 50%; }
 @media (max-width: 639.98px) {
   .hero--venture .hero__mark { width: 72px; height: 72px; padding: 9px; border-radius: 18px; margin-bottom: var(--s2); }
 }
