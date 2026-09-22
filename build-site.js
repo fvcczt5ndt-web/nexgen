@@ -1239,9 +1239,18 @@ ${urls}
 </urlset>
 `);
 
-/* CNAME — GitHub Pages reads the custom domain from this file. Emitting it here
-   keeps it in the published artifact across rebuilds, so it cannot be lost by a
-   later `node build-site.js` run. Content must be the bare host, no scheme. */
-fs.writeFileSync(path.join(OUT, 'CNAME'), 'nexgen.bh\n');
-
-console.log('wrote robots.txt, sitemap.xml, CNAME');
+/* CNAME — GitHub Pages reads the custom domain from this file, and within a
+   workflow build the file is what binds (or unbinds) the domain. It is therefore
+   gated: emit it only when CUSTOM_DOMAIN is set, so the default build serves on
+   the github.io preview URL and the live domain can be switched on deliberately.
+     CUSTOM_DOMAIN=nexgen.bh node build-site.js    # bind the custom domain
+     node build-site.js                            # unbind, preview only
+   Content must be the bare host, no scheme. */
+const CUSTOM_DOMAIN = process.env.CUSTOM_DOMAIN || '';
+if (CUSTOM_DOMAIN) {
+  fs.writeFileSync(path.join(OUT, 'CNAME'), CUSTOM_DOMAIN + '\n');
+  console.log(`wrote robots.txt, sitemap.xml, CNAME (${CUSTOM_DOMAIN})`);
+} else {
+  try { fs.unlinkSync(path.join(OUT, 'CNAME')); } catch {}
+  console.log('wrote robots.txt, sitemap.xml (no CNAME -> github.io preview)');
+}
