@@ -1345,6 +1345,38 @@ main > .next + .section {
 .js .reveal[data-delay="2"] { transition-delay: .12s; }
 .js .reveal[data-delay="3"] { transition-delay: .18s; }
 
+/* Venture status marker: a venture that is not live yet says so plainly, in the
+   site's own type and accent, so no page implies a shipping product. */
+.status-note {
+  display: inline-block;
+  margin: 0 0 var(--s2);
+  padding: 9px 16px;
+  font-family: var(--font-sans);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--teal-ink);
+  background: rgba(42, 157, 153, .12);
+  border: 1px solid rgba(42, 157, 153, .34);
+  border-radius: 999px;
+}
+/* On the dark grounds the marker switches to the bright accent and a lighter
+   rule, matching the eyebrow treatment already used there. */
+.hero .status-note, .section--dark .status-note {
+  color: var(--teal-bright);
+  background: rgba(255, 255, 255, .08);
+  border-color: rgba(255, 255, 255, .28);
+}
+/* In a card body the paragraph rule (`.venture__body p`) outranks a bare class,
+   and the flex column would stretch the pill edge to edge; restate the size and
+   let the pill hug its own text. */
+.venture__body .status-note {
+  font-size: var(--fs-label);
+  align-self: flex-start;
+  margin-bottom: 10px;
+}
+
 /* --- 18. Responsive scale-up --------------------------------------------- */
 @media (min-width: 640px) {
   :root { --gutter: 24px; }

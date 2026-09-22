@@ -57,6 +57,9 @@ const VENTURES = [
     title: 'AI-Powered Smart Living System',
     copy: 'A next-generation smart home and building platform that adapts to behavior, emotion, and daily routines—not just device commands.',
     img: 'venture-dari.webp',
+    /* Dari is not live: the status travels with the card so the overview pages
+       cannot imply a shipping product. Same wording as the Dari page hero. */
+    status: 'In development — coming soon',
   },
   {
     name: 'SABY',
@@ -257,12 +260,16 @@ function ventureCard(v, h, i, wide) {
   const img = v.round
     ? `<img class="venture__mark--round" src="assets/img/${v.img}" alt="${v.name} — ${v.title}" loading="lazy" decoding="async">`
     : `<img src="assets/img/${v.img}" alt="${v.name} — ${v.title}" loading="lazy" decoding="async">`;
+  /* A venture that is not live says so on its card, in the site's own pill. */
+  const status = v.status
+    ? `\n                <p class="status-note">${v.status}</p>`
+    : '';
   return `            <article class="card venture reveal${wide ? ' venture--wide' : ''}" data-delay="${i % 3}">
               <div class="venture__media">
                 ${img}
               </div>
               <div class="venture__body">
-                <p class="venture__kicker">${v.kicker}</p>
+                <p class="venture__kicker">${v.kicker}</p>${status}
                 <h${h} class="venture__title">${v.name}</h${h}>
                 <p>${v.copy}</p>
                 <div class="card__foot"><a class="link-arrow" href="${v.file}">Read More</a></div>
@@ -327,7 +334,7 @@ function teamCards(team) {
         </article>`).join('\n');
 }
 
-function hero({ image, imageSmall, imageStacked, mark, title, lead, eyebrow, actions = '', cls = '' }) {
+function hero({ image, imageSmall, imageStacked, mark, title, lead, eyebrow, status = '', actions = '', cls = '' }) {
   /* imageSmall: a 960w rendition for phones; the wide one serves large screens. */
   const srcset = imageSmall
     ? ` srcset="assets/img/${imageSmall} 960w, assets/img/${image} 1920w" sizes="(max-width: 1099px) 100vw, 66vw" width="1920" height="1080"`
@@ -348,11 +355,12 @@ function hero({ image, imageSmall, imageStacked, mark, title, lead, eyebrow, act
     ? `      <img class="hero__mark" src="assets/img/${mark}" alt="" width="240" height="240">\n`
     : '';
   const eyebrowHtml = eyebrow ? `      <p class="eyebrow">${eyebrow}</p>\n` : '';
+  const statusHtml = status ? `      <p class="status-note">${status}</p>\n` : '';
   const actionsHtml = actions ? `      <div class="btn-row hero__actions">${actions}</div>\n` : '';
   return `  <section class="hero${cls}${photoCls}">
 ${media}    <div class="container hero__inner">
 ${markHtml}${eyebrowHtml}      <h1>${title}</h1>
-      <p class="lead">${lead}</p>
+${statusHtml}      <p class="lead">${lead}</p>
 ${actionsHtml}    </div>
   </section>`;
 }
@@ -473,14 +481,14 @@ const aboutBody = `${hero({
       <div class="reveal">
         <p class="eyebrow">Founder’s message</p>
         <h2>Abdullah Sultan AlMutairi</h2>
-        <p class="person__role">Founder &amp; Chief Executive Officer</p>
+        <p class="person__role">Chairman &amp; CEO</p>
         <p>NEXGEN was founded on the belief that innovation must deliver real value—not just ideas.</p>
         <p>As a holding company, our role goes beyond capital allocation. We actively shape ventures that address critical challenges facing our region, from clean energy and infrastructure efficiency to financial systems and digital transformation.</p>
         <p>We take a disciplined and selective approach, partnering with proven global innovators and regional institutions to ensure each venture is practical, scalable, and aligned with the long-term priorities of the Gulf.</p>
         <p>NEXGEN is committed to building companies that stand the test of time—creating sustainable impact for our partners, our markets, and future generations.</p>
       </div>
       <figure class="figure reveal" data-delay="1">
-        <img src="assets/img/team-abdullah.webp" alt="Abdullah Sultan AlMutairi, Founder &amp; Chief Executive Officer of NEXGEN Holdings" loading="lazy" decoding="async">
+        <img src="assets/img/team-abdullah.webp" alt="Abdullah Sultan AlMutairi, Chairman &amp; CEO of NEXGEN Holdings" loading="lazy" decoding="async">
       </figure>
     </div>
   </section>
@@ -491,7 +499,7 @@ const aboutBody = `${hero({
         <p class="eyebrow">Leadership</p>
         <h2>Our Leadership Structure</h2>
       </div>
-      <div class="grid grid-2 mt-4">
+      <div class="grid grid-3 mt-4">
         <article class="person reveal">
           <div class="person__media"><img src="assets/img/team-omar.webp" alt="Omar Almutairi, Head Of Fintech" loading="lazy" decoding="async"></div>
           <div class="person__body">
@@ -508,12 +516,22 @@ const aboutBody = `${hero({
             <p class="person__note">Leads NEXGEN’s renewable energy initiatives, overseeing decarbonization projects, water-energy recovery solutions, and strategic partnerships with utilities and infrastructure operators across the GCC.</p>
           </div>
         </article>
+        <article class="person reveal" data-delay="2">
+          <div class="person__media"><img src="assets/img/advisor-moatassem.webp" alt="Moatassem Abdelhaleem, Head of AI &amp; Digital Transformation" loading="lazy" decoding="async"></div>
+          <div class="person__body">
+            <h3 class="person__name">Moatassem Abdelhaleem</h3>
+            <p class="person__role">Head of AI &amp; Digital Transformation</p>
+            <p class="person__note">Leads NEXGEN’s artificial intelligence and digital transformation agenda.</p>
+          </div>
+        </article>
       </div>
 
       <div class="center reveal intro mt-6">
         <h2>Advisory Board</h2>
       </div>
-      <div class="grid grid-3 mt-4">
+      <!-- Advisory Board now carries two members; the AI & digital transformation
+           lead moved up into the leadership grid above. -->
+      <div class="grid grid-2 mt-4">
         <a class="advisor reveal" href="https://www.linkedin.com/in/abdullahmansouralenezi" target="_blank" rel="noopener">
           <img src="assets/img/advisor-alenzi.webp" alt="Abdullah Alenezi" loading="lazy" decoding="async">
           <span>
@@ -526,13 +544,6 @@ const aboutBody = `${hero({
           <span>
             <span class="advisor__name">Hanan Alsharah</span>
             <span class="advisor__role">Founder and CEO of Innotech</span>
-          </span>
-        </a>
-        <a class="advisor reveal" data-delay="2" href="https://www.linkedin.com/in/moatassem-abdelhaleem" target="_blank" rel="noopener">
-          <img src="assets/img/advisor-moatassem.webp" alt="Moatassem Abdelhaleem" loading="lazy" decoding="async">
-          <span>
-            <span class="advisor__name">Moatassem Abdelhaleem</span>
-            <span class="advisor__role">Founder &amp; CEO of Hexaflow</span>
           </span>
         </a>
       </div>
@@ -884,8 +895,8 @@ const esaalBody = `${hero({
       </div>
       <div class="stats reveal mt-4">
         <div class="stat">
-          <p class="stat__value">15,000<sup>+</sup></p>
-          <p class="stat__label">Yearly receipts sent from over 15k stores across the world</p>
+          <p class="stat__value">More than 15,000</p>
+          <p class="stat__label">receipts</p>
         </div>
         <div class="stat">
           <p class="stat__value">30<sup>%</sup></p>
@@ -946,6 +957,7 @@ const dariBody = `${hero({
   mark: 'venture-dari.webp',
   eyebrow: 'Artificial Intelligence',
   title: 'Dari',
+  status: 'In development — coming soon',
   lead: 'AI Smart Living — a home and building ecosystem that understands behavior, emotion, and lifestyle.',
   actions: `<a class="btn btn--accent" href="contact.html">Contact Us</a>`,
   ...ventureHeroOpts('dari'),
@@ -1108,7 +1120,7 @@ const PAGES = [
   { slug: 'inpipe-energy.html', active: 'inpipe-energy.html', title: 'InPipe Energy — HydroXS In-Pipe Hydropower | NEXGEN Holdings', desc: 'NEXGEN is the exclusive regional partner of InPipe Energy (USA), bringing HydroXS technology to the Gulf to turn excess water pressure into clean, reliable power.', body: inpipeBody, ogImage: 'hero-inpipe.webp' , cta: { title: 'Bring HydroXS to your network.', text: 'Get in touch to discuss whether HydroXS fits your site.', label: 'Contact Us' } },
   { slug: 'trust-flow.html', active: 'trust-flow.html', title: 'Trust Flow — Corporate & Investor Onboarding AI | NEXGEN Holdings', desc: 'Trust Flow automates onboarding for banks, investment firms, funds, and asset managers with AI document extraction, automated KYC/KYB, and compliance workflows.', body: trustFlowBody, ogImage: 'venture-trust-flow.webp' , cta: { title: 'Learn More About Trust Flow', text: 'Get in touch to learn more about Trust Flow for your bank, fund, or investment firm.', label: 'Contact Us' } , theme: 'trust-flow' },
   { slug: 'esaal.html', active: 'esaal.html', title: 'Esaal — Digital Receipts & Spending Intelligence | NEXGEN Holdings', desc: 'In collaboration with Esaal, NEXGEN brings Plug-n-Play digital receipts to the GCC — real-time customer profiling, campaign measurement, and no extra hardware.', body: esaalBody, ogImage: 'venture-esaal.webp' , cta: { title: 'Bring digital receipts to your customers.', text: 'Talk to us about a Plug-n-Play rollout across your stores.', label: 'Contact Us' } , theme: 'esaal' },
-  { slug: 'dari.html', active: 'dari.html', title: 'Dari — AI-Powered Smart Living System | NEXGEN Holdings', desc: 'Dari is a human-centric smart home and building platform that adapts to behavior, emotion, and daily routines using behavioral and emotional AI.', body: dariBody, ogImage: 'venture-dari.webp' , cta: { title: 'Shape the next generation of smart living.', text: 'Explore a partnership around Dari.', label: 'Contact Us' } , theme: 'dari' },
+  { slug: 'dari.html', active: 'dari.html', title: 'Dari — AI-Powered Smart Living System (In Development) | NEXGEN Holdings', desc: 'Dari is an in-development smart home and building platform that adapts to behavior, emotion, and daily routines using behavioral and emotional AI. Coming soon.', body: dariBody, ogImage: 'venture-dari.webp' , cta: { title: 'Shape the next generation of smart living.', text: 'Explore a partnership around Dari.', label: 'Contact Us' } , theme: 'dari' },
   { slug: 'saby.html', active: 'saby.html', title: 'SABY — Modern Technology Studio | NEXGEN Holdings', desc: 'SABY is NEXGEN’s dedicated software engineering studio delivering AI development, digital transformation, and enterprise-grade platforms for the region.', body: sabyBody, ogImage: 'venture-saby.webp' , cta: { title: 'Have something to build?', text: 'Talk to our engineering studio about AI and digital transformation.', label: 'Contact Us' } , theme: 'saby' },
   { slug: 'contact.html', active: 'contact.html', title: 'Contact Us — NEXGEN Holdings', desc: 'Contact NEXGEN Holdings for partnerships, ventures, and site assessments. Phone +973 3660 0911, email info@nexgen.bh.', body: contactBody, ogImage: 'contact-visual.webp', noCta: true },
 ];
