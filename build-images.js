@@ -49,18 +49,22 @@ for (const slug of ['trust-flow', 'esaal', 'dari', 'saby']) {
 // vertical crop is taken from the top of the cover-fit image (0 = keep the
 // very top / trim only the bottom; higher = allow more headroom to be cut).
 const LEADERSHIP = [
-  { name: 'team-abdullah.webp',     src: 'leadership-new/founder.jpg',   w: 900, h: 1094, top_frac: 0.08 },
-  { name: 'team-omar.webp',         src: 'leadership-new/omar.jpg',      w: 900, h: 1094, top_frac: 0.25 },
-  { name: 'team-jernej.webp',       src: 'leadership-new/jernej.jpg',    w: 900, h: 1094, top_frac: 0.15 },
-  { name: 'advisor-alenzi.webp',    src: 'leadership-new/alenzi.jpg',    w: 700, h: 771,  top_frac: 0 },
-  { name: 'advisor-alsharah.webp',  src: 'leadership-new/hanan.jpg',     w: 700, h: 771,  top_frac: 0.05 },
-  { name: 'advisor-moatassem.webp', src: 'leadership-new/moatassem.jpg', w: 700, h: 778,  top_frac: 0.15 },
+  // Plain crops, no baked ring/corners: .person__media (border-radius +
+  // overflow:hidden) and .advisor img (border-radius:50%) do the shaping in
+  // CSS, matching every other rounded card on the site. Canvas dims mirror
+  // those CSS targets: 4:5 for the leadership tier, 1:1 for advisor circles.
+  { name: 'team-abdullah.webp',     src: 'leadership-new/founder.jpg',   w: 900, h: 1125, top_frac: 0.08 },
+  { name: 'team-omar.webp',         src: 'leadership-new/omar.jpg',      w: 900, h: 1125, top_frac: 0.22 },
+  { name: 'team-jernej.webp',       src: 'leadership-new/jernej.jpg',    w: 900, h: 1125, top_frac: 0.15 },
+  { name: 'advisor-alenzi.webp',    src: 'leadership-new/alenzi.jpg',    w: 700, h: 700,  top_frac: 0 },
+  { name: 'advisor-alsharah.webp',  src: 'leadership-new/hanan.jpg',     w: 700, h: 700,  top_frac: 0.05 },
+  { name: 'advisor-moatassem.webp', src: 'leadership-new/moatassem.jpg', w: 700, h: 700,  top_frac: 0.15 },
 ];
 
 function buildLeadershipPortraits() {
   const { execFileSync } = require('child_process');
   const jobs = LEADERSHIP.map(p => ({
-    src: S(p.src), dst: path.join(OUT, p.name), canvas_w: p.w, canvas_h: p.h, top_frac: p.top_frac,
+    src: S(p.src), dst: path.join(OUT, p.name), canvas_w: p.w, canvas_h: p.h, top_frac: p.top_frac, frame: false,
   }));
   execFileSync('python3', [path.join(__dirname, 'tools', 'frame-portrait.py'), JSON.stringify(jobs)], { stdio: 'inherit' });
 }

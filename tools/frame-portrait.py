@@ -9,7 +9,7 @@ BORDER = (33, 117, 130, 255)   # measured ring colour
 RADIUS = 28
 RING = 9
 
-def process(src, dst, canvas_w, canvas_h, top_frac=0.15, zoom=1.0):
+def process(src, dst, canvas_w, canvas_h, top_frac=0.15, zoom=1.0, frame=False):
     im = Image.open(src).convert('RGB')
     w, h = im.size
     scale = max(canvas_w / w, canvas_h / h) * zoom
@@ -19,6 +19,14 @@ def process(src, dst, canvas_w, canvas_h, top_frac=0.15, zoom=1.0):
     left = round(excess_x * 0.5)
     top = round(excess_y * top_frac)
     im = im.crop((left, top, left + canvas_w, top + canvas_h))
+
+    if not frame:
+        # Plain rectangular crop: the site's own CSS (border-radius +
+        # overflow:hidden on .person__media, border-radius:50% on .advisor
+        # img) does all the shaping, so no ring or rounding is baked in here.
+        im.convert('RGB').save(dst, 'WEBP', quality=88)
+        print('wrote', dst, im.size)
+        return
 
     # Rounded-rect alpha mask, supersampled for a clean edge.
     S = 4
