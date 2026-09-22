@@ -486,8 +486,8 @@ module.exports = {
     'Moatassem Abdelhaleem': 'معتصم عبدالحليم',
     'Abdullah Alenezi': 'عبدالله العنزي',
     'Hanan Alsharah': 'حنان الشره',
-    'Reem Musabbah': 'ريم مصباح',
-    'AlHassan A.': 'الحسن أ.',
+    'Reem Musabbah': 'ريم المصبح',
+    'AlHassan Faraj Allah': 'الحسن فرج الله',
     'Anas Ali': 'أنس علي',
     'Mohamed Roushdy, MBA': 'محمد رشدي، ماجستير إدارة أعمال',
     'Sreela Sreenarayanan': 'سريلا سرينارايانان',
@@ -504,7 +504,7 @@ module.exports = {
 
   esaalTeamRoles: {
     'Reem Musabbah': 'الرئيسة التنفيذية والمؤسِّسة',
-    'AlHassan A.': 'المدير التقني',
+    'AlHassan Faraj Allah': 'المدير التقني',
     'Anas Ali': 'مدير العمليات والشريك المؤسِّس',
   },
 

@@ -459,7 +459,7 @@ module.exports = {
 
   esaalTeamRoles: {
     'Reem Musabbah': 'CEO &amp; Founder',
-    'AlHassan A.': 'CTO',
+    'AlHassan Faraj Allah': 'CTO',
     'Anas Ali': 'COO &amp; Co-founder',
   },
 

@@ -59,7 +59,7 @@ const INPIPE_TEAM = [
    listed by name only rather than padded with a stock face. */
 const ESAAL_TEAM = [
   { file: 'esaal-reem.webp',     name: 'Reem Musabbah' },
-  { file: 'esaal-alhassan.webp', name: 'AlHassan A.' },
+  { file: 'esaal-alhassan.webp', name: 'AlHassan Faraj Allah' },
   { file: 'esaal-anas.webp',     name: 'Anas Ali' },
 ];
 
