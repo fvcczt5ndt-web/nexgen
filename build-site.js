@@ -517,7 +517,7 @@ const aboutBody = `${hero({
           </div>
         </article>
         <article class="person reveal" data-delay="2">
-          <div class="person__media"><img src="assets/img/advisor-moatassem.webp" alt="Moatassem Abdelhaleem, Head of AI &amp; Digital Transformation" loading="lazy" decoding="async"></div>
+          <div class="person__media"><img src="assets/img/team-moatassem.webp" alt="Moatassem Abdelhaleem, Head of AI &amp; Digital Transformation" loading="lazy" decoding="async"></div>
           <div class="person__body">
             <h3 class="person__name">Moatassem Abdelhaleem</h3>
             <p class="person__role">Head of AI &amp; Digital Transformation</p>

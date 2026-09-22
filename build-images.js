@@ -23,10 +23,15 @@ const PLAN = [
   ['inpipe-plant.webp',     S('1766084020662_inpipe_energy_for_nexgen.pdf_2.webp'), 1200, 'content'],
   ['inpipe-visual.webp',    S('1766174630830_elegant_corporate_business_style_zoom_virtual_background_7.webp'), 1200, 'content'],
   ['venture-why.webp',      S('1765899457233_nexgen_profile_7.webp'), 900, 'content'],
-  ['venture-trust-flow.webp', MARK('venture-trust-flow-clean.png'), 480, 'mark'],
-  ['venture-dari.webp',     MARK('venture-dari-clean.png'), 480, 'mark'],
-  ['venture-saby.webp',     MARK('venture-saby-clean.png'), 480, 'mark'],
-  ['venture-esaal.webp',    MARK('venture-esaal-clean.png'), 480, 'mark'],
+  // The *-alpha.png files are the true-alpha rebuilds: the baked white ground is
+  // keyed out and the ink re-solved into a dark band, so each mark reads on the
+  // #fff plate. The older source/marks/*-clean.png files are opaque and carry
+  // that white ground, so pointing these rows back at them would silently undo
+  // the fix on the next run.
+  ['venture-trust-flow.webp', S('venture-trust-flow-alpha.png'), 480, 'mark'],
+  ['venture-dari.webp',     S('venture-dari-alpha.png'), 480, 'mark'],
+  ['venture-saby.webp',     S('venture-saby-alpha.png'), 480, 'mark'],
+  ['venture-esaal.webp',    S('venture-esaal-alpha.png'), 480, 'mark'],
   // Leadership/advisory portraits: no longer simple resizes — see the
   // LEADERSHIP block + tools/frame-portrait.py below, which crops each
   // photo onto the site's rounded, teal-ringed card frame.
@@ -58,7 +63,7 @@ const LEADERSHIP = [
   { name: 'team-jernej.webp',       src: 'leadership-new/jernej.jpg',    w: 900, h: 1125, top_frac: 0.15 },
   { name: 'advisor-alenzi.webp',    src: 'leadership-new/alenzi.jpg',    w: 700, h: 700,  top_frac: 0 },
   { name: 'advisor-alsharah.webp',  src: 'leadership-new/hanan.jpg',     w: 700, h: 700,  top_frac: 0.05 },
-  { name: 'advisor-moatassem.webp', src: 'leadership-new/moatassem.jpg', w: 700, h: 700,  top_frac: 0.15 },
+  { name: 'team-moatassem.webp',    src: 'leadership-new/moatassem.jpg', w: 900, h: 1125, top_frac: 0.15 },
 ];
 
 function buildLeadershipPortraits() {
