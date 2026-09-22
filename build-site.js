@@ -1239,4 +1239,9 @@ ${urls}
 </urlset>
 `);
 
-console.log('wrote robots.txt, sitemap.xml');
+/* CNAME — GitHub Pages reads the custom domain from this file. Emitting it here
+   keeps it in the published artifact across rebuilds, so it cannot be lost by a
+   later `node build-site.js` run. Content must be the bare host, no scheme. */
+fs.writeFileSync(path.join(OUT, 'CNAME'), 'nexgen.bh\n');
+
+console.log('wrote robots.txt, sitemap.xml, CNAME');
