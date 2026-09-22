@@ -326,16 +326,51 @@ function teamCards(T, ctx, team, roles) {
         </article>`).join('\n');
 }
 
-function hero(T, ctx, { image, imageSmall, imageStacked, mark, title, lead, eyebrow, status = '', actions = '', cls = '' }) {
-  /* imageSmall: a 960w rendition for phones; the wide one serves large screens. */
-  const srcset = imageSmall
-    ? ` srcset="${ctx.A}img/${imageSmall} 960w, ${ctx.A}img/${image} 1920w" sizes="(max-width: 1099px) 100vw, 66vw" width="1920" height="1080"`
-    : '';
-  const imgTag = `<img src="${ctx.A}img/${image}"${srcset} alt="" fetchpriority="high" decoding="async">`;
-  /* imageStacked: a tighter crop swapped in where the hero stacks (< 1100px). */
-  const picture = imageStacked
-    ? `<picture><source media="(max-width: 1099px)" srcset="${ctx.A}img/${imageStacked}">${imgTag}</picture>`
-    : imgTag;
+/* Hero renditions: every width build-images.js emitted for this photograph,
+   ascending. Reading them off disk keeps the markup honest — a page never
+   advertises a width that was never produced, and a hero whose source is only
+   1280px wide is never claimed as 1920w. */
+function heroRenditions(image) {
+  const base = image.replace(/\.webp$/, '');
+  const out = [];
+  for (const f of [`${base}-960.webp`, `${base}-1440.webp`, image]) {
+    const dim = intrinsic(`assets/img/${f}`);
+    if (dim && !out.some((r) => r.f === f)) out.push({ f, w: dim.w, h: dim.h });
+  }
+  return out.sort((a, b) => a.w - b.w);
+}
+
+function hero(T, ctx, { image, imageStacked, mark, title, lead, eyebrow, status = '', actions = '', cls = '' }) {
+  /* Both the srcset and the sizes attribute are derived rather than assumed.
+     They were wrong before in two ways that are exactly the "pixelated on a
+     large screen" complaint:
+       - every hero advertised 1920w whether or not a 1920px file existed, so a
+         1280px source was upscaled to fill the claim;
+       - sizes said 66vw for every hero, including the full-bleed ones, so a
+         1440px screen asked for the 960px file and stretched it.
+     A split hero paints into 66vw once the layout splits at 1100px; every other
+     photo hero is full bleed at every width. */
+  const rends = image ? heroRenditions(image) : [];
+  const largest = rends[rends.length - 1];
+  const sizes = /hero--split/.test(cls)
+    ? '(max-width: 1099px) 100vw, 66vw'
+    : '100vw';
+  const dims = largest ? ` width="${largest.w}" height="${largest.h}"` : '';
+  const webpSrcset = rends.map((r) => `${ctx.A}img/${r.f} ${r.w}w`).join(', ');
+  /* AVIF rides along only where it survived the size check in build-images.js,
+     so a <source> is emitted only when it is a real win at that width. */
+  const avif = rends
+    .map((r) => ({ ...r, f: r.f.replace(/\.webp$/, '.avif') }))
+    .filter((r) => fs.existsSync(path.join(OUT, 'assets', 'img', r.f)));
+  const sources = [];
+  /* imageStacked: a tighter crop swapped in where the hero stacks (< 1100px).
+     It is an art-directed frame with its own file, so it is listed first and
+     wins by media query before the format sources below are considered. */
+  if (imageStacked) sources.push(`<source media="(max-width: 1099px)" srcset="${ctx.A}img/${imageStacked}">`);
+  if (avif.length) sources.push(`<source type="image/avif" srcset="${avif.map((r) => `${ctx.A}img/${r.f} ${r.w}w`).join(', ')}" sizes="${sizes}">`);
+  sources.push(`<source type="image/webp" srcset="${webpSrcset}" sizes="${sizes}">`);
+  const imgTag = `<img src="${ctx.A}img/${image}" srcset="${webpSrcset}" sizes="${sizes}"${dims} alt="" fetchpriority="high" decoding="async">`;
+  const picture = `<picture>${sources.join('')}${imgTag}</picture>`;
   const media = image
     ? `    <div class="hero__media">${picture}</div>\n`
     : '';
@@ -363,9 +398,8 @@ ${actionsHtml}    </div>
    petrol plate. */
 function ventureHeroOpts(slug) {
   const big = `hero-${slug}.webp`;
-  const small = `hero-${slug}-960.webp`;
   if (!fs.existsSync(path.join(OUT, 'assets', 'img', big))) return { cls: ' hero--plate hero--home' };
-  return { image: big, imageSmall: fs.existsSync(path.join(OUT, 'assets', 'img', small)) ? small : undefined, cls: ` hero--home hero--split hero--venture hero--${slug}` };
+  return { image: big, cls: ` hero--home hero--split hero--venture hero--${slug}` };
 }
 
 function splitImage(ctx, src, alt, opts = {}) {
@@ -380,7 +414,6 @@ function homeBody(T, ctx) {
   const p = T.pages.index;
   return `${hero(T, ctx, {
     image: 'hero-home.webp',
-    imageSmall: 'hero-home-960.webp',
     title: p.heroTitle,
     lead: p.heroLead,
     actions: `<a class="btn btn--accent" href="#focus-areas">${p.heroBtn1}</a>

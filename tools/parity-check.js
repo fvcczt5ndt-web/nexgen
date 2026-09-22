@@ -30,7 +30,14 @@ const PAGES = [
         const shown = (e) => { const r = e.getBoundingClientRect(); const s = getComputedStyle(e);
           return r.width > 8 && r.height > 8 && s.display !== 'none' && s.visibility !== 'hidden'; };
         const imgs = [...document.querySelectorAll('main img, section img, footer img')]
-          .filter(shown).map(i => (i.currentSrc || i.src).split('/').pop().replace(/-960|-crop/, ''));
+          .filter(shown).map(i => (i.currentSrc || i.src).split('/').pop()
+            /* Normalise away the things that legitimately differ per width: the
+               chosen rendition width and the chosen format. -960 / -1440 are the
+               same photograph as the full-size file, and a browser may serve
+               AVIF at one width and WebP at another. */
+            .replace(/^(.*?)-\d+(\.(webp|avif|jpe?g|png))$/, '$1$2')
+            .replace(/\.avif$/, '.webp')
+            .replace(/-crop/, ''));
         const heads = [...document.querySelectorAll('h1,h2,h3')].filter(shown).map(h => h.textContent.trim().replace(/\s+/g, ' '));
         const hm = document.querySelector('.hero__media');
         const hero = hm ? Math.round(hm.getBoundingClientRect().height) : null;

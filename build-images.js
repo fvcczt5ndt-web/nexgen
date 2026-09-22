@@ -13,9 +13,12 @@ const HERO_HOME = '/home/opc/.openclaw/workspace/nexgen/source/images/hero-home-
 const MARK = (n) => '/home/opc/.openclaw/workspace/nexgen/source/marks/' + n;
 
 // name, source, maxWidth, kind
+// Heroes are listed ONCE. build-images.js derives every rendition width from
+// the source itself and names them <base>-<w>.webp, so a second "-960" row
+// would regenerate the same filenames from a different plan entry and clobber
+// the real 960 file with the largest one.
 const PLAN = [
   ['hero-home.webp',        HERO_HOME,  1920, 'hero'],
-  ['hero-home-960.webp',    HERO_HOME,  960,  'hero'],
   ['hero-about.webp',       S('1766170156047_elegant_corporate_business_style_zoom_virtual_background_6.png'), 1920, 'hero'],
   ['hero-inpipe.webp',      S('1766173560541_inpipe_energy_for_nexgen.pdf_3.webp'), 1920, 'hero'],
   // Right side of the InPipe slide only (equipment + logo, no baked-in headline): used for the stacked hero band.
@@ -41,10 +44,7 @@ const PLAN = [
 // Venture hero photographs: picked up automatically once source/images/hero-<slug>-v1.(jpg|png) exists.
 for (const slug of ['trust-flow', 'esaal', 'dari', 'saby']) {
   const f = ['jpg', 'png'].map(e => S(`hero-${slug}-v1.${e}`)).find(fs.existsSync);
-  if (f) {
-    PLAN.push([`hero-${slug}.webp`, f, 1920, 'hero']);
-    PLAN.push([`hero-${slug}-960.webp`, f, 960, 'hero']);
-  }
+  if (f) PLAN.push([`hero-${slug}.webp`, f, 1920, 'hero']);
 }
 
 // Leadership/advisory portraits. Plain corporate photos don't carry the
@@ -74,29 +74,128 @@ function buildLeadershipPortraits() {
   execFileSync('python3', [path.join(__dirname, 'tools', 'frame-portrait.py'), JSON.stringify(jobs)], { stdio: 'inherit' });
 }
 
+/* Widths offered per hero photograph. The largest rendition is the native
+   source width (capped at 1920), never upscaled: a wide retina screen gets the
+   best file that exists rather than an interpolated one, and a phone never
+   downloads the desktop rendition. */
+const HERO_WIDTHS = [960, 1440, 1920];
+
+/* Quality and size policy, per kind.
+
+   This replaces a loop that walked quality down whenever a file passed 150KB.
+   That rule was blind to which image it was punishing, and the victim was
+   always the same one: hero-home — the largest, most visible image on the site
+   — shipped at q54, which is what the visible blocking on a large screen was.
+
+   A hero is the one place where bytes buy something, so heroes get a high fixed
+   quality and a generous safety cap that only exists to catch a pathological
+   file. Small marks and inline content images keep a tight budget because at
+   their rendered size the difference is invisible. */
+const QUALITY = { hero: 85, mark: 84, content: 82 };
+const CAP = { hero: 480 * 1024, mark: 160 * 1024, content: 260 * 1024 };
+/* AVIF quality for heroes. Measured against the same source: AVIF q75 lands at
+   MSE 8.7 versus WebP q85's 11.3 — better — while weighing 405KB against 460KB.
+   So the large, high-DPI screen that needs the bytes most gets a smaller file
+   that holds more detail. */
+const AVIF_QUALITY = 75;
+
+async function sourceWidth(file) {
+  const m = await sharp(file, { failOn: 'none' }).metadata();
+  return m.width || 0;
+}
+
+/* One resize pipeline, two encoders. WebP is written for every image; heroes
+   also get AVIF, the format a large high-DPI screen benefits from most. */
 async function encode(file, width, quality, extract) {
   let pipe = sharp(file, { failOn: 'none' }).rotate();
   if (extract) pipe = pipe.extract(extract);
   const meta = extract ? { width: extract.width } : await pipe.metadata();
   if (meta.width > width) pipe = pipe.resize({ width, withoutEnlargement: true });
-  return pipe.webp({ quality, effort: 5, smartSubsample: true }).toBuffer();
+  return pipe.webp({ quality, effort: 6, smartSubsample: true }).toBuffer();
+}
+
+async function encodeAvif(file, width, quality, extract) {
+  let pipe = sharp(file, { failOn: 'none' }).rotate();
+  if (extract) pipe = pipe.extract(extract);
+  const meta = extract ? { width: extract.width } : await pipe.metadata();
+  if (meta.width > width) pipe = pipe.resize({ width, withoutEnlargement: true });
+  return pipe.avif({ quality, effort: 4 }).toBuffer();
+}
+
+/* The renditions a hero photograph should ship: every step from HERO_WIDTHS the
+   source can actually fill, plus the native width itself when it sits between
+   two steps (so a 1280px source yields 960 and 1280, not a stretched 1440).
+   The longest is written under the plan's own name, the rest get a -<w> suffix. */
+function heroRenditions(name, srcW) {
+  const base = name.replace(/\.webp$/, '');
+  const max = Math.min(srcW, 1920);
+  const widths = HERO_WIDTHS.filter((w) => w <= max);
+  if (max > 960 && !widths.includes(max)) widths.push(max);
+  widths.sort((a, b) => a - b);
+  const largest = widths[widths.length - 1];
+  return widths.map((w) => (w === largest ? { out: name, w } : { out: `${base}-${w}.webp`, w }));
 }
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
   const report = [];
+  const produced = new Set();
   for (const [name, file, width, kind, extract] of PLAN) {
-    const q = kind === 'mark' ? 82 : 78;
-    let buf = await encode(file, width, q, extract);
-    let quality = q;
-    while (buf.length > 150 * 1024 && quality > 55) {
-      quality -= 8;
-      buf = await encode(file, width, quality, extract);
+    const q = QUALITY[kind] || 82;
+    const cap = CAP[kind] || 260 * 1024;
+    /* A cropped hero (the art-directed stacked band) is a single fixed frame. */
+    const jobs = (kind === 'hero' && !extract)
+      ? heroRenditions(name, await sourceWidth(file))
+      : [{ out: name, w: width }];
+    for (const job of jobs) {
+      let quality = q;
+      let buf = await encode(file, job.w, quality, extract);
+      /* Safety net only. It never walks far enough to damage the image: the
+         floor is well above the point where artefacts show. */
+      while (buf.length > cap && quality > 76) {
+        quality -= 4;
+        buf = await encode(file, job.w, quality, extract);
+      }
+      fs.writeFileSync(path.join(OUT, job.out), buf);
+      produced.add(job.out);
+      const meta = await sharp(buf).metadata();
+      report.push({ name: job.out, before: fs.statSync(file).size, after: buf.length, dim: meta.width + 'x' + meta.height, quality });
+      /* Heroes also ship as AVIF. The cropped stacked band is skipped: it is a
+         single art-directed frame with its own <source>, so an AVIF beside it
+         would never be referenced. */
+      if (kind === 'hero' && !extract) {
+        const avifOut = job.out.replace(/\.webp$/, '.avif');
+        let aq = AVIF_QUALITY;
+        let abuf = await encodeAvif(file, job.w, aq, extract);
+        while (abuf.length > cap && aq > 52) {
+          aq -= 6;
+          abuf = await encodeAvif(file, job.w, aq, extract);
+        }
+        /* Keep AVIF only when it measurably beats WebP for this exact frame.
+           Several of these photographs arrive already compressed, and on those
+           AVIF re-encodes LARGER (measured: hero-saby +12%, hero-inpipe +5%).
+           Shipping those would spend bytes to no benefit, so the comparison is
+           per file rather than a blanket policy. */
+        if (abuf.length < buf.length) {
+          fs.writeFileSync(path.join(OUT, avifOut), abuf);
+          produced.add(avifOut);
+          report.push({ name: avifOut, before: fs.statSync(file).size, after: abuf.length, dim: meta.width + 'x' + meta.height, quality: 'avif' + aq });
+        } else {
+          try { fs.unlinkSync(path.join(OUT, avifOut)); } catch {}
+        }
+      }
     }
-    fs.writeFileSync(path.join(OUT, name), buf);
-    const before = fs.statSync(file).size;
-    const meta = await sharp(buf).metadata();
-    report.push({ name, before, after: buf.length, dim: meta.width + 'x' + meta.height, quality });
+  }
+
+  /* Drop hero renditions left by an earlier run that this one did not produce.
+     A renamed or re-sourced hero would otherwise leave a stale file on disk for
+     the page to keep advertising — and a file written under the wrong width is
+     worse than a missing one, because it looks fine until it is downloaded. */
+  for (const f of fs.readdirSync(OUT)) {
+    if (!/^hero-.*\.(webp|avif)$/.test(f)) continue;
+    if (produced.has(f)) continue;
+    fs.unlinkSync(path.join(OUT, f));
+    console.log('removed stale rendition', f);
   }
 
   buildLeadershipPortraits();
