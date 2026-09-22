@@ -27,12 +27,9 @@ const PLAN = [
   ['venture-dari.webp',     MARK('venture-dari-clean.png'), 480, 'mark'],
   ['venture-saby.webp',     MARK('venture-saby-clean.png'), 480, 'mark'],
   ['venture-esaal.webp',    MARK('venture-esaal-clean.png'), 480, 'mark'],
-  ['team-abdullah.webp',    S('1765903483458_nexgen_profile_9.webp'), 900, 'content'],
-  ['team-omar.webp',        S('1765904277616_nexgen_profile_10.webp'), 900, 'content'],
-  ['team-jernej.webp',      S('1765903486740_nexgen_profile_8.webp'), 900, 'content'],
-  ['advisor-alenzi.webp',   S('1766186380853_nexgen_profile_15.webp'), 700, 'card'],
-  ['advisor-alsharah.webp', S('1766187515349_nexgen_profile_16.png'), 700, 'card'],
-  ['advisor-moatassem.webp', S('1766187527755_nexgen_profile_17.png'), 700, 'card'],
+  // Leadership/advisory portraits: no longer simple resizes — see the
+  // LEADERSHIP block + tools/frame-portrait.py below, which crops each
+  // photo onto the site's rounded, teal-ringed card frame.
   ['contact-visual.webp',   S('1765985907616_nexgen_profile_11.webp'), 1200, 'content'],
 ];
 
@@ -43,6 +40,29 @@ for (const slug of ['trust-flow', 'esaal', 'dari', 'saby']) {
     PLAN.push([`hero-${slug}.webp`, f, 1920, 'hero']);
     PLAN.push([`hero-${slug}-960.webp`, f, 960, 'hero']);
   }
+}
+
+// Leadership/advisory portraits. Plain corporate photos don't carry the
+// rounded-card + teal-ring frame the rest of the site's people photos use, so
+// each one is cropped onto that frame by tools/frame-portrait.py rather than
+// run through the generic resize path above. top_frac is how much of the
+// vertical crop is taken from the top of the cover-fit image (0 = keep the
+// very top / trim only the bottom; higher = allow more headroom to be cut).
+const LEADERSHIP = [
+  { name: 'team-abdullah.webp',     src: 'leadership-new/founder.jpg',   w: 900, h: 1094, top_frac: 0.08 },
+  { name: 'team-omar.webp',         src: 'leadership-new/omar.jpg',      w: 900, h: 1094, top_frac: 0.25 },
+  { name: 'team-jernej.webp',       src: 'leadership-new/jernej.jpg',    w: 900, h: 1094, top_frac: 0.15 },
+  { name: 'advisor-alenzi.webp',    src: 'leadership-new/alenzi.jpg',    w: 700, h: 771,  top_frac: 0 },
+  { name: 'advisor-alsharah.webp',  src: 'leadership-new/hanan.jpg',     w: 700, h: 771,  top_frac: 0.05 },
+  { name: 'advisor-moatassem.webp', src: 'leadership-new/moatassem.jpg', w: 700, h: 778,  top_frac: 0.15 },
+];
+
+function buildLeadershipPortraits() {
+  const { execFileSync } = require('child_process');
+  const jobs = LEADERSHIP.map(p => ({
+    src: S(p.src), dst: path.join(OUT, p.name), canvas_w: p.w, canvas_h: p.h, top_frac: p.top_frac,
+  }));
+  execFileSync('python3', [path.join(__dirname, 'tools', 'frame-portrait.py'), JSON.stringify(jobs)], { stdio: 'inherit' });
 }
 
 async function encode(file, width, quality, extract) {
@@ -69,6 +89,8 @@ async function encode(file, width, quality, extract) {
     const meta = await sharp(buf).metadata();
     report.push({ name, before, after: buf.length, dim: meta.width + 'x' + meta.height, quality });
   }
+
+  buildLeadershipPortraits();
 
   // --- logo: alpha-trim, then pad, then export webp + favicon png ---
   const logoFile = S('1745450260181_nexgen_logo-with_new_colors_2.webp');
