@@ -46,6 +46,49 @@
     U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+/* Arabic. Amiri (Naskh serif) carries the display levels and IBM Plex Sans
+   Arabic the body, mirroring the Latin two-role system: a serif that states and
+   a geometric sans that structures. Both files carry the full Latin set, so
+   brand names inside Arabic sentences set from the Arabic face rather than
+   falling back. Neither has letter-spacing applied anywhere — tracking severs
+   the joins between Arabic letters (see section 22). */
+@font-face {
+  font-family: "Amiri";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/amiri-regular.woff2") format("woff2");
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF,
+    U+0000-00FF, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212;
+}
+@font-face {
+  font-family: "Amiri";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../fonts/amiri-bold.woff2") format("woff2");
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF,
+    U+0000-00FF, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  font-style: normal;
+  font-weight: 400 500;
+  font-display: swap;
+  src: url("../fonts/plex-arabic-regular.woff2") format("woff2");
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF,
+    U+0000-00FF, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  font-style: normal;
+  font-weight: 600 700;
+  font-display: swap;
+  src: url("../fonts/plex-arabic-semibold.woff2") format("woff2");
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF,
+    U+0000-00FF, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212;
+}
+
 /* --- 1. Tokens ----------------------------------------------------------- */
 :root {
   /* Colour — petrol neutrals tinted toward the brand hue (the mark is
@@ -112,6 +155,11 @@
   /* Two families by ROLE: Newsreader states, Instrument Sans structures. */
   --font-display: "Newsreader", Georgia, "Times New Roman", serif;
   --font-sans: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  /* Arabic families sit AFTER the Latin ones: Latin glyphs (brand names such
+     as NEXGEN or InPipe) still come from the Latin face, and only the Arabic
+     runs fall through to these. */
+  --font-display-ar: "Amiri", "Noto Naskh Arabic", Georgia, serif;
+  --font-sans-ar: "IBM Plex Sans Arabic", "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
 
   /* Motion tokens — one curve family, used by every transition below. */
   --ease:        cubic-bezier(.23, 1, .32, 1);   /* strong ease-out (UI)   */
@@ -233,14 +281,14 @@ h1, h2, h3, h4, p, li, a, span { overflow-wrap: break-word; }
 .checklist { display: grid; gap: 10px; }
 .checklist li {
   position: relative;
-  padding-left: 26px;
+  padding-inline-start: 26px;
   max-width: 62ch;
   color: var(--body);
 }
 .checklist li::before {
   content: "";
   position: absolute;
-  left: 3px;
+  inset-inline-start: 3px;
   top: .62em;
   width: 7px;
   height: 7px;
@@ -436,13 +484,13 @@ main > .next + .section {
 .link-arrow::after { content: "\2192"; transition: transform var(--dur-ui) var(--ease); }
 @media (hover: hover) and (pointer: fine) {
   .link-arrow:hover { color: var(--teal-ink); }
-  .link-arrow:hover::after { transform: translateX(5px); }
+  .link-arrow:hover::after { transform: translateX(5px); }   /* flipped in section 22 */
 }
 
 /* --- 6. Skip link -------------------------------------------------------- */
 .skip-link {
   position: absolute;
-  left: -9999px;
+  inset-inline-start: -9999px;
   top: 0;
   z-index: 300;
   padding: 14px 22px;
@@ -454,7 +502,7 @@ main > .next + .section {
   letter-spacing: .05em;
   text-transform: uppercase;
 }
-.skip-link:focus { left: 12px; top: 12px; }
+.skip-link:focus { inset-inline-start: 12px; top: 12px; }
 
 /* --- 7. Topbar + navigation ---------------------------------------------- */
 .topbar {
@@ -499,6 +547,50 @@ main > .next + .section {
   height: var(--topbar-h);
 }
 
+/* The bar's trailing cluster: the language switch and the contact button. They
+   travel together so the CTA keeps its place at the end of the row and the
+   switch never collides with the nav. */
+.topbar__end {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+}
+
+/* Language switch. Deliberately quiet — it is a utility, not a call to action:
+   no fill, no border, just the other language's own name in its own script.
+   Sized to a full 44px target because it is tapped, not read. */
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: .02em;
+  color: rgba(255, 255, 255, .70);
+  white-space: nowrap;
+  transition: color var(--dur-ui) var(--ease), background-color var(--dur-ui) var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .lang-switch:hover { color: #fff; background: rgba(255, 255, 255, .08); }
+}
+/* On the Arabic pages the switch reads "English" — a Latin word. Keep it in the
+   Latin face so it does not get set in Amiri, where a lone Latin word at label
+   size looks like a different brand. */
+[dir="rtl"] .lang-switch { font-family: "Instrument Sans", "Helvetica Neue", Arial, sans-serif; }
+
+@media (max-width: 419.98px) {
+  /* 360px is tight: the brand, the switch, the CTA and the toggle all compete.
+     The switch keeps its 44px height but drops to the compact padding. */
+  .lang-switch { padding: 0 8px; }
+  .topbar__end { gap: 4px; }
+}
+
 .topbar__brand { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; min-height: 44px; }
 .topbar__brand img { height: 42px; width: auto; }
 .topbar__brand-text { display: flex; flex-direction: column; line-height: 1.15; }
@@ -519,7 +611,7 @@ main > .next + .section {
 
 .topbar__toggle {
   display: block;
-  margin-left: auto;
+  margin-inline-start: auto;
   width: 48px;
   height: 48px;
   /* The topbar row is tight at 360px; without this the button is flex-shrunk
@@ -562,7 +654,7 @@ main > .next + .section {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  transform: translateX(102%);
+  transform: translateX(102%);   /* flipped for RTL in section 22 */
   visibility: hidden;
   transition: transform .3s var(--ease), visibility .3s;
 }
@@ -588,7 +680,7 @@ main > .next + .section {
 .topbar__menu a[aria-current="page"]::after {
   content: "";
   width: 6px; height: 6px;
-  margin-left: auto;
+  margin-inline-start: auto;
   background: var(--teal-bright);
   border-radius: 50%;
 }
@@ -616,7 +708,7 @@ main > .next + .section {
 .drop__caret {
   width: 9px;
   height: 9px;
-  border-right: 2px solid currentColor;
+  border-inline-end: 2px solid currentColor;
   border-bottom: 2px solid currentColor;
   transform: rotate(45deg) translate(-2px, -2px);
   transition: transform .25s var(--ease);
@@ -625,9 +717,9 @@ main > .next + .section {
    reachable without JS. The caret collapses it. */
 .drop__menu {
   flex: 1 0 100%;
-  margin-left: 2px;
+  margin-inline-start: 2px;
   padding: 0 0 10px 12px;
-  border-left: 1px solid rgba(255, 255, 255, .12);
+  border-inline-start: 1px solid rgba(255, 255, 255, .12);
 }
 .drop__menu a {
   min-height: 48px;
@@ -675,7 +767,7 @@ main > .next + .section {
     align-self: stretch;
     align-items: stretch;
     gap: 6px;
-    margin-left: auto;
+    margin-inline-start: auto;
     padding: 0;
     background: none;
     overflow: visible;
@@ -707,11 +799,11 @@ main > .next + .section {
   .topbar__menu a::after {
     content: "";
     position: absolute;
-    left: 12px; right: 12px; bottom: 5px;
+    inset-inline: 12px; bottom: 5px;
     height: 2px;
     background: var(--teal-bright);
     transform: scaleX(0);
-    transform-origin: left;
+    transform-origin: left;   /* flipped for RTL in section 22 */
     transition: transform .25s var(--ease);
   }
   .topbar__menu a[aria-current="page"] { color: #fff; }
@@ -729,7 +821,7 @@ main > .next + .section {
   .drop__menu {
     position: absolute;
     top: calc(100% + 8px);
-    left: 0;
+    inset-inline-start: 0;
     z-index: 1;
     flex: none;
     min-width: 236px;
@@ -760,7 +852,7 @@ main > .next + .section {
   }
   .drop__menu a[aria-current="page"] { background: rgba(95, 211, 207, .14); color: #fff; }
 
-  .topbar__cta { margin-top: 0; margin-left: 10px; width: auto; min-height: 44px; padding: 12px 20px; }
+  .topbar__cta { margin-top: 0; width: auto; min-height: 44px; padding: 12px 20px; }
 }
 
 /* No-JS drawer fallback. The slide-in drawer is opened by the toggle, which is
@@ -775,7 +867,7 @@ main > .next + .section {
   body .hero { margin-top: 0; }
   .topbar__inner { flex-wrap: wrap; height: auto; min-height: var(--topbar-h); }
   .topbar__toggle { display: none; }
-  .topbar__cta { margin-left: auto; }
+  .topbar__cta { margin-inline-start: auto; }
   .topbar__nav {
     position: static;
     order: 3;
@@ -967,7 +1059,7 @@ main > .next + .section {
 }
 @media (min-width: 900px) {
   .venture--wide { flex-direction: row; }
-  .venture--wide .venture__media { flex: 0 0 34%; min-height: 0; border-bottom: 0; border-right: 1px solid var(--hairline); }
+  .venture--wide .venture__media { flex: 0 0 34%; min-height: 0; border-bottom: 0; border-inline-end: 1px solid var(--hairline); }
   .venture--wide .venture__body { justify-content: center; padding: var(--s4); }
   .venture--wide .venture__body p { max-width: 60ch; }
 }
@@ -986,7 +1078,7 @@ main > .next + .section {
 .value::before {
   content: "";
   position: absolute;
-  left: 0; top: -1px;
+  inset-inline-start: 0; top: -1px;
   width: 34px; height: 2px;
   background: var(--teal);
 }
@@ -1001,7 +1093,7 @@ main > .next + .section {
   box-shadow: var(--shadow-sm);
 }
 
-.person { text-align: left; }
+.person { text-align: start; }
 .person__media { overflow: hidden; border-radius: var(--radius-lg); background: var(--panel-2); }
 .person__media img {
   width: 100%;
@@ -1115,7 +1207,7 @@ main > .next + .section {
   color: var(--ink);
   margin-bottom: 10px;
 }
-.stat__value sup { font-size: .5em; vertical-align: super; margin-left: 1px; }
+.stat__value sup { font-size: .5em; vertical-align: super; margin-inline-start: 1px; }
 .stat__label { font-size: .9375rem; color: var(--body); margin: 0 auto; }
 
 /* On a dark band: hairline-divided cells rather than floating cards. */
@@ -1677,3 +1769,88 @@ main > .next + .section {
   border-radius: 999px;
 }
 .card__foot--links { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+
+/* --- 22. Arabic / RTL ------------------------------------------------------
+   One direction-keyed block instead of a second stylesheet, so the Arabic
+   locale can never drift away from the English one structurally.
+
+   Three things Arabic needs that Latin does not:
+   1. The two-role font system mapped to Arabic faces (serif display over
+      geometric sans), mirroring Newsreader over Instrument Sans.
+   2. letter-spacing forced to 0. Tracking is a Latin device; on Arabic it
+      severs the joins between letters and the word stops being a word.
+   3. The handful of genuinely directional details (the arrow glyph, the
+      underline's origin, which side the hero photograph sits on). */
+[dir="rtl"] {
+  --font-display: "Amiri", "Noto Naskh Arabic", "Times New Roman", serif;
+  --font-sans: "IBM Plex Sans Arabic", "Instrument Sans", "Noto Sans Arabic",
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Tracking off, everywhere. The Latin faces listed as a fallback still render
+   correctly at zero tracking. */
+[dir="rtl"] *,
+[dir="rtl"] *::before,
+[dir="rtl"] *::after { letter-spacing: 0 !important; }
+
+/* Arabic has no case, so an uppercase transform is a no-op — but leaving the
+   declaration in place makes the component look "wrong" to anyone reading the
+   CSS later. Reset it so the intent is explicit. */
+[dir="rtl"] .eyebrow,
+[dir="rtl"] .footer__heading,
+[dir="rtl"] .footer__label,
+[dir="rtl"] .venture__kicker,
+[dir="rtl"] .person__role,
+[dir="rtl"] .contact-row__label,
+[dir="rtl"] .status-note,
+[dir="rtl"] .cred__kicker,
+[dir="rtl"] .team-advisors__title,
+[dir="rtl"] .link-arrow { text-transform: none; }
+
+/* The brand wordmark is Latin artwork, not translated copy: keep it in the
+   Latin face even on Arabic pages, so the logo looks identical on both. */
+[dir="rtl"] .topbar__brand-name,
+[dir="rtl"] .topbar__brand-tag { font-family: "Instrument Sans", "Helvetica Neue", Arial, sans-serif; }
+
+/* Arabic ascenders and descenders sit deeper than Latin ones, and Naskh reads
+   small at the same nominal size — so the Arabic lines get a little more room.
+   Amiri's x-height ratio to Newsreader is 0.984, so the display sizes match at
+   their face value rather than needing to be scaled up. */
+[dir="rtl"] body { line-height: 1.75; }
+[dir="rtl"] .lead { line-height: 1.72; }
+[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4 { line-height: 1.35; }
+[dir="rtl"] .hero h1 { line-height: 1.28; }
+[dir="rtl"] .stat__value { line-height: 1.2; }
+[dir="rtl"] .teammate__role { line-height: 1.6; }
+
+/* The disclosure arrow, the link arrow and the nav underline all point in a
+   reading direction. */
+[dir="rtl"] .link-arrow::after { content: "\2190"; }
+[dir="rtl"] .link-arrow:hover::after { transform: translateX(-5px); }
+[dir="rtl"] .topbar__menu a::after { transform-origin: right; }
+
+/* Wide hero: the photograph moves to the opposite side of the copy, so the
+   composition mirrors instead of the type running into the image. */
+@media (min-width: 1100px) {
+  [dir="rtl"] .hero--split .hero__media { inset: 0 auto 0 0; }
+  [dir="rtl"] .hero--split .hero__media img { object-position: 38% 50%; }
+}
+
+/* The mobile drawer is anchored to one edge; mirror where it parks itself.
+   Scoped to the drawer's own breakpoint: above it the nav is position:static
+   (a normal row), and an unscoped transform would slide the whole desktop nav
+   off-screen. */
+@media (max-width: 939.98px) {
+  [dir="rtl"] .topbar__nav { transform: translateX(-102%); }
+  [dir="rtl"] .nav-open .topbar__nav { transform: none; }
+}
+
+/* Arabic numerals in the counters would fight the western digits used in the
+   copy, so the step counter stays as it is. The step gutter moves to the other
+   side automatically (grid follows the document direction). */
+[dir="rtl"] .step::before { font-family: "IBM Plex Sans Arabic", "Instrument Sans", sans-serif; }
+
+/* Amiri is a Naskh face: at the small label sizes its hairlines thin out, so
+   the display face is not used below the heading levels. */
+[dir="rtl"] .figure figcaption,
+[dir="rtl"] .cred__note { font-family: var(--font-sans); }

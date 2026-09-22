@@ -1,57 +1,166 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://nexgen.bh/</loc>
     <lastmod>2026-09-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nexgen.bh/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://nexgen.bh/ar/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://nexgen.bh/"/>
+  </url>
+  <url>
+    <loc>https://nexgen.bh/ar/</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nexgen.bh/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://nexgen.bh/ar/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://nexgen.bh/"/>
   </url>
   <url>
     <loc>https://nexgen.bh/about.html</loc>
     <lastmod>2026-09-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nexgen.bh/about.html"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://nexgen.bh/ar/about.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://nexgen.bh/about.html"/>
+  </url>
+  <url>
+    <loc>https://nexgen.bh/ar/about.html</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nexgen.bh/about.html"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://nexgen.bh/ar/about.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://nexgen.bh/about.html"/>
   </url>
   <url>
     <loc>https://nexgen.bh/companies.html</loc>
     <lastmod>2026-09-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nexgen.bh/companies.html"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://nexgen.bh/ar/companies.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://nexgen.bh/companies.html"/>
+  </url>
+  <url>
+    <loc>https://nexgen.bh/ar/companies.html</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nexgen.bh/companies.html"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://nexgen.bh/ar/companies.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://nexgen.bh/companies.html"/>
   </url>
   <url>
     <loc>https://nexgen.bh/inpipe-energy.html</loc>
     <lastmod>2026-09-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nexgen.bh/inpipe-energy.html"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://nexgen.bh/ar/inpipe-energy.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://nexgen.bh/inpipe-energy.html"/>
+  </url>
+  <url>
+    <loc>https://nexgen.bh/ar/inpipe-energy.html</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nexgen.bh/inpipe-energy.html"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://nexgen.bh/ar/inpipe-energy.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://nexgen.bh/inpipe-energy.html"/>
   </url>
   <url>
     <loc>https://nexgen.bh/trust-flow.html</loc>
     <lastmod>2026-09-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nexgen.bh/trust-flow.html"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://nexgen.bh/ar/trust-flow.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://nexgen.bh/trust-flow.html"/>
+  </url>
+  <url>
+    <loc>https://nexgen.bh/ar/trust-flow.html</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nexgen.bh/trust-flow.html"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://nexgen.bh/ar/trust-flow.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://nexgen.bh/trust-flow.html"/>
   </url>
   <url>
     <loc>https://nexgen.bh/esaal.html</loc>
     <lastmod>2026-09-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nexgen.bh/esaal.html"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://nexgen.bh/ar/esaal.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://nexgen.bh/esaal.html"/>
+  </url>
+  <url>
+    <loc>https://nexgen.bh/ar/esaal.html</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nexgen.bh/esaal.html"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://nexgen.bh/ar/esaal.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://nexgen.bh/esaal.html"/>
   </url>
   <url>
     <loc>https://nexgen.bh/dari.html</loc>
     <lastmod>2026-09-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nexgen.bh/dari.html"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://nexgen.bh/ar/dari.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://nexgen.bh/dari.html"/>
+  </url>
+  <url>
+    <loc>https://nexgen.bh/ar/dari.html</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nexgen.bh/dari.html"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://nexgen.bh/ar/dari.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://nexgen.bh/dari.html"/>
   </url>
   <url>
     <loc>https://nexgen.bh/saby.html</loc>
     <lastmod>2026-09-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nexgen.bh/saby.html"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://nexgen.bh/ar/saby.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://nexgen.bh/saby.html"/>
+  </url>
+  <url>
+    <loc>https://nexgen.bh/ar/saby.html</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nexgen.bh/saby.html"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://nexgen.bh/ar/saby.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://nexgen.bh/saby.html"/>
   </url>
   <url>
     <loc>https://nexgen.bh/contact.html</loc>
     <lastmod>2026-09-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nexgen.bh/contact.html"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://nexgen.bh/ar/contact.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://nexgen.bh/contact.html"/>
+  </url>
+  <url>
+    <loc>https://nexgen.bh/ar/contact.html</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://nexgen.bh/contact.html"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://nexgen.bh/ar/contact.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://nexgen.bh/contact.html"/>
   </url>
 </urlset>

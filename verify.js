@@ -4,7 +4,15 @@ const fs = require('fs');
 const path = require('path');
 
 const SITE = '/home/opc/.openclaw/workspace/nexgen/site';
-const PAGES = ['index.html','about.html','companies.html','inpipe-energy.html','trust-flow.html','esaal.html','saby.html','dari.html','contact.html'];
+const SLUGS = ['index.html','about.html','companies.html','inpipe-energy.html','trust-flow.html','esaal.html','saby.html','dari.html','contact.html'];
+/* Both locales ship the same nine pages. The Arabic ones live under ar/ and
+   reference the shared assets one level up, so every check below runs per
+   directory rather than against a single flat list. */
+const LOCALES = [
+  { code: 'en', dir: SITE, pages: SLUGS.map((s) => ({ rel: s, abs: path.join(SITE, s) })) },
+  { code: 'ar', dir: path.join(SITE, 'ar'), pages: SLUGS.map((s) => ({ rel: `ar/${s}`, abs: path.join(SITE, 'ar', s) })) },
+];
+const PAGES = LOCALES.flatMap((l) => l.pages.map((p) => p.abs));
 
 let brokenLinks = 0, badRefs = [], samplePage = 0, parseErrors = [];
 const allRefs = [];
@@ -17,8 +25,8 @@ function resolveRef(fromFile, ref) {
   return { ok: fs.existsSync(abs), abs, clean };
 }
 
-for (const p of PAGES) {
-  const abs = path.join(SITE, p);
+for (const abs of PAGES) {
+  const p = path.relative(SITE, abs);
   const html = fs.readFileSync(abs, 'utf8');
 
   if (/Sample Page/i.test(html)) { samplePage++; console.log('!! "Sample Page" found in', p); }
@@ -75,14 +83,14 @@ for (const p of PAGES) {
 }
 
 // duplicate titles / descriptions?
-const titles = PAGES.map(p => (fs.readFileSync(path.join(SITE, p), 'utf8').match(/<title>([^<]*)<\/title>/) || [])[1]);
+const titles = PAGES.map(p => (fs.readFileSync(p, 'utf8').match(/<title>([^<]*)<\/title>/) || [])[1]);
 if (new Set(titles).size !== titles.length) parseErrors.push('duplicate <title> across pages');
-const descs = PAGES.map(p => (fs.readFileSync(path.join(SITE, p), 'utf8').match(/name="description" content="([^"]*)"/) || [])[1]);
+const descs = PAGES.map(p => (fs.readFileSync(p, 'utf8').match(/name="description" content="([^"]*)"/) || [])[1]);
 if (new Set(descs).size !== descs.length) parseErrors.push('duplicate meta description across pages');
 
 // clone slugs anywhere in output HTML?
 for (const p of PAGES) {
-  const html = fs.readFileSync(path.join(SITE, p), 'utf8');
+  const html = fs.readFileSync(p, 'utf8');
   if (/-clone/.test(html)) parseErrors.push(`${p}: "-clone" slug referenced in output`);
 }
 
@@ -97,16 +105,55 @@ else {
     else console.log('\nJSON-LD Organization OK:', obj.name, '|', obj.url, '|', obj.email, '|', obj.telephone, '| sameAs:', obj.sameAs.join(', '));
   } catch (e) { parseErrors.push('JSON-LD invalid JSON: ' + e.message); }
 }
-let ldCount = 0;
-for (const p of PAGES) if (/application\/ld\+json/.test(fs.readFileSync(path.join(SITE, p), 'utf8'))) ldCount++;
-if (ldCount !== 1) parseErrors.push(`JSON-LD present on ${ldCount} pages (expected 1, homepage only)`);
+/* JSON-LD belongs on the homepage of each locale, nowhere else. */
+let ldCount = 0, ldWhere = [];
+for (const abs of PAGES) if (/application\/ld\+json/.test(fs.readFileSync(abs, 'utf8'))) { ldCount++; ldWhere.push(path.relative(SITE, abs)); }
+if (ldCount !== 2) parseErrors.push(`JSON-LD present on ${ldCount} pages (expected 2: each locale's homepage, got ${ldWhere.join(', ')})`);
+
+// Language and direction must be declared on every page, and must match locale.
+for (const loc of LOCALES) {
+  for (const pg of loc.pages) {
+    const html = fs.readFileSync(pg.abs, 'utf8');
+    const m = html.match(/<html lang="([^"]*)" dir="([^"]*)">/);
+    if (!m) { parseErrors.push(`${pg.rel}: <html> missing lang/dir`); continue; }
+    const wantDir = loc.code === 'ar' ? 'rtl' : 'ltr';
+    if (m[1] !== loc.code) parseErrors.push(`${pg.rel}: lang is "${m[1]}", expected "${loc.code}"`);
+    if (m[2] !== wantDir) parseErrors.push(`${pg.rel}: dir is "${m[2]}", expected "${wantDir}"`);
+    // Both alternates, pointing at the mirrored URL.
+    if (!html.includes('hreflang="ar"') || !html.includes('hreflang="en"')) {
+      parseErrors.push(`${pg.rel}: missing hreflang alternates`);
+    }
+    if (!/class="lang-switch"/.test(html)) parseErrors.push(`${pg.rel}: missing language switch`);
+  }
+}
+
+// Arabic pages must actually contain Arabic, and Latin pages must not.
+for (const loc of LOCALES) {
+  for (const pg of loc.pages) {
+    const raw = fs.readFileSync(pg.abs, 'utf8')
+      .replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/g, '');
+    /* The language switch names the OTHER language in its own script, so an
+       English page legitimately carries the word "العربية". Drop that element
+       before counting, then check the rest of the page. */
+    const text = raw.replace(/<a class="lang-switch"[\s\S]*?<\/a>/g, '')
+      .replace(/<[^>]+>/g, ' ');
+    const arabic = (text.match(/[\u0600-\u06FF]/g) || []).length;
+    if (loc.code === 'ar' && arabic < 200) parseErrors.push(`${pg.rel}: only ${arabic} Arabic characters - looks untranslated`);
+    if (loc.code === 'en' && arabic > 0) parseErrors.push(`${pg.rel}: ${arabic} Arabic characters on an English page`);
+    /* And the switch itself must always be present, in both locales. */
+    if (!/class="lang-switch"/.test(raw)) parseErrors.push(`${pg.rel}: language switch missing`);
+  }
+}
 
 // sitemap / robots
 const sm = fs.readFileSync(path.join(SITE, 'sitemap.xml'), 'utf8');
 const smUrls = [...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map(x => x[1]);
 console.log('\nsitemap urls:', smUrls.length);
 smUrls.forEach(u => console.log('  ', u));
-if (smUrls.length !== 9) parseErrors.push(`sitemap has ${smUrls.length} urls (expected 9)`);
+/* One entry per page per locale. */
+if (smUrls.length !== SLUGS.length * 2) parseErrors.push(`sitemap has ${smUrls.length} urls (expected ${SLUGS.length * 2})`);
+const smAlt = (sm.match(/hreflang="ar"/g) || []).length;
+if (smAlt < SLUGS.length * 2) parseErrors.push(`sitemap alternates: ${smAlt} ar entries (expected ${SLUGS.length * 2})`);
 const rb = fs.readFileSync(path.join(SITE, 'robots.txt'), 'utf8');
 if (!/Sitemap:/.test(rb)) parseErrors.push('robots.txt missing Sitemap line');
 

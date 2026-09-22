@@ -1,8 +1,17 @@
 #!/usr/bin/env node
-/* Generates the static NEXGEN Holdings site. No build step is required to view
-   the output — this script just writes the plain HTML files once. */
+/* Generates the static NEXGEN Holdings site: English at the root, Arabic under
+   /ar/. Both locales share ONE set of templates, so the two versions cannot
+   drift apart — only the strings and the text direction change.
+
+   Still no build step to view the output: this script writes plain HTML once.
+
+   Assets are shared. English pages reference them as "assets/…"; Arabic pages
+   live one directory deeper, so they reference "../assets/…". That prefix is the
+   only structural difference between the two renders (ctx.A). */
 const fs = require('fs');
 const path = require('path');
+const enContent = require('./en-content.js');
+const arContent = require('./ar-content.js');
 
 const OUT = '/home/opc/.openclaw/workspace/nexgen/site';
 const SITE = 'https://nexgen.bh';
@@ -10,105 +19,98 @@ const PHONE = '+973 3660 0911';
 const PHONE_HREF = 'tel:+97336600911';
 const EMAIL = 'info@nexgen.bh';
 const LINKEDIN = 'https://www.linkedin.com/company/nexgen-holdings/';
-const FOOTER_COPY = `© Copyright ${new Date().getFullYear()} NEXGEN Holdings`;
 
-const NAV = [
-  { label: 'Home', href: 'index.html' },
-  { label: 'About Us', href: 'about.html' },
-  /* Every company sits behind one "Companies" group, so the bar stays short
-     instead of naming each one. The label is a real link to the overview page
-     and a separate caret button owns the disclosure. Contact is not a nav item:
-     the accent button at the end of the bar is the single way in. */
-  {
-    label: 'Ventures & Partnerships',
-    href: 'companies.html',
-    id: 'companies-menu',
-    children: [
-      { label: 'InPipe Energy', href: 'inpipe-energy.html' },
-      { label: 'Trust Flow', href: 'trust-flow.html' },
-      { label: 'Esaal', href: 'esaal.html' },
-      { label: 'Dari', href: 'dari.html' },
-      { label: 'SABY', href: 'saby.html' },
-    ],
-  },
+/* ------------------------------------------------------- structural metadata
+   Things that do not translate: file names, slugs, image files. Everything a
+   reader sees comes from the locale content files. */
+
+const VENTURE_META = [
+  { key: 'trust-flow', name: 'Trust Flow', file: 'trust-flow.html', img: 'venture-trust-flow.webp' },
+  { key: 'esaal',      name: 'Esaal',      file: 'esaal.html',      img: 'venture-esaal.webp' },
+  { key: 'dari',       name: 'Dari',       file: 'dari.html',       img: 'venture-dari.webp', status: true },
+  { key: 'saby',       name: 'SABY',       file: 'saby.html',       img: 'venture-saby.webp' },
 ];
 
-const VENTURES = [
-  {
-    name: 'Trust Flow',
-    file: 'trust-flow.html',
-    kicker: 'Corporate & Investor Onboarding AI',
-    title: 'Corporate & Investor Onboarding AI',
-    copy: 'A platform that accelerates onboarding for banks, investment firms, asset managers, & funds through AI-driven document processing, automated KYC/KYB, & intelligent compliance summaries.',
-    img: 'venture-trust-flow.webp',
-  },
-  {
-    name: 'Esaal',
-    file: 'esaal.html',
-    kicker: 'Digital Receipts & Spending Intelligence',
-    title: 'Digital Receipts & Spending Intelligence',
-    copy: 'An AI engine that converts receipts into structured, searchable financial data—powering insights for individuals, businesses, and retailers.',
-    img: 'venture-esaal.webp',
-  },
-  {
-    name: 'Dari',
-    file: 'dari.html',
-    kicker: 'AI-Powered Smart Living System',
-    title: 'AI-Powered Smart Living System',
-    copy: 'A next-generation smart home and building platform that adapts to behavior, emotion, and daily routines—not just device commands.',
-    img: 'venture-dari.webp',
-    /* Dari is not live: the status travels with the card so the overview pages
-       cannot imply a shipping product. Same wording as the Dari page hero. */
-    status: 'In development — coming soon',
-  },
-  {
-    name: 'SABY',
-    file: 'saby.html',
-    kicker: 'Modern Technology Studio',
-    title: 'Modern Technology Studio',
-    copy: 'NEXGEN’s dedicated software engineering arm specializing in AI development, digital transformation, and enterprise-grade platforms.',
-    img: 'venture-saby.webp',
-  },
-];
-
-/* InPipe is a company too; it is kept apart from VENTURES because the footer and
-   nav list it in their own place. */
-const INPIPE = {
-  name: 'InPipe Energy',
-  file: 'inpipe-energy.html',
-  kicker: 'HydroXS In-Pipe Hydropower',
-  title: 'HydroXS in-pipe hydropower',
-  copy: 'NEXGEN is the exclusive regional partner of InPipe Energy (USA), bringing HydroXS® technology to the Gulf—turning excess water pressure inside pipelines into clean electricity.',
-  img: 'inpipe-plant.webp',
-  round: true,
+/* InPipe is a company too; it is kept apart from VENTURE_META because the footer
+   and nav list it in their own place. */
+const INPIPE_META = {
+  key: 'inpipe', name: 'InPipe Energy', file: 'inpipe-energy.html',
+  img: 'inpipe-plant.webp', round: true,
 };
 
-/* The three areas NEXGEN focuses on. Every company belongs to one primary area;
-   the site speaks in these names everywhere a sector is mentioned. */
-const PILLARS = [
-  { name: 'Renewable &amp; Clean Energy', blurb: 'Turning the energy already inside water infrastructure into clean, reliable power.', files: ['inpipe-energy.html'] },
-  { name: 'Digital Transformation', blurb: 'Replacing paper, manual work, and fragmented systems with connected digital platforms.', files: ['esaal.html', 'saby.html'] },
-  { name: 'Artificial Intelligence', blurb: 'Applying AI to documents, decisions, and daily life—from institutional compliance to smart homes.', files: ['trust-flow.html', 'dari.html'] },
+const PILLAR_META = [
+  { key: 'energy',  files: ['inpipe-energy.html'] },
+  { key: 'digital', files: ['esaal.html', 'saby.html'] },
+  { key: 'ai',      files: ['trust-flow.html', 'dari.html'] },
 ];
 
-/* ---------------------------------------------------------------- partials */
+const INPIPE_TEAM = [
+  { file: 'inpipe-semler.webp',    name: 'Gregg Semler' },
+  { file: 'inpipe-frost.webp',     name: 'David Frost' },
+  { file: 'inpipe-klann.webp',     name: 'Richard Klann' },
+  { file: 'inpipe-conner.webp',    name: 'Mickey Conner' },
+  { file: 'inpipe-robinson.webp',  name: 'John Robinson' },
+  { file: 'inpipe-perrin.webp',    name: 'Kyle Perrin' },
+  { file: 'inpipe-morrison.webp',  name: 'Chris Morrison' },
+  { file: 'inpipe-dickinson.webp', name: 'Mary Ann Dickinson' },
+];
 
-function topbar(active) {
-  const items = NAV.map((item) => {
+/* Esaal's own leadership. Advisors have no portrait in the source, so they are
+   listed by name only rather than padded with a stock face. */
+const ESAAL_TEAM = [
+  { file: 'esaal-reem.webp',     name: 'Reem Musabbah' },
+  { file: 'esaal-alhassan.webp', name: 'AlHassan A.' },
+  { file: 'esaal-anas.webp',     name: 'Anas Ali' },
+];
+
+const ESAAL_ADVISORS = ['Mohamed Roushdy, MBA', 'Sreela Sreenarayanan', 'Ashutosh Ashish'];
+
+/* NEXGEN's own people. `latin` is the name as it appears on the English site;
+   the Arabic locale may carry its own rendering in T.people[key].name. */
+const LEADERSHIP = [
+  { key: 'omar',       file: 'team-omar.webp',      latin: 'Omar Almutairi',       altKey: 'omar' },
+  { key: 'jernej',     file: 'team-jernej.webp',    latin: 'Jernej Hercog',        altKey: 'jernej' },
+  { key: 'moatassem',  file: 'team-moatassem.webp', latin: 'Moatassem Abdelhaleem', altKey: 'moatassem' },
+];
+
+const ADVISORS = [
+  { key: 'advisorAlenezi',  file: 'advisor-alenzi.webp',  latin: 'Abdullah Alenezi', url: 'https://www.linkedin.com/in/abdullahmansouralenezi' },
+  { key: 'advisorAlsharah', file: 'advisor-alsharah.webp', latin: 'Hanan Alsharah',   url: 'https://www.linkedin.com/in/hanan-alsharah-67b9a01b9' },
+];
+
+/* Personal names are Latin in the English content; the Arabic locale supplies
+   its own rendering by Latin key. Falling back to the Latin name is deliberate:
+   a name the locale has not transliterated still renders (the Arabic faces
+   carry the full Latin set) instead of vanishing. */
+function nameFor(T, latin) {
+  return (T.names && T.names[latin]) || latin;
+}
+
+/* Fills a {name}/{role}/{note} object from locale content, falling back to the
+   Latin name where the locale has no rendering of it (non-Arab personal names). */
+function person(T, key, latinName) {
+  const p = (T.people && T.people[key]) || {};
+  return { name: p.name || nameFor(T, latinName) || '', role: p.role || '', note: p.note || '' };
+}
+
+/* ------------------------------------------------------------------- chrome */
+
+function topbar(T, ctx) {
+  const items = ctx.NAV.map((item) => {
     if (!item.children) {
-      const current = item.href === active ? ' aria-current="page"' : '';
+      const current = item.href === ctx.active ? ' aria-current="page"' : '';
       return `          <li><a href="${item.href}"${current}>${item.label}</a></li>`;
     }
     /* The group lights up when the overview page or any of its children is the
        page you are on, so the caret never hides where you are. */
-    const groupCurrent = item.children.some((c) => c.href === active);
-    const self = item.href === active ? ' aria-current="page"' : '';
+    const groupCurrent = item.children.some((c) => c.href === ctx.active);
+    const self = item.href === ctx.active ? ' aria-current="page"' : '';
     const kids = item.children
-      .map((c) => `              <li><a href="${c.href}"${c.href === active ? ' aria-current="page"' : ''}>${c.label}</a></li>`)
+      .map((c) => `              <li><a href="${c.href}"${c.href === ctx.active ? ' aria-current="page"' : ''}>${c.label}</a></li>`)
       .join('\n');
     return `          <li class="drop${groupCurrent ? ' is-current' : ''}" data-drop>
             <a href="${item.href}"${self}>${item.label}</a>
-            <button class="drop__toggle" type="button" data-drop-toggle aria-expanded="false" aria-controls="${item.id}" aria-label="Open ${item.label} menu">
+            <button class="drop__toggle" type="button" data-drop-toggle aria-expanded="false" aria-controls="${item.id}" aria-label="${T.nav.openMenu(item.label)}">
               <span class="drop__caret" aria-hidden="true"></span>
             </button>
             <ul class="drop__menu" id="${item.id}">
@@ -117,25 +119,28 @@ ${kids}
           </li>`;
   }).join('\n');
 
-  return `  <a class="skip-link" href="#main">Skip to content</a>
+  return `  <a class="skip-link" href="#main">${T.nav.skip}</a>
   <header class="topbar" data-topbar>
     <div class="container topbar__inner">
-      <a class="topbar__brand" href="index.html" aria-label="NEXGEN Holdings — Home">
-        <img src="assets/img/mark.webp" alt="NEXGEN Holdings logo" width="52" height="52">
+      <a class="topbar__brand" href="index.html" aria-label="${T.nav.brandHome}">
+        <img src="${ctx.A}img/mark.webp" alt="${T.nav.brandName}" width="52" height="52">
         <span class="topbar__brand-text">
           <span class="topbar__brand-name">NEXGEN</span>
           <span class="topbar__brand-tag">Holdings</span>
         </span>
       </a>
-      <button class="topbar__toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-menu" aria-label="Open navigation menu">
+      <button class="topbar__toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-menu" aria-label="${T.nav.openNav}">
         <span></span><span></span><span></span>
       </button>
-      <nav class="topbar__nav" aria-label="Primary">
+      <nav class="topbar__nav" aria-label="${T.nav.primary}">
         <ul class="topbar__menu" id="primary-menu">
 ${items}
         </ul>
       </nav>
-      <a class="btn btn--quiet topbar__cta" href="contact.html"${active === 'contact.html' ? ' aria-current="page"' : ''}>Contact</a>
+      <div class="topbar__end">
+        <a class="lang-switch" href="${ctx.switchHref}" hreflang="${ctx.switchLang}" lang="${ctx.switchLang}" aria-label="${T.nav.langAria}">${T.nav.langLabel}</a>
+        <a class="btn btn--quiet topbar__cta" href="contact.html"${ctx.active === 'contact.html' ? ' aria-current="page"' : ''}>${T.nav.contact}</a>
+      </div>
     </div>
   </header>`;
 }
@@ -143,7 +148,7 @@ ${items}
 /* One closing call to action per page, worded for the page it closes: the same
    action the hero offers, said once more where a reader who has finished the
    page is deciding what to do next. Phone is a quiet text alternative. */
-function ctaBand(cta, theme = '') {
+function ctaBand(T, ctx, cta, theme = '') {
   return `  <section class="cta-band${theme ? ` theme-${theme}` : ''}">
     <div class="container">
       <div class="cta-band__inner">
@@ -153,74 +158,91 @@ function ctaBand(cta, theme = '') {
         </div>
         <div class="cta-band__actions">
           <a class="btn btn--primary" href="contact.html">${cta.label}</a>
-          <a class="cta-band__alt" href="${PHONE_HREF}">or call ${PHONE}</a>
+          <a class="cta-band__alt" href="${PHONE_HREF}">${T.cta.alt(PHONE)}</a>
         </div>
       </div>
     </div>
   </section>`;
 }
 
-function footer() {
+function footer(T, ctx) {
   /* Home and About Us are site pages, not companies — they sit under Quick
      Links. Ventures & Partnerships lists every company and partner in one
      place, InPipe included, so nothing is miscategorised as "Company". */
-  const ventureLinks = [INPIPE, ...VENTURES].map(v => `            <a href="${v.file}">${v.name}</a>`).join('\n');
+  const all = [INPIPE_META, ...VENTURE_META];
+  const ventureLinks = all
+    .map((v) => `            <a href="${v.file}">${v.name}</a>`)
+    .join('\n');
   return `  <footer class="footer">
     <div class="container footer__top">
       <div class="footer__brand">
-        <img src="assets/img/logo.webp" alt="NEXGEN Holdings" width="46" height="52">
-        <p>A Gulf-based holding company building and scaling high-impact ventures across renewable &amp; clean energy, digital transformation, and artificial intelligence.</p>
+        <img src="${ctx.A}img/logo.webp" alt="${T.nav.brandName}" width="46" height="52">
+        <p>${T.footer.blurb}</p>
       </div>
       <div>
-        <h2 class="footer__heading">Ventures &amp; Partnerships</h2>
-        <nav class="footer__links" aria-label="Ventures & Partnerships">
+        <h2 class="footer__heading">${T.footer.ventures}</h2>
+        <nav class="footer__links" aria-label="${T.footer.venturesAria}">
 ${ventureLinks}
         </nav>
       </div>
       <div>
-        <h2 class="footer__heading">Quick Links</h2>
-        <nav class="footer__links" aria-label="Quick Links">
-          <a href="index.html">Home</a>
-          <a href="about.html">About Us</a>
-          <a href="companies.html">Ventures &amp; Partnerships</a>
-          <a href="contact.html">Contact Us</a>
+        <h2 class="footer__heading">${T.footer.quick}</h2>
+        <nav class="footer__links" aria-label="${T.footer.quickAria}">
+          <a href="index.html">${T.footer.home}</a>
+          <a href="about.html">${T.footer.about}</a>
+          <a href="companies.html">${T.footer.venturesLink}</a>
+          <a href="contact.html">${T.footer.contact}</a>
         </nav>
       </div>
       <div>
-        <h2 class="footer__heading">Get in touch</h2>
+        <h2 class="footer__heading">${T.footer.getInTouch}</h2>
         <div class="footer__contact">
           <div>
-            <span class="footer__label">Phone</span>
+            <span class="footer__label">${T.footer.phone}</span>
             <a href="${PHONE_HREF}">${PHONE}</a>
           </div>
           <div>
-            <span class="footer__label">Email</span>
+            <span class="footer__label">${T.footer.email}</span>
             <a href="mailto:${EMAIL}">${EMAIL}</a>
           </div>
           <div>
-            <span class="footer__label">LinkedIn</span>
+            <span class="footer__label">${T.footer.linkedin}</span>
             <a href="${LINKEDIN}" target="_blank" rel="noopener">nexgen-holdings</a>
           </div>
         </div>
       </div>
     </div>
     <div class="container footer__bottom">
-      <p>${FOOTER_COPY}</p>
-      <p><a href="sitemap.xml">Sitemap</a></p>
+      <p>${T.footer.copyright}</p>
+      <p><a href="${ctx.R}sitemap.xml">${T.footer.sitemap}</a></p>
     </div>
   </footer>`;
 }
 
-function page({ slug, title, desc, active, head = '', body, ogImage = 'hero-home.webp', noCta = false, cta = null, theme = '' }) {
-  const canonical = slug === 'index.html' ? `${SITE}/` : `${SITE}/${slug}`;
+function page(T, ctx, { slug, title, desc, active, head = '', body, ogImage = 'hero-home.webp', noCta = false, cta = null, theme = '' }) {
+  const home = slug === 'index.html';
+  const canonical = ctx.code === 'en'
+    ? (home ? `${SITE}/` : `${SITE}/${slug}`)
+    : (home ? `${SITE}/ar/` : `${SITE}/ar/${slug}`);
+  const altEn = home ? `${SITE}/` : `${SITE}/${slug}`;
+  const altAr = home ? `${SITE}/ar/` : `${SITE}/ar/${slug}`;
+  /* Fonts differ per locale, so preload only the pair this page renders in. */
+  const preload = ctx.code === 'ar'
+    ? `<link rel="preload" href="${ctx.A}fonts/amiri-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="${ctx.A}fonts/plex-arabic-regular.woff2" as="font" type="font/woff2" crossorigin>`
+    : `<link rel="preload" href="${ctx.A}fonts/newsreader-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="${ctx.A}fonts/instrument-sans-latin.woff2" as="font" type="font/woff2" crossorigin>`;
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="${ctx.code}" dir="${ctx.dir}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${title}</title>
 <meta name="description" content="${desc}">
 <link rel="canonical" href="${canonical}">
+<link rel="alternate" hreflang="en" href="${altEn}">
+<link rel="alternate" hreflang="ar" href="${altAr}">
+<link rel="alternate" hreflang="x-default" href="${altEn}">
 <meta name="theme-color" content="#363634">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="NEXGEN Holdings">
@@ -228,25 +250,25 @@ function page({ slug, title, desc, active, head = '', body, ogImage = 'hero-home
 <meta property="og:description" content="${desc}">
 <meta property="og:url" content="${canonical}">
 <meta property="og:image" content="${SITE}/assets/img/${ogImage}">
-<meta property="og:locale" content="en_US">
-<meta name="twitter:card" content="summary_large_image">
+<meta property="og:locale" content="${ctx.ogLocale}">
+${ctx.ogAlt ? `<meta property="og:locale:alternate" content="${ctx.ogAlt}">
+` : ''}<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${title}">
 <meta name="twitter:description" content="${desc}">
 <meta name="twitter:image" content="${SITE}/assets/img/${ogImage}">
-<link rel="icon" href="favicon.png" type="image/png">
-<link rel="apple-touch-icon" href="favicon.png">
-<link rel="preload" href="assets/fonts/newsreader-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="assets/fonts/instrument-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/css/site.css">
+<link rel="icon" href="${ctx.R}favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="${ctx.R}favicon.png">
+${preload}
+<link rel="stylesheet" href="${ctx.A}css/site.css">
 ${head}</head>
 <body>
-${topbar(active)}
+${topbar(T, ctx)}
 <main id="main"${theme ? ` class="theme-${theme}"` : ''}>
 ${body}
 </main>
-${noCta || !cta || cta.band === false ? '' : ctaBand(cta, theme)}
-${footer()}
-<script src="assets/js/site.js" defer></script>
+${noCta || !cta || cta.band === false ? '' : ctaBand(T, ctx, cta, theme)}
+${footer(T, ctx)}
+<script src="${ctx.A}js/site.js" defer></script>
 </body>
 </html>
 `;
@@ -254,41 +276,40 @@ ${footer()}
 
 /* ------------------------------------------------------------------ blocks */
 
-const stars = '<span aria-hidden="true">*</span>';
-
-function ventureCard(v, h, i, wide) {
+function ventureCard(T, ctx, v, h, i, wide) {
+  const copy = T.ventures[v.key];
   const img = v.round
-    ? `<img class="venture__mark--round" src="assets/img/${v.img}" alt="${v.name} — ${v.title}" loading="lazy" decoding="async">`
-    : `<img src="assets/img/${v.img}" alt="${v.name} — ${v.title}" loading="lazy" decoding="async">`;
+    ? `<img class="venture__mark--round" src="${ctx.A}img/${v.img}" alt="${v.name} — ${copy.kicker}" loading="lazy" decoding="async">`
+    : `<img src="${ctx.A}img/${v.img}" alt="${v.name} — ${copy.kicker}" loading="lazy" decoding="async">`;
   /* A venture that is not live says so on its card, in the site's own pill. */
   const status = v.status
-    ? `\n                <p class="status-note">${v.status}</p>`
+    ? `\n                <p class="status-note">${T.ui.inDevelopment}</p>`
     : '';
   return `            <article class="card venture reveal${wide ? ' venture--wide' : ''}" data-delay="${i % 3}">
               <div class="venture__media">
                 ${img}
               </div>
               <div class="venture__body">
-                <p class="venture__kicker">${v.kicker}</p>${status}
+                <p class="venture__kicker">${copy.kicker}</p>${status}
                 <h${h} class="venture__title">${v.name}</h${h}>
-                <p>${v.copy}</p>
-                <div class="card__foot"><a class="link-arrow" href="${v.file}">Read More</a></div>
+                <p>${copy.copy}</p>
+                <div class="card__foot"><a class="link-arrow" href="${v.file}">${T.ui.readMore}</a></div>
               </div>
             </article>`;
 }
 
 /* Companies grouped under the three focus areas. headLevel is the pillar
    heading; cards sit one level below it. */
-function pillarSections(headLevel, cardLevel) {
-  const all = [INPIPE, ...VENTURES];
-  return PILLARS.map((p, pi) => {
-    const items = p.files.map(f => all.find(v => v.file === f));
-    const cards = items.map((v, i) => ventureCard(v, cardLevel, i, items.length === 1)).join('\n');
+function pillarSections(T, ctx, headLevel, cardLevel) {
+  const all = [INPIPE_META, ...VENTURE_META];
+  return PILLAR_META.map((p, pi) => {
+    const items = p.files.map((f) => all.find((v) => v.file === f));
+    const cards = items.map((v, i) => ventureCard(T, ctx, v, cardLevel, i, items.length === 1)).join('\n');
     return `        <div class="pillar">
           <div class="pillar__head reveal">
             <p class="pillar__num">0${pi + 1}</p>
-            <h${headLevel} class="pillar__title">${p.name}</h${headLevel}>
-            <p>${p.blurb}</p>
+            <h${headLevel} class="pillar__title">${T.pillars[p.key].name}</h${headLevel}>
+            <p>${T.pillars[p.key].blurb}</p>
           </div>
           <div class="pillar__cards${items.length > 1 ? ' pillar__cards--2' : ''}">
 ${cards}
@@ -297,52 +318,23 @@ ${cards}
   }).join('\n');
 }
 
-/* Partner team. Every entry is InPipe's own people, presented as such: the
-   section says whose team it is, and the photos keep one grayscale treatment so
-   nine different source photographs read as a set. */
-const INPIPE_TEAM = [
-  { file: 'inpipe-semler.webp',    name: 'Gregg Semler',       role: 'CEO &amp; Founder' },
-  { file: 'inpipe-frost.webp',     name: 'David Frost',        role: 'Business Development' },
-  { file: 'inpipe-klann.webp',     name: 'Richard Klann',      role: 'Vice President, Finance' },
-  { file: 'inpipe-conner.webp',    name: 'Mickey Conner',      role: 'Director, Engineering' },
-  { file: 'inpipe-robinson.webp',  name: 'John Robinson',      role: 'Operations Manager' },
-  { file: 'inpipe-perrin.webp',    name: 'Kyle Perrin',        role: 'Sales Manager' },
-  { file: 'inpipe-morrison.webp',  name: 'Chris Morrison',     role: 'Industry Advisor · Morrison Water' },
-  { file: 'inpipe-dickinson.webp', name: 'Mary Ann Dickinson', role: 'Industry Advisor · Alliance for Water Efficiency' },
-];
-
-/* Esaal's own leadership, same treatment as the InPipe group. Photos come from
-   Esaal's company profile. Advisors have no portrait in the source, so they are
-   listed by name only rather than padded with a stock face. */
-const ESAAL_TEAM = [
-  { file: 'esaal-reem.webp',     name: 'Reem Musabbah', role: 'CEO &amp; Founder' },
-  { file: 'esaal-alhassan.webp', name: 'AlHassan A.',   role: 'CTO' },
-  { file: 'esaal-anas.webp',     name: 'Anas Ali',      role: 'COO &amp; Co-founder' },
-];
-
-const ESAAL_ADVISORS = [
-  ['Mohamed Roushdy, MBA', 'Fintech · Open Banking · Digital Transformation'],
-  ['Sreela Sreenarayanan', 'Commercial Operations · Pricing &amp; Financials'],
-  ['Ashutosh Ashish', 'Digital Banking · Onboarding · Digital Channels'],
-];
-
-function teamCards(team) {
+function teamCards(T, ctx, team, roles) {
   return team.map((m, i) => `        <article class="teammate reveal" data-delay="${i % 4}">
-          <img src="assets/img/${m.file}" alt="${m.name}" loading="lazy" decoding="async">
-          <h3 class="teammate__name">${m.name}</h3>
-          <p class="teammate__role">${m.role}</p>
+          <img src="${ctx.A}img/${m.file}" alt="${nameFor(T, m.name)}" loading="lazy" decoding="async">
+          <h3 class="teammate__name">${nameFor(T, m.name)}</h3>
+          <p class="teammate__role">${roles[m.name] || ''}</p>
         </article>`).join('\n');
 }
 
-function hero({ image, imageSmall, imageStacked, mark, title, lead, eyebrow, status = '', actions = '', cls = '' }) {
+function hero(T, ctx, { image, imageSmall, imageStacked, mark, title, lead, eyebrow, status = '', actions = '', cls = '' }) {
   /* imageSmall: a 960w rendition for phones; the wide one serves large screens. */
   const srcset = imageSmall
-    ? ` srcset="assets/img/${imageSmall} 960w, assets/img/${image} 1920w" sizes="(max-width: 1099px) 100vw, 66vw" width="1920" height="1080"`
+    ? ` srcset="${ctx.A}img/${imageSmall} 960w, ${ctx.A}img/${image} 1920w" sizes="(max-width: 1099px) 100vw, 66vw" width="1920" height="1080"`
     : '';
-  const imgTag = `<img src="assets/img/${image}"${srcset} alt="" fetchpriority="high" decoding="async">`;
+  const imgTag = `<img src="${ctx.A}img/${image}"${srcset} alt="" fetchpriority="high" decoding="async">`;
   /* imageStacked: a tighter crop swapped in where the hero stacks (< 1100px). */
   const picture = imageStacked
-    ? `<picture><source media="(max-width: 1099px)" srcset="assets/img/${imageStacked}">${imgTag}</picture>`
+    ? `<picture><source media="(max-width: 1099px)" srcset="${ctx.A}img/${imageStacked}">${imgTag}</picture>`
     : imgTag;
   const media = image
     ? `    <div class="hero__media">${picture}</div>\n`
@@ -352,7 +344,7 @@ function hero({ image, imageSmall, imageStacked, mark, title, lead, eyebrow, sta
      their own dark ground edge to edge. */
   const photoCls = image ? ' hero--photo' : '';
   const markHtml = mark
-    ? `      <img class="hero__mark" src="assets/img/${mark}" alt="" width="240" height="240">\n`
+    ? `      <img class="hero__mark" src="${ctx.A}img/${mark}" alt="" width="240" height="240">\n`
     : '';
   const eyebrowHtml = eyebrow ? `      <p class="eyebrow">${eyebrow}</p>\n` : '';
   const statusHtml = status ? `      <p class="status-note">${status}</p>\n` : '';
@@ -366,9 +358,9 @@ ${actionsHtml}    </div>
 }
 
 /* A venture page opens like the homepage: copy and logo tile on the ground, a
-   photograph open on the right (a band under the copy on small screens). The
-   photograph is optional so a page never ships an empty frame: without
-   assets/img/hero-<slug>.webp it keeps the compact petrol plate. */
+   photograph open on one side. The photograph is optional so a page never ships
+   an empty frame: without assets/img/hero-<slug>.webp it keeps the compact
+   petrol plate. */
 function ventureHeroOpts(slug) {
   const big = `hero-${slug}.webp`;
   const small = `hero-${slug}-960.webp`;
@@ -376,35 +368,36 @@ function ventureHeroOpts(slug) {
   return { image: big, imageSmall: fs.existsSync(path.join(OUT, 'assets', 'img', small)) ? small : undefined, cls: ` hero--home hero--split hero--venture hero--${slug}` };
 }
 
-function splitImage(src, alt, opts = {}) {
-  const cls = opts.reverse ? ' figure reveal' : ' figure reveal';
-  return `        <figure class="${cls.trim()}">
-          <img src="assets/img/${src}" alt="${alt}" loading="lazy" decoding="async">
+function splitImage(ctx, src, alt, opts = {}) {
+  return `        <figure class="figure reveal">
+          <img src="${ctx.A}img/${src}" alt="${alt}" loading="lazy" decoding="async">
         </figure>`;
 }
 
 /* ------------------------------------------------------------------- pages */
 
-const homeBody = `${hero({
-  image: 'hero-home.webp',
-  imageSmall: 'hero-home-960.webp',
-  title: 'Building the Next Generation of <span class="nowrap">Impact-Driven</span> Ventures',
-  lead: `A Gulf-based holding company building and scaling high-impact ventures in renewable &amp; clean energy, digital transformation, and artificial intelligence—for governments, utilities, banks, and enterprises across the GCC.`,
-  actions: `<a class="btn btn--accent" href="#focus-areas">Explore Our Focus Areas</a>
-        <a class="btn btn--onDark" href="companies.html">Explore Our Ventures</a>`,
-  cls: ' hero--home hero--split',
-})}
+function homeBody(T, ctx) {
+  const p = T.pages.index;
+  return `${hero(T, ctx, {
+    image: 'hero-home.webp',
+    imageSmall: 'hero-home-960.webp',
+    title: p.heroTitle,
+    lead: p.heroLead,
+    actions: `<a class="btn btn--accent" href="#focus-areas">${p.heroBtn1}</a>
+        <a class="btn btn--onDark" href="companies.html">${p.heroBtn2}</a>`,
+    cls: ' hero--home hero--split',
+  })}
 
   <section class="section">
     <div class="container split split--editorial">
       <div class="reveal">
-        <h2>Innovation With Purpose. Impact With Scale.</h2>
-        <p class="lead">NEXGEN is a diversified holding company headquartered in the Gulf, focused on building ventures that deliver economic, environmental, and digital transformation.</p>
+        <h2>${p.h2}</h2>
+        <p class="lead">${p.lead}</p>
       </div>
       <div class="reveal" data-delay="1">
-        <p>Our portfolio spans three focus areas—renewable &amp; clean energy, digital transformation, and artificial intelligence—each designed to solve real challenges and create real value.</p>
-        <p>We partner with global technology leaders, regional institutions, and forward-thinking organizations to bring world-class solutions to the GCC.</p>
-        <div class="btn-row mt-3"><a class="btn btn--outline" href="about.html">Learn More</a></div>
+        <p>${p.p1}</p>
+        <p>${p.p2}</p>
+        <div class="btn-row mt-3"><a class="btn btn--outline" href="about.html">${p.btn}</a></div>
       </div>
     </div>
   </section>
@@ -412,48 +405,60 @@ const homeBody = `${hero({
   <section class="section section--alt" id="focus-areas">
     <div class="container">
       <div class="center reveal intro">
-        <p class="eyebrow">Our focus</p>
-        <h2>Three Focus Areas</h2>
-        <p class="lead">Every NEXGEN company is built within one of three areas.</p>
+        <p class="eyebrow">${p.eyebrow}</p>
+        <h2>${p.focusH2}</h2>
+        <p class="lead">${p.focusLead}</p>
       </div>
       <div class="pillars mt-4">
-${pillarSections(3, 4)}
+${pillarSections(T, ctx, 3, 4)}
       </div>
     </div>
   </section>`;
+}
 
-const aboutBody = `${hero({
-  image: 'hero-about.webp',
-  cls: ' hero--abstract',
-  title: 'About NEXGEN Holdings',
-  lead: 'A holding company headquartered in Bahrain, building and scaling high-impact ventures across renewable &amp; clean energy, digital transformation, and artificial intelligence, active across the GCC.',
-})}
+function aboutBody(T, ctx) {
+  const p = T.pages.about;
+  const alts = T.imgAlts || {};
+  const lead0 = LEADERSHIP[0], lead1 = LEADERSHIP[1], lead2 = LEADERSHIP[2];
+  const p0 = person(T, lead0.key, lead0.latin);
+  const p1 = person(T, lead1.key, lead1.latin);
+  const p2 = person(T, lead2.key, lead2.latin);
+  const adv0 = person(T, ADVISORS[0].key, ADVISORS[0].latin);
+  const adv1 = person(T, ADVISORS[1].key, ADVISORS[1].latin);
+  const founderRole = (T.people.abdullah || {}).role || 'Chairman &amp; CEO';
+  const founderAlt = (T.people.abdullah || {}).alt || (T.people.abdullah || {}).altText || '';
+  return `${hero(T, ctx, {
+    image: 'hero-about.webp',
+    cls: ' hero--abstract',
+    title: p.heroTitle,
+    lead: p.heroLead,
+  })}
 
   <section class="section">
     <div class="container split split--reverse">
       <div class="reveal">
-        <h2>Building the Next Generation of <span class="nowrap">Impact-Driven</span> Ventures</h2>
-        <p class="lead">NEXGEN Holdings is a diversified holding company headquartered in Bahrain, focused on creating, scaling, and operating ventures across the GCC that deliver measurable economic, environmental, and technological impact.</p>
-        <p>We operate across three focus areas—renewable &amp; clean energy, digital transformation, and artificial intelligence—transforming proven ideas into structured, market-ready businesses. NEXGEN combines strategic vision, regional insight, and disciplined execution to ensure every venture is built for long-term relevance and sustainable growth.</p>
-        <p>Rather than pursuing volume, NEXGEN follows a selective, high-conviction approach—focusing on ventures that align with regional priorities, regulatory environments, and real market demand across the GCC.</p>
+        <h2>${p.h2}</h2>
+        <p class="lead">${p.lead}</p>
+        <p>${p.p1}</p>
+        <p>${p.p2}</p>
       </div>
-      ${splitImage('contact-visual.webp', 'NEXGEN Holdings corporate visual')}
+      ${splitImage(ctx, 'contact-visual.webp', alts.corporateVisual || 'NEXGEN Holdings corporate visual')}
     </div>
   </section>
 
   <section class="section section--alt">
     <div class="container">
       <div class="center reveal intro">
-        <h2>Our Vision &amp; Mission</h2>
+        <h2>${p.vmH2}</h2>
       </div>
       <div class="grid grid-2 mt-4">
         <article class="panel reveal">
-          <h3>Our Vision</h3>
-          <p>To become the Gulf’s leading innovation holding—driving the transition toward sustainable energy, digital transformation, and AI-enabled ecosystems.</p>
+          <h3>${p.visionH}</h3>
+          <p>${p.visionP}</p>
         </article>
         <article class="panel reveal" data-delay="1">
-          <h3>Our Mission</h3>
-          <p>To build and scale ventures that solve real-world challenges, reduce environmental impact, improve operational efficiency, and enable long-term value creation for governments, enterprises, and communities across the region.</p>
+          <h3>${p.missionH}</h3>
+          <p>${p.missionP}</p>
         </article>
       </div>
     </div>
@@ -462,16 +467,11 @@ const aboutBody = `${hero({
   <section class="section">
     <div class="container">
       <div class="center reveal intro">
-        <p class="eyebrow">Our values</p>
-        <h2>How We Work</h2>
+        <p class="eyebrow">${p.valuesEyebrow}</p>
+        <h2>${p.valuesH2}</h2>
       </div>
       <ul class="chips chips--center mt-4 reveal">
-        <li>Innovation</li>
-        <li>Sustainability</li>
-        <li>Integrity</li>
-        <li>Partnership</li>
-        <li>Excellence</li>
-        <li>Impact</li>
+${p.values.map((v) => `        <li>${v}</li>`).join('\n')}
       </ul>
     </div>
   </section>
@@ -479,16 +479,16 @@ const aboutBody = `${hero({
   <section class="section section--dark">
     <div class="container split">
       <div class="reveal">
-        <p class="eyebrow">Founder’s message</p>
-        <h2>Abdullah Sultan AlMutairi</h2>
-        <p class="person__role">Chairman &amp; CEO</p>
-        <p>NEXGEN was founded on the belief that innovation must deliver real value—not just ideas.</p>
-        <p>As a holding company, our role goes beyond capital allocation. We actively shape ventures that address critical challenges facing our region, from clean energy and infrastructure efficiency to financial systems and digital transformation.</p>
-        <p>We take a disciplined and selective approach, partnering with proven global innovators and regional institutions to ensure each venture is practical, scalable, and aligned with the long-term priorities of the Gulf.</p>
-        <p>NEXGEN is committed to building companies that stand the test of time—creating sustainable impact for our partners, our markets, and future generations.</p>
+        <p class="eyebrow">${p.founderEyebrow}</p>
+        <h2>${(T.people.abdullah || {}).name || p.founderName}</h2>
+        <p class="person__role">${founderRole}</p>
+        <p>${p.founderP1}</p>
+        <p>${p.founderP2}</p>
+        <p>${p.founderP3}</p>
+        <p>${p.founderP4}</p>
       </div>
       <figure class="figure reveal" data-delay="1">
-        <img src="assets/img/team-abdullah.webp" alt="Abdullah Sultan AlMutairi, Chairman &amp; CEO of NEXGEN Holdings" loading="lazy" decoding="async">
+        <img src="${ctx.A}img/team-abdullah.webp" alt="${founderAlt}" loading="lazy" decoding="async">
       </figure>
     </div>
   </section>
@@ -496,54 +496,54 @@ const aboutBody = `${hero({
   <section class="section">
     <div class="container">
       <div class="center reveal intro">
-        <p class="eyebrow">Leadership</p>
-        <h2>Our Leadership Structure</h2>
+        <p class="eyebrow">${p.leadershipEyebrow}</p>
+        <h2>${p.leadershipH2}</h2>
       </div>
       <div class="grid grid-3 mt-4">
         <article class="person reveal">
-          <div class="person__media"><img src="assets/img/team-omar.webp" alt="Omar Almutairi, Head Of Fintech" loading="lazy" decoding="async"></div>
+          <div class="person__media"><img src="${ctx.A}img/${lead0.file}" alt="${p0.name}, ${p0.role}" loading="lazy" decoding="async"></div>
           <div class="person__body">
-            <h3 class="person__name">Omar Almutairi</h3>
-            <p class="person__role">Head Of Fintech</p>
-            <p class="person__note">Oversees NEXGEN’s financial technology portfolio, including digital onboarding platforms, compliance solutions, and financial infrastructure serving banks, investment firms, and enterprises.</p>
+            <h3 class="person__name">${p0.name}</h3>
+            <p class="person__role">${p0.role}</p>
+            <p class="person__note">${p0.note}</p>
           </div>
         </article>
         <article class="person reveal" data-delay="1">
-          <div class="person__media"><img src="assets/img/team-jernej.webp" alt="Jernej Hercog, Head Of Renewable Energy" loading="lazy" decoding="async"></div>
+          <div class="person__media"><img src="${ctx.A}img/${lead1.file}" alt="${p1.name}, ${p1.role}" loading="lazy" decoding="async"></div>
           <div class="person__body">
-            <h3 class="person__name">Jernej Hercog</h3>
-            <p class="person__role">Head Of Renewable Energy</p>
-            <p class="person__note">Leads NEXGEN’s renewable energy initiatives, overseeing decarbonization projects, water-energy recovery solutions, and strategic partnerships with utilities and infrastructure operators across the GCC.</p>
+            <h3 class="person__name">${p1.name}</h3>
+            <p class="person__role">${p1.role}</p>
+            <p class="person__note">${p1.note}</p>
           </div>
         </article>
         <article class="person reveal" data-delay="2">
-          <div class="person__media"><img src="assets/img/team-moatassem.webp" alt="Moatassem Abdelhaleem, Head of AI &amp; Digital Transformation" loading="lazy" decoding="async"></div>
+          <div class="person__media"><img src="${ctx.A}img/${lead2.file}" alt="${p2.name}, ${p2.role}" loading="lazy" decoding="async"></div>
           <div class="person__body">
-            <h3 class="person__name">Moatassem Abdelhaleem</h3>
-            <p class="person__role">Head of AI &amp; Digital Transformation</p>
-            <p class="person__note">Leads NEXGEN’s artificial intelligence and digital transformation agenda.</p>
+            <h3 class="person__name">${p2.name}</h3>
+            <p class="person__role">${p2.role}</p>
+            <p class="person__note">${p2.note}</p>
           </div>
         </article>
       </div>
 
       <div class="center reveal intro mt-6">
-        <h2>Advisory Board</h2>
+        <h2>${p.advisorsH2}</h2>
       </div>
-      <!-- Advisory Board now carries two members; the AI & digital transformation
-           lead moved up into the leadership grid above. -->
+      <!-- Advisory Board carries two members; the AI & digital transformation
+           lead sits in the leadership grid above. -->
       <div class="grid grid-2 mt-4">
-        <a class="advisor reveal" href="https://www.linkedin.com/in/abdullahmansouralenezi" target="_blank" rel="noopener">
-          <img src="assets/img/advisor-alenzi.webp" alt="Abdullah Alenezi" loading="lazy" decoding="async">
+        <a class="advisor reveal" href="${ADVISORS[0].url}" target="_blank" rel="noopener">
+          <img src="${ctx.A}img/${ADVISORS[0].file}" alt="${adv0.name}" loading="lazy" decoding="async">
           <span>
-            <span class="advisor__name">Abdullah Alenezi</span>
-            <span class="advisor__role">Shadow Executive · C-Suite Advisory</span>
+            <span class="advisor__name">${adv0.name}</span>
+            <span class="advisor__role">${adv0.role}</span>
           </span>
         </a>
-        <a class="advisor reveal" data-delay="1" href="https://www.linkedin.com/in/hanan-alsharah-67b9a01b9" target="_blank" rel="noopener">
-          <img src="assets/img/advisor-alsharah.webp" alt="Hanan Alsharah" loading="lazy" decoding="async">
+        <a class="advisor reveal" data-delay="1" href="${ADVISORS[1].url}" target="_blank" rel="noopener">
+          <img src="${ctx.A}img/${ADVISORS[1].file}" alt="${adv1.name}" loading="lazy" decoding="async">
           <span>
-            <span class="advisor__name">Hanan Alsharah</span>
-            <span class="advisor__role">Founder and CEO of Innotech</span>
+            <span class="advisor__name">${adv1.name}</span>
+            <span class="advisor__role">${adv1.role}</span>
           </span>
         </a>
       </div>
@@ -553,139 +553,108 @@ const aboutBody = `${hero({
   <section class="section section--alt">
     <div class="container split">
       <div class="reveal">
-        <p class="eyebrow">Partnerships</p>
-        <h2>Strategic Partnerships &amp; Investment Interest</h2>
-        <p>NEXGEN selectively engages with strategic partners, institutional investors, and family offices that share our vision for sustainable growth and high-impact innovation across renewable energy, digital transformation, and AI.</p>
-        <p>We do not pursue open fundraising or public investment offerings. All partnership and investment discussions are evaluated privately and aligned with NEXGEN’s strategic roadmap, governance standards, and long-term objectives.</p>
-        <p>Organizations interested in exploring strategic alignment with NEXGEN are invited to submit a confidential inquiry.</p>
-        <div class="btn-row mt-3"><a class="btn btn--primary" href="contact.html">Express Strategic Interest</a></div>
+        <p class="eyebrow">${p.partnershipsEyebrow}</p>
+        <h2>${p.partnershipsH2}</h2>
+        <p>${p.partnershipsP1}</p>
+        <p>${p.partnershipsP2}</p>
+        <p>${p.partnershipsP3}</p>
+        <div class="btn-row mt-3"><a class="btn btn--primary" href="contact.html">${p.partnershipsBtn}</a></div>
       </div>
       <div class="reveal" data-delay="1">
-        <h2>Looking Forward</h2>
-        <p>NEXGEN continues to expand its portfolio with future ventures aligned with renewable energy, digital transformation, and AI. Our platform is designed to evolve—welcoming new opportunities that strengthen the NEXGEN ecosystem while preserving focus, quality, and strategic intent.</p>
-        <h3 class="mt-4">Partner With NEXGEN</h3>
-        <p>Whether you represent a government entity, enterprise, financial institution, or strategic partner, NEXGEN welcomes conversations that shape the future of renewable energy, digital transformation, and AI.</p>
+        <h2>${p.forwardH2}</h2>
+        <p>${p.forwardP}</p>
+        <h3 class="mt-4">${p.partnerH3}</h3>
+        <p>${p.partnerP}</p>
       </div>
     </div>
   </section>`;
+}
 
-const companiesBody = `${hero({
-  image: 'hero-about.webp',
-  cls: ' hero--abstract',
-  title: 'Ventures &amp; Partnerships',
-  lead: 'NEXGEN’s ventures and partnerships, grouped by focus area: renewable &amp; clean energy, digital transformation, and artificial intelligence.',
-})}
+function companiesBody(T, ctx) {
+  const p = T.pages.companies;
+  return `${hero(T, ctx, {
+    image: 'hero-about.webp',
+    cls: ' hero--abstract',
+    title: p.heroTitle,
+    lead: p.heroLead,
+  })}
 
   <section class="section">
     <div class="container">
       <div class="pillars">
-${pillarSections(2, 3)}
+${pillarSections(T, ctx, 2, 3)}
       </div>
     </div>
   </section>`;
+}
 
-const inpipeBody = `${hero({
-  image: 'hero-inpipe.webp',
-  imageStacked: 'hero-inpipe-crop.webp',
-  eyebrow: 'Renewable &amp; Clean Energy',
-  title: 'Turning Water Pressure Into Clean, Reliable Power',
-  lead: 'NEXGEN is the exclusive regional partner bringing HydroXS® technology to the Gulf—enabling utilities, municipalities, and large facilities to recover energy, reduce emissions, and improve operational efficiency.',
-  actions: `<a class="btn btn--accent" href="contact.html">Contact Us</a>`,
-  cls: ' hero--bright hero--inpipe',
-})}
+function inpipeBody(T, ctx) {
+  const p = T.pages.inpipe;
+  const alts = T.imgAlts || {};
+  const sites = T.inpipeSites;
+  return `${hero(T, ctx, {
+    image: 'hero-inpipe.webp',
+    imageStacked: 'hero-inpipe-crop.webp',
+    eyebrow: p.heroEyebrow,
+    title: p.heroTitle,
+    lead: p.heroLead,
+    actions: `<a class="btn btn--accent" href="contact.html">${p.heroBtn}</a>`,
+    cls: ' hero--bright hero--inpipe',
+  })}
 
   <section class="section">
     <div class="container split">
       <div class="reveal">
-        <h2>The Challenge</h2>
-        <p>Water delivery across the GCC consumes massive electricity. At pressure-control points, this energy is traditionally wasted as heat, driving up operating costs and carbon emissions.</p>
-        <p>Utilities need solutions that:</p>
+        <h2>${p.challengeH}</h2>
+        <p>${p.challengeP1}</p>
+        <p>${p.challengeP2}</p>
         <ul class="checklist">
-          <li>Lower electricity consumption</li>
-          <li>Reduce CO₂ emissions</li>
-          <li>Improve pressure management</li>
-          <li>Extend pipeline lifespan</li>
-          <li>Require no operational disruption</li>
+${p.challengeList.map((x) => `          <li>${x}</li>`).join('\n')}
         </ul>
       </div>
-      ${splitImage('inpipe-visual.webp', 'Water infrastructure energy recovery')}
+      ${splitImage(ctx, 'inpipe-visual.webp', alts.inpipeVisual || 'Water infrastructure energy recovery')}
     </div>
   </section>
 
   <section class="section section--alt">
     <div class="container split split--reverse">
       <div class="reveal">
-        <h2>HydroXS Solution</h2>
-        <p><strong>HydroXS</strong> installs directly onto existing pipeline infrastructure and captures energy from excess pressure. As water flows through, the system safely reduces pressure while generating clean electricity.</p>
-        <h3 class="mt-4">Key Advantages</h3>
+        <h2>${p.solutionH}</h2>
+        <p>${p.solutionP}</p>
+        <h3 class="mt-4">${p.advH}</h3>
         <ul class="checklist">
-          <li>No change in water operations</li>
-          <li>Predictable renewable power (day &amp; night)</li>
-          <li>Works with gravity, pumping, regulator sites</li>
-          <li>Supports national sustainability and Net Zero targets</li>
+${p.advList.map((x) => `          <li>${x}</li>`).join('\n')}
         </ul>
-        <h3 class="mt-4">HydroXS Specifications</h3>
+        <h3 class="mt-4">${p.specH}</h3>
         <ul class="checklist">
-          <li>Scalable from 10 kW to 2 MW</li>
-          <li>Installs in pipe diameters of 4-110 inches <span class="nowrap">(5-280 cm)</span></li>
-          <li>Made in the USA</li>
-          <li>Patent issued, with additional patents pending</li>
+${p.specList.map((x) => `          <li>${x}</li>`).join('\n')}
         </ul>
       </div>
-      ${splitImage('inpipe-plant.webp', 'HydroXS installed on a water pipeline')}
+      ${splitImage(ctx, 'inpipe-plant.webp', alts.inpipePlant || 'HydroXS installed on a water pipeline')}
     </div>
   </section>
 
   <section class="section section--dark">
     <div class="container">
       <div class="center reveal intro">
-        <h2>Real Results</h2>
-        <p class="lead">Examples from existing deployments:</p>
+        <h2>${p.resultsH}</h2>
+        <p class="lead">${p.resultsLead}</p>
       </div>
       <div class="stats reveal mt-4">
-        <div class="stat">
-          <p class="stat__value">89,000<sup>+</sup></p>
-          <p class="stat__label">Hours of fleet runtime</p>
-        </div>
-        <div class="stat">
-          <p class="stat__value">99<sup>%</sup></p>
-          <p class="stat__label">Fleet availability</p>
-        </div>
-        <div class="stat">
-          <p class="stat__value">97.9<sup>%</sup></p>
-          <p class="stat__label">Lowest per-site availability</p>
-        </div>
-        <div class="stat">
-          <p class="stat__value">99.9<sup>%</sup></p>
-          <p class="stat__label">Highest per-site availability</p>
-        </div>
+${p.statsTop.map((s) => `        <div class="stat">
+          <p class="stat__value">${s.v}</p>
+          <p class="stat__label">${s.l}</p>
+        </div>`).join('\n')}
       </div>
       <div class="stats reveal mt-3">
-        <div class="stat">
-          <p class="stat__value">30 kW</p>
-          <p><strong>Hillsboro Water, Oregon</strong></p>
-          <p>About 200,000 kWh per year<br>1,400 tons CO₂ offset<br>Commissioned September 2020</p>
-          <p>Output net-metered, used for stadium lighting, EV charging and concessions.</p>
-        </div>
-        <div class="stat">
-          <p class="stat__value">22 kW</p>
-          <p><strong>Skagit PUD pumping facility</strong></p>
-          <p>About 104,000 kWh per year<br>728 tons CO₂ offset over its lifetime<br>Commissioned July 2021</p>
-        </div>
-        <div class="stat">
-          <p class="stat__value">30 kW</p>
-          <p><strong>EBMUD (East Bay Municipal Utility District) pump facility</strong></p>
-          <p>150,000 kWh per year<br>1,050 tons CO₂ offset<br>Commissioned September 2023</p>
-          <p>InPipe owns, operates and maintains the structure.</p>
-        </div>
-        <div class="stat">
-          <p class="stat__value">56 kW</p>
-          <p><strong>Aurora Water regulator replacement</strong></p>
-          <p>255,000 kWh per year<br>3,023 tons CO₂ offset<br>Commissioned October 2024</p>
-        </div>
+${sites.map((s) => `        <div class="stat">
+          <p class="stat__value">${s.v}</p>
+          <p><strong>${s.n}</strong></p>
+          <p>${s.d}</p>${s.extra ? `\n          <p>${s.extra}</p>` : ''}
+        </div>`).join('\n')}
       </div>
       <div class="center mt-3">
-        <p class="cred__note">Source: InPipe Energy company profile, 2025.</p>
+        <p class="cred__note">${p.cite}</p>
       </div>
     </div>
   </section>
@@ -693,26 +662,17 @@ const inpipeBody = `${hero({
   <section class="section">
     <div class="container split">
       <div class="reveal">
-        <h2>GCC Use Cases</h2>
-        <p>HydroXS is an ideal fit for:</p>
+        <h2>${p.useCasesH}</h2>
+        <p>${p.useCasesP}</p>
         <ul class="checklist">
-          <li>Water transmission &amp; distribution</li>
-          <li>District cooling lines</li>
-          <li>Treated wastewater lines</li>
-          <li>Firewater loops</li>
-          <li>RO desalination networks</li>
-          <li>High-pressure industrial water systems</li>
+${p.useCasesList.map((x) => `          <li>${x}</li>`).join('\n')}
         </ul>
       </div>
       <div class="reveal" data-delay="1">
-        <p class="eyebrow">Delivery process</p>
-        <h2>NEXGEN Manages The Full Journey</h2>
+        <p class="eyebrow">${p.processEyebrow}</p>
+        <h2>${p.processH}</h2>
         <ol class="steps mt-3">
-          <li class="step"><div><h3>Data Collection Support</h3></div></li>
-          <li class="step"><div><h3>Hydraulic &amp; Energy Analysis</h3></div></li>
-          <li class="step"><div><h3>Technical &amp; Financial Proposal</h3></div></li>
-          <li class="step"><div><h3>Procurement &amp; Installation</h3></div></li>
-          <li class="step"><div><h3>Commissioning &amp; Monitoring</h3></div></li>
+${p.steps.map((s) => `          <li class="step"><div><h3>${s}</h3></div></li>`).join('\n')}
         </ol>
       </div>
     </div>
@@ -721,53 +681,45 @@ const inpipeBody = `${hero({
   <section class="section">
     <div class="container">
       <div class="center reveal intro">
-        <p class="eyebrow">Our technology partner</p>
-        <h2>The InPipe Energy Team</h2>
-        <p class="lead">The people behind HydroXS®, built on decades in water and clean energy.</p>
+        <p class="eyebrow">${p.teamEyebrow}</p>
+        <h2>${p.teamH}</h2>
+        <p class="lead">${p.teamLead}</p>
       </div>
       <div class="team-grid mt-4">
-${teamCards(INPIPE_TEAM)}
+${teamCards(T, ctx, INPIPE_TEAM, T.inpipeTeamRoles)}
       </div>
     </div>
   </section>`;
+}
 
-const trustFlowBody = `${hero({
-  mark: 'venture-trust-flow.webp',
-  eyebrow: 'Artificial Intelligence',
-  title: 'Trust Flow',
-  lead: 'Intelligent onboarding for banks &amp; investment firms — a unified AI platform that accelerates onboarding, elevates compliance accuracy, and streamlines documentation for banks, corporate clients, investment firms, funds, and asset managers.',
-  actions: `<a class="btn btn--accent" href="contact.html">Contact Us</a>`,
-  ...ventureHeroOpts('trust-flow'),
-})}
+function trustFlowBody(T, ctx) {
+  const p = T.pages.trustFlow;
+  return `${hero(T, ctx, {
+    mark: 'venture-trust-flow.webp',
+    eyebrow: p.heroEyebrow,
+    title: p.heroTitle,
+    lead: p.heroLead,
+    actions: `<a class="btn btn--accent" href="contact.html">${p.heroBtn}</a>`,
+    ...ventureHeroOpts('trust-flow'),
+  })}
 
   <section class="section section--alt">
     <div class="container split">
       <div class="reveal">
-        <h2>The Challenge</h2>
-        <p>Financial institutions waste time and resources on:</p>
+        <h2>${p.challengeH}</h2>
+        <p>${p.challengeP}</p>
         <ul class="checklist">
-          <li>Manual document handling</li>
-          <li>Repeated follow-ups</li>
-          <li>Slow investor and corporate onboarding</li>
-          <li>Fragmented compliance workflows</li>
-          <li>High regulatory pressure</li>
-          <li>Long turnaround times</li>
+${p.challengeList.map((x) => `          <li>${x}</li>`).join('\n')}
         </ul>
-        <p class="mt-3">These bottlenecks delay revenue, frustrate clients, and increase operational costs.</p>
+        <p class="mt-3">${p.challengeP2}</p>
       </div>
       <div class="reveal" data-delay="1">
-        <h2>The Solution</h2>
-        <p><strong>Trust Flow</strong> is a NEXGEN venture that automates the entire onboarding process with AI, ensuring fast, accurate, and complete files.</p>
-        <p>Every file arrives complete, sourced, and audit-ready—without an analyst retyping a single document.</p>
-        <h3 class="mt-4">What It Includes</h3>
+        <h2>${p.solutionH}</h2>
+        <p>${p.solutionP}</p>
+        <p>${p.solutionP2}</p>
+        <h3 class="mt-4">${p.includesH}</h3>
         <ul class="checklist">
-          <li>AI document extraction</li>
-          <li>Automated KYC/KYB</li>
-          <li>Beneficial ownership mapping</li>
-          <li>AML &amp; sanctions screening</li>
-          <li>Risk scoring &amp; case summaries</li>
-          <li>Digital submission &amp; electronic signatures</li>
-          <li>Centralized analyst &amp; compliance workflows</li>
+${p.includesList.map((x) => `          <li>${x}</li>`).join('\n')}
         </ul>
       </div>
     </div>
@@ -776,45 +728,38 @@ const trustFlowBody = `${hero({
   <section class="section">
     <div class="container split">
       <div class="reveal">
-        <h2>Who It Serves</h2>
+        <h2>${p.servesH}</h2>
         <ul class="chips">
-          <li>Banks</li>
-          <li>Investment Firms &amp; Asset Managers</li>
-          <li>Private Equity &amp; Venture Capital Funds</li>
-          <li>Corporate Service Providers</li>
-          <li>Real Estate Funds</li>
-          <li>Family Offices</li>
+${p.servesList.map((x) => `          <li>${x}</li>`).join('\n')}
         </ul>
       </div>
       <div class="reveal" data-delay="1">
-        <h2>What Institutions Gain</h2>
+        <h2>${p.gainH}</h2>
         <ul class="checklist">
-          <li>Cost optimization</li>
-          <li>Faster onboarding</li>
-          <li>Higher compliance accuracy</li>
-          <li>Better investor experience</li>
-          <li>Standardized risk evaluation</li>
-          <li>Reduced operational workload</li>
+${p.gainList.map((x) => `          <li>${x}</li>`).join('\n')}
         </ul>
       </div>
     </div>
   </section>`;
+}
 
-const esaalBody = `${hero({
-  mark: 'venture-esaal.webp',
-  eyebrow: 'Digital Transformation',
-  title: 'Esaal',
-  lead: 'Digital receipts &amp; spending intelligence — in collaboration with Esaal, NEXGEN brings a Plug-n-Play digital receipt platform to the GCC, replacing paper receipts with real-time data.',
-  actions: `<a class="btn btn--accent" href="contact.html">Contact Us</a>
-        <a class="btn btn--onDark" href="https://www.esaal.co/" target="_blank" rel="noopener">Visit esaal.co</a>`,
-  ...ventureHeroOpts('esaal'),
-})}
+function esaalBody(T, ctx) {
+  const p = T.pages.esaal;
+  return `${hero(T, ctx, {
+    mark: 'venture-esaal.webp',
+    eyebrow: p.heroEyebrow,
+    title: p.heroTitle,
+    lead: p.heroLead,
+    actions: `<a class="btn btn--accent" href="contact.html">${p.heroBtn}</a>
+        <a class="btn btn--onDark" href="https://www.esaal.co/" target="_blank" rel="noopener">${p.heroBtn2}</a>`,
+    ...ventureHeroOpts('esaal'),
+  })}
 
   <section class="section">
     <div class="container">
       <div class="center reveal intro--wide">
-        <h2>Digital Receipts &amp; Spending Intelligence</h2>
-        <p class="lead">An AI engine that converts receipts into structured, searchable financial data—powering insights for individuals, businesses, and retailers. Esaal replaces the paper receipt with a smarter, digital one, and turns every transaction into a real-time customer signal.</p>
+        <h2>${p.introH}</h2>
+        <p class="lead">${p.introLead}</p>
       </div>
     </div>
   </section>
@@ -822,31 +767,23 @@ const esaalBody = `${hero({
   <section class="section section--alt">
     <div class="container split">
       <div class="reveal">
-        <h2>The Problem</h2>
-        <p>Businesses lose time and value to:</p>
+        <h2>${p.problemH}</h2>
+        <p>${p.problemP}</p>
         <ul class="checklist">
-          <li>Lack of digitisation in invoicing processes</li>
-          <li>Manual policy-compliance checks that consume staff time</li>
-          <li>Customer profiling through data enrichment is very difficult</li>
-          <li>Paper-receipt data that teams cannot put to use</li>
-          <li>Limited tools for tax compliance and transparency in the UAE</li>
+${p.problemList.map((x) => `          <li>${x}</li>`).join('\n')}
         </ul>
         <div class="panel reveal mt-4">
-          <p class="stat__value">25<sup>%</sup></p>
-          <p>Paper receipts leave 25% of businesses out of pocket by up to $10,000.</p>
-          <p class="cred__note">Source: Esaal company profile.</p>
+          <p class="stat__value">${p.problemStatV}</p>
+          <p>${p.problemStatP}</p>
+          <p class="cred__note">${p.problemCite}</p>
         </div>
       </div>
       <div class="reveal" data-delay="1">
-        <h2>The Solution</h2>
-        <p><strong>Esaal</strong> turns every receipt—paper, email, POS—into clean, structured financial data instantly.</p>
-        <h3 class="mt-4">Features</h3>
+        <h2>${p.solutionH}</h2>
+        <p>${p.solutionP}</p>
+        <h3 class="mt-4">${p.featuresH}</h3>
         <ul class="checklist">
-          <li>AI receipt scanning</li>
-          <li>Spending insights</li>
-          <li>Business expense reporting</li>
-          <li>Retail analytics</li>
-          <li>Integrations with POS and ERP</li>
+${p.featuresList.map((x) => `          <li>${x}</li>`).join('\n')}
         </ul>
       </div>
     </div>
@@ -855,34 +792,14 @@ const esaalBody = `${hero({
   <section class="section">
     <div class="container">
       <div class="center reveal intro--wide">
-        <p class="eyebrow">The platform</p>
-        <h2>Seamless Plug-n-Play With Your POS</h2>
+        <p class="eyebrow">${p.platformEyebrow}</p>
+        <h2>${p.platformH}</h2>
       </div>
       <div class="grid grid-3 mt-4">
-        <article class="card reveal">
-          <h3>Plug-n-Play Integration</h3>
-          <p>Smart receipts integrate directly with your POS and other tools. No additional apps or hardware required for you or your customers.</p>
-        </article>
-        <article class="card reveal" data-delay="1">
-          <h3>Real-Time Customer Profiling</h3>
-          <p>Pinpoint your customers and their buying habits with advanced digital receipts, enhancing customer profiling and behavioral insights.</p>
-        </article>
-        <article class="card reveal" data-delay="2">
-          <h3>Campaign Measurement</h3>
-          <p>Determine the effectiveness of your digital receipt campaigns through receipt-based measurement.</p>
-        </article>
-        <article class="card reveal">
-          <h3>Connect</h3>
-          <p>Link in-store transactions with a seamless plug-in, ensuring real-time data integration and accessibility.</p>
-        </article>
-        <article class="card reveal" data-delay="1">
-          <h3>Measure &amp; Optimise</h3>
-          <p>Unlock comprehensive insights into your most valuable customers with the merchant dashboard, enabling targeted optimisation strategies.</p>
-        </article>
-        <article class="card reveal" data-delay="2">
-          <h3>Privacy &amp; Compliance</h3>
-          <p>Customer data is handled with explicit opt-in at checkout, and the platform operates in line with applicable privacy and data-protection requirements.</p>
-        </article>
+${p.cards.map((c, i) => `        <article class="card reveal"${i % 3 ? ` data-delay="${i % 3}"` : ''}>
+          <h3>${c.h}</h3>
+          <p>${c.p}</p>
+        </article>`).join('\n')}
       </div>
     </div>
   </section>
@@ -890,26 +807,14 @@ const esaalBody = `${hero({
   <section class="section section--dark">
     <div class="container">
       <div class="center reveal intro">
-        <p class="eyebrow">By the numbers</p>
-        <h2>It works. We’ve got the receipts.</h2>
+        <p class="eyebrow">${p.numbersEyebrow}</p>
+        <h2>${p.numbersH}</h2>
       </div>
       <div class="stats reveal mt-4">
-        <div class="stat">
-          <p class="stat__value">More than 15,000</p>
-          <p class="stat__label">receipts</p>
-        </div>
-        <div class="stat">
-          <p class="stat__value">30<sup>%</sup></p>
-          <p class="stat__label">Opt-in rate for digital receipts at checkout</p>
-        </div>
-        <div class="stat">
-          <p class="stat__value">70<sup>%</sup></p>
-          <p class="stat__label">Open rates for our digital receipts</p>
-        </div>
-        <div class="stat">
-          <p class="stat__value">20<sup>%</sup></p>
-          <p class="stat__label">Click through rate on our digital receipts</p>
-        </div>
+${p.stats.map((s) => `        <div class="stat">
+          <p class="stat__value">${s.v}</p>
+          <p class="stat__label">${s.l}</p>
+        </div>`).join('\n')}
       </div>
     </div>
   </section>
@@ -917,19 +822,17 @@ const esaalBody = `${hero({
   <section class="section">
     <div class="container split">
       <div class="reveal">
-        <h2>Value</h2>
+        <h2>${p.valueH}</h2>
         <ul class="checklist">
-          <li>Clear spending for individuals</li>
-          <li>Accurate records for businesses</li>
-          <li>Deep insights for retailers</li>
+${p.valueList.map((x) => `          <li>${x}</li>`).join('\n')}
         </ul>
         <div class="btn-row mt-4">
-          <a class="btn btn--primary" href="https://apps.apple.com/ae/app/esaal/id6444912096" target="_blank" rel="noopener">Get the App</a>
+          <a class="btn btn--primary" href="https://apps.apple.com/ae/app/esaal/id6444912096" target="_blank" rel="noopener">${p.appBtn}</a>
         </div>
       </div>
       <figure class="figure figure--plate reveal" data-delay="1">
-        <img src="assets/img/venture-esaal.webp" alt="Esaal app icon" loading="lazy" decoding="async" class="figure__mark figure__mark--lg">
-        <figcaption>Esaal — the new, smarter way to E-receipt.</figcaption>
+        <img src="${ctx.A}img/venture-esaal.webp" alt="${(T.imgAlts || {}).esaalMark || 'Esaal app icon'}" loading="lazy" decoding="async" class="figure__mark figure__mark--lg">
+        <figcaption>${p.caption}</figcaption>
       </figure>
     </div>
   </section>
@@ -937,37 +840,40 @@ const esaalBody = `${hero({
   <section class="section">
     <div class="container">
       <div class="center reveal intro">
-        <p class="eyebrow">Our venture partner</p>
-        <h2>The Esaal Team</h2>
-        <p class="lead">Esaal builds and runs the receipts platform. NEXGEN brings it to the Gulf.</p>
+        <p class="eyebrow">${p.teamEyebrow}</p>
+        <h2>${p.teamH}</h2>
+        <p class="lead">${p.teamLead}</p>
       </div>
       <div class="team-grid team-grid--trio mt-4">
-${teamCards(ESAAL_TEAM)}
+${teamCards(T, ctx, ESAAL_TEAM, T.esaalTeamRoles)}
       </div>
       <div class="team-advisors reveal">
-        <h3 class="team-advisors__title">Advisors</h3>
+        <h3 class="team-advisors__title">${p.advisorsTitle}</h3>
         <ul class="team-advisors__list">
-${ESAAL_ADVISORS.map(([n, d]) => `          <li><strong>${n}</strong><span>${d}</span></li>`).join('\n')}
+${ESAAL_ADVISORS.map((n) => `          <li><strong>${nameFor(T, n)}</strong><span>${T.esaalAdvisorRoles[n] || ''}</span></li>`).join('\n')}
         </ul>
       </div>
     </div>
   </section>`;
+}
 
-const dariBody = `${hero({
-  mark: 'venture-dari.webp',
-  eyebrow: 'Artificial Intelligence',
-  title: 'Dari',
-  status: 'In development — coming soon',
-  lead: 'AI Smart Living — a home and building ecosystem that understands behavior, emotion, and lifestyle.',
-  actions: `<a class="btn btn--accent" href="contact.html">Contact Us</a>`,
-  ...ventureHeroOpts('dari'),
-})}
+function dariBody(T, ctx) {
+  const p = T.pages.dari;
+  return `${hero(T, ctx, {
+    mark: 'venture-dari.webp',
+    eyebrow: p.heroEyebrow,
+    title: p.heroTitle,
+    status: p.heroStatus,
+    lead: p.heroLead,
+    actions: `<a class="btn btn--accent" href="contact.html">${p.heroBtn}</a>`,
+    ...ventureHeroOpts('dari'),
+  })}
 
   <section class="section">
     <div class="container">
       <div class="center reveal intro--wide">
-        <h2>AI-Powered Smart Living System</h2>
-        <p class="lead">Automation that anticipates the people in a building instead of reacting to the devices in it.</p>
+        <h2>${p.introH}</h2>
+        <p class="lead">${p.introLead}</p>
       </div>
     </div>
   </section>
@@ -975,19 +881,15 @@ const dariBody = `${hero({
   <section class="section section--alt">
     <div class="container split">
       <div class="reveal">
-        <h2>The Problem</h2>
-        <p>Traditional smart home systems are device-based and reactive. They don’t understand people.</p>
+        <h2>${p.problemH}</h2>
+        <p>${p.problemP}</p>
       </div>
       <div class="reveal" data-delay="1">
-        <h2>The Solution</h2>
-        <p><strong>Dari</strong> creates human-centric automation using behavioral and emotional AI.</p>
-        <h3 class="mt-4">Features</h3>
+        <h2>${p.solutionH}</h2>
+        <p>${p.solutionP}</p>
+        <h3 class="mt-4">${p.featuresH}</h3>
         <ul class="checklist">
-          <li>Behavioral learning</li>
-          <li>Emotion-aware automation</li>
-          <li>Unified IoT control</li>
-          <li>Smart building mode</li>
-          <li>Energy optimization</li>
+${p.featuresList.map((x) => `          <li>${x}</li>`).join('\n')}
         </ul>
       </div>
     </div>
@@ -996,41 +898,36 @@ const dariBody = `${hero({
   <section class="section">
     <div class="container">
       <div class="center reveal intro">
-        <h2>Value</h2>
+        <h2>${p.valueH}</h2>
       </div>
       <div class="grid grid-4 mt-4">
-        <div class="value reveal"><h3>Energy efficiency</h3></div>
-        <div class="value reveal" data-delay="1"><h3>Comfort</h3></div>
-        <div class="value reveal" data-delay="2"><h3>Safety</h3></div>
-        <div class="value reveal" data-delay="3"><h3>Premium living experience</h3></div>
+${p.values.map((v, i) => `        <div class="value reveal"${i ? ` data-delay="${i}"` : ''}><h3>${v}</h3></div>`).join('\n')}
       </div>
     </div>
   </section>`;
+}
 
-const sabyBody = `${hero({
-  mark: 'venture-saby.webp',
-  eyebrow: 'Digital Transformation',
-  title: 'SABY',
-  lead: 'Modern technology studio — software engineering, AI development, digital transformation, and enterprise platforms.',
-  actions: `<a class="btn btn--accent" href="contact.html">Contact Us</a>`,
-  ...ventureHeroOpts('saby'),
-})}
+function sabyBody(T, ctx) {
+  const p = T.pages.saby;
+  return `${hero(T, ctx, {
+    mark: 'venture-saby.webp',
+    eyebrow: p.heroEyebrow,
+    title: p.heroTitle,
+    lead: p.heroLead,
+    actions: `<a class="btn btn--accent" href="contact.html">${p.heroBtn}</a>`,
+    ...ventureHeroOpts('saby'),
+  })}
 
   <section class="section">
     <div class="container split">
       <div class="reveal">
-        <h2>Who We Are</h2>
-        <p>SABY is NEXGEN’s technology subsidiary, delivering modern, scalable digital solutions for the region.</p>
+        <h2>${p.whoH}</h2>
+        <p>${p.whoP}</p>
       </div>
       <div class="reveal" data-delay="1">
-        <h2>Expertise</h2>
+        <h2>${p.expertiseH}</h2>
         <ul class="checklist">
-          <li>AI &amp; automation</li>
-          <li>Web &amp; mobile apps</li>
-          <li>SaaS engineering</li>
-          <li>Cloud &amp; cybersecurity</li>
-          <li>UX/UI</li>
-          <li>Enterprise integrations</li>
+${p.expertiseList.map((x) => `          <li>${x}</li>`).join('\n')}
         </ul>
       </div>
     </div>
@@ -1039,47 +936,48 @@ const sabyBody = `${hero({
   <section class="section section--alt">
     <div class="container">
       <div class="center reveal intro">
-        <h2>Why SABY?</h2>
+        <h2>${p.whyH}</h2>
       </div>
       <div class="grid grid-3 mt-4">
-        <article class="card reveal"><h3>Modern engineering practices</h3></article>
-        <article class="card reveal" data-delay="1"><h3>Fast delivery cycles</h3></article>
-        <article class="card reveal" data-delay="2"><h3>Enterprise-grade execution</h3></article>
+${p.whyCards.map((c, i) => `        <article class="card reveal"${i ? ` data-delay="${i}"` : ''}><h3>${c}</h3></article>`).join('\n')}
       </div>
     </div>
   </section>`;
+}
 
-const contactBody = `${hero({
-  title: 'Contact Us',
-  lead: 'Whether you represent a government entity, enterprise, financial institution, or strategic partner, NEXGEN welcomes conversations that shape the future of renewable energy, digital transformation, and AI.',
-  cls: ' hero--plate',
-})}
+function contactBody(T, ctx) {
+  const p = T.pages.contact;
+  return `${hero(T, ctx, {
+    title: p.heroTitle,
+    lead: p.heroLead,
+    cls: ' hero--plate',
+  })}
 
   <section class="section">
     <div class="container split">
       <div class="reveal">
-        <p class="eyebrow">Direct lines</p>
-        <h2>Talk to NEXGEN</h2>
+        <p class="eyebrow">${p.eyebrow}</p>
+        <h2>${p.h2}</h2>
         <div class="contact-card mt-3">
           <a class="contact-row" href="${PHONE_HREF}">
-            <span class="contact-row__label">Phone</span>
+            <span class="contact-row__label">${p.phoneLabel}</span>
             <span class="contact-row__value">${PHONE}</span>
-            <span class="contact-row__note">Call us for partnerships, ventures, and general inquiries.</span>
+            <span class="contact-row__note">${p.phoneNote}</span>
           </a>
           <a class="contact-row" href="mailto:${EMAIL}">
-            <span class="contact-row__label">Email</span>
+            <span class="contact-row__label">${p.emailLabel}</span>
             <span class="contact-row__value">${EMAIL}</span>
-            <span class="contact-row__note">Organizations interested in exploring strategic alignment with NEXGEN are invited to submit a confidential inquiry.</span>
+            <span class="contact-row__note">${p.emailNote}</span>
           </a>
           <a class="contact-row" href="${LINKEDIN}" target="_blank" rel="noopener">
-            <span class="contact-row__label">LinkedIn</span>
+            <span class="contact-row__label">${p.linkedinLabel}</span>
             <span class="contact-row__value">nexgen-holdings</span>
-            <span class="contact-row__note">Follow NEXGEN Holdings for venture and partnership updates.</span>
+            <span class="contact-row__note">${p.linkedinNote}</span>
           </a>
         </div>
       </div>
       <figure class="figure reveal" data-delay="1">
-        <img src="assets/img/contact-visual.webp" alt="NEXGEN Holdings corporate visual" loading="lazy" decoding="async">
+        <img src="${ctx.A}img/contact-visual.webp" alt="${(T.imgAlts || {}).corporateVisual || 'NEXGEN Holdings corporate visual'}" loading="lazy" decoding="async">
       </figure>
     </div>
   </section>
@@ -1087,55 +985,68 @@ const contactBody = `${hero({
   <section class="section section--alt">
     <div class="container">
       <div class="center reveal intro--wide">
-        <p class="eyebrow">Our focus</p>
-        <h2>Where We Work</h2>
-        <p class="lead">Talk to us about any of NEXGEN’s three focus areas.</p>
+        <p class="eyebrow">${p.focusEyebrow}</p>
+        <h2>${p.focusH}</h2>
+        <p class="lead">${p.focusLead}</p>
       </div>
       <div class="grid grid-3 mt-4">
         <article class="card reveal">
-          <h3>Renewable &amp; Clean Energy</h3>
-          <p>HydroXS in-pipe hydropower with InPipe Energy (USA) for utilities, municipalities, and large facilities.</p>
+          <h3>${p.cardEnergyH}</h3>
+          <p>${p.cardEnergyP}</p>
           <div class="card__foot card__foot--links"><a class="link-arrow" href="inpipe-energy.html">InPipe Energy</a></div>
         </article>
         <article class="card reveal" data-delay="1">
-          <h3>Digital Transformation</h3>
-          <p>Digital receipts and connected platforms, and an engineering studio to build them.</p>
+          <h3>${p.cardDigitalH}</h3>
+          <p>${p.cardDigitalP}</p>
           <div class="card__foot card__foot--links"><a class="link-arrow" href="esaal.html">Esaal</a><a class="link-arrow" href="saby.html">SABY</a></div>
         </article>
         <article class="card reveal" data-delay="2">
-          <h3>Artificial Intelligence</h3>
-          <p>AI for institutional onboarding and compliance, and for homes that understand their people.</p>
+          <h3>${p.cardAiH}</h3>
+          <p>${p.cardAiP}</p>
           <div class="card__foot card__foot--links"><a class="link-arrow" href="trust-flow.html">Trust Flow</a><a class="link-arrow" href="dari.html">Dari</a></div>
         </article>
       </div>
     </div>
   </section>`;
+}
 
-/* --------------------------------------------------------------- write out */
+/* --------------------------------------------------------------- page table */
 
-const PAGES = [
-  { slug: 'index.html', active: 'index.html', title: 'NEXGEN Holdings — Renewable Energy, Digital Transformation & AI in the GCC', desc: 'NEXGEN Holdings is a Gulf-based holding company building high-impact ventures in renewable & clean energy, digital transformation, and artificial intelligence across the GCC.', body: homeBody, ogImage: 'hero-home.webp', home: true , cta: { title: 'Let’s build the future together.', text: 'Ready to explore partnership opportunities in renewable energy, digital transformation, or AI?', label: 'Contact Us' } },
-  { slug: 'about.html', active: 'about.html', title: 'About Us — NEXGEN Holdings', desc: 'NEXGEN Holdings builds and scales ventures across renewable & clean energy, digital transformation, and artificial intelligence — our vision, mission, values, and leadership.', body: aboutBody, ogImage: 'hero-about.webp' , cta: { label: 'Express Strategic Interest', band: false } },
-  { slug: 'companies.html', active: 'companies.html', title: 'Ventures & Partnerships — NEXGEN Holdings', desc: 'NEXGEN Holdings’ ventures and partnerships across renewable & clean energy, digital transformation, and artificial intelligence: InPipe Energy, Esaal, SABY, Trust Flow, and Dari.', body: companiesBody, ogImage: 'hero-about.webp' , cta: { title: 'Not sure which venture fits?', text: 'Tell us what you are working on and we will point you to the right team.', label: 'Contact Us' } },
-  { slug: 'inpipe-energy.html', active: 'inpipe-energy.html', title: 'InPipe Energy — HydroXS In-Pipe Hydropower | NEXGEN Holdings', desc: 'NEXGEN is the exclusive regional partner of InPipe Energy (USA), bringing HydroXS technology to the Gulf to turn excess water pressure into clean, reliable power.', body: inpipeBody, ogImage: 'hero-inpipe.webp' , cta: { title: 'Bring HydroXS to your network.', text: 'Get in touch to discuss whether HydroXS fits your site.', label: 'Contact Us' } },
-  { slug: 'trust-flow.html', active: 'trust-flow.html', title: 'Trust Flow — Corporate & Investor Onboarding AI | NEXGEN Holdings', desc: 'Trust Flow automates onboarding for banks, investment firms, funds, and asset managers with AI document extraction, automated KYC/KYB, and compliance workflows.', body: trustFlowBody, ogImage: 'venture-trust-flow.webp' , cta: { title: 'Learn More About Trust Flow', text: 'Get in touch to learn more about Trust Flow for your bank, fund, or investment firm.', label: 'Contact Us' } , theme: 'trust-flow' },
-  { slug: 'esaal.html', active: 'esaal.html', title: 'Esaal — Digital Receipts & Spending Intelligence | NEXGEN Holdings', desc: 'In collaboration with Esaal, NEXGEN brings Plug-n-Play digital receipts to the GCC — real-time customer profiling, campaign measurement, and no extra hardware.', body: esaalBody, ogImage: 'venture-esaal.webp' , cta: { title: 'Bring digital receipts to your customers.', text: 'Talk to us about a Plug-n-Play rollout across your stores.', label: 'Contact Us' } , theme: 'esaal' },
-  { slug: 'dari.html', active: 'dari.html', title: 'Dari — AI-Powered Smart Living System (In Development) | NEXGEN Holdings', desc: 'Dari is an in-development smart home and building platform that adapts to behavior, emotion, and daily routines using behavioral and emotional AI. Coming soon.', body: dariBody, ogImage: 'venture-dari.webp' , cta: { title: 'Shape the next generation of smart living.', text: 'Explore a partnership around Dari.', label: 'Contact Us' } , theme: 'dari' },
-  { slug: 'saby.html', active: 'saby.html', title: 'SABY — Modern Technology Studio | NEXGEN Holdings', desc: 'SABY is NEXGEN’s dedicated software engineering studio delivering AI development, digital transformation, and enterprise-grade platforms for the region.', body: sabyBody, ogImage: 'venture-saby.webp' , cta: { title: 'Have something to build?', text: 'Talk to our engineering studio about AI and digital transformation.', label: 'Contact Us' } , theme: 'saby' },
-  { slug: 'contact.html', active: 'contact.html', title: 'Contact Us — NEXGEN Holdings', desc: 'Contact NEXGEN Holdings for partnerships, ventures, and site assessments. Phone +973 3660 0911, email info@nexgen.bh.', body: contactBody, ogImage: 'contact-visual.webp', noCta: true },
-];
+function pageList(T, ctx) {
+  return [
+    { slug: 'index.html', active: 'index.html', title: T.pages.index.title, desc: T.pages.index.desc, body: homeBody(T, ctx), ogImage: 'hero-home.webp', home: true },
+    { slug: 'about.html', active: 'about.html', title: T.pages.about.title, desc: T.pages.about.desc, body: aboutBody(T, ctx), ogImage: 'hero-about.webp' },
+    { slug: 'companies.html', active: 'companies.html', title: T.pages.companies.title, desc: T.pages.companies.desc, body: companiesBody(T, ctx), ogImage: 'hero-about.webp' },
+    { slug: 'inpipe-energy.html', active: 'inpipe-energy.html', title: T.pages.inpipe.title, desc: T.pages.inpipe.desc, body: inpipeBody(T, ctx), ogImage: 'hero-inpipe.webp' },
+    { slug: 'trust-flow.html', active: 'trust-flow.html', title: T.pages.trustFlow.title, desc: T.pages.trustFlow.desc, body: trustFlowBody(T, ctx), ogImage: 'venture-trust-flow.webp', theme: 'trust-flow' },
+    { slug: 'esaal.html', active: 'esaal.html', title: T.pages.esaal.title, desc: T.pages.esaal.desc, body: esaalBody(T, ctx), ogImage: 'venture-esaal.webp', theme: 'esaal' },
+    { slug: 'dari.html', active: 'dari.html', title: T.pages.dari.title, desc: T.pages.dari.desc, body: dariBody(T, ctx), ogImage: 'venture-dari.webp', theme: 'dari' },
+    { slug: 'saby.html', active: 'saby.html', title: T.pages.saby.title, desc: T.pages.saby.desc, body: sabyBody(T, ctx), ogImage: 'venture-saby.webp', theme: 'saby' },
+    { slug: 'contact.html', active: 'contact.html', title: T.pages.contact.title, desc: T.pages.contact.desc, body: contactBody(T, ctx), ogImage: 'contact-visual.webp', noCta: true },
+  ];
+}
 
-const JSONLD = `  <script type="application/ld+json">
+/* A page's closing band, taken from its own locale content. A page without a
+   ctaTitle gets no band. */
+function ctaFor(T, key) {
+  const p = T.pages[key];
+  if (!p || !p.ctaTitle || p.ctaBand === false) return null;
+  return { title: p.ctaTitle, text: p.ctaText, label: p.ctaLabel };
+}
+
+function jsonld(T, ctx) {
+  const home = ctx.code === 'en' ? `${SITE}/` : `${SITE}/ar/`;
+  return `  <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "NEXGEN Holdings",
-  "url": "https://nexgen.bh",
+  "name": "${T.jsonld.name}",
+  "url": "${home}",
   "email": "${EMAIL}",
   "telephone": "+97336600911",
   "logo": "${SITE}/assets/img/logo.webp",
   "image": "${SITE}/assets/img/hero-home.webp",
-  "description": "NEXGEN Holdings is a Gulf-based holding company building high-impact ventures in renewable and clean energy, digital transformation, and artificial intelligence.",
+  "description": "${T.jsonld.description}",
   "sameAs": [
     "${LINKEDIN}"
   ],
@@ -1153,6 +1064,7 @@ const JSONLD = `  <script type="application/ld+json">
 }
   </script>
 `;
+}
 
 /* --- Intrinsic image sizes -------------------------------------------------
    Every <img> gets width/height so a lazy-loaded image reserves its box and the
@@ -1177,18 +1089,21 @@ function webpSize(file) {
 
 const sizeCache = new Map();
 function intrinsic(src) {
-  if (sizeCache.has(src)) return sizeCache.get(src);
-  const file = path.join(OUT, src);
+  /* Arabic pages carry an "../assets/…" prefix; the file lives at the same
+     place either way. */
+  const rel = src.replace(/^(\.\.\/)+/, '');
+  if (sizeCache.has(rel)) return sizeCache.get(rel);
+  const file = path.join(OUT, rel);
   let dim = null;
   if (fs.existsSync(file)) { try { dim = webpSize(file); } catch (e) { dim = null; } }
-  sizeCache.set(src, dim);
+  sizeCache.set(rel, dim);
   return dim;
 }
 
 function withIntrinsicSizes(html) {
   return html.replace(/<img\b[^>]*>/g, (tag) => {
     if (/\swidth=/.test(tag) && /\sheight=/.test(tag)) return tag;
-    const m = tag.match(/\ssrc="(assets\/img\/[^"]+)"/);
+    const m = tag.match(/\ssrc="((?:\.\.\/)*assets\/img\/[^"]+)"/);
     if (!m) return tag;
     const dim = intrinsic(m[1]);
     if (!dim) return tag;
@@ -1196,25 +1111,72 @@ function withIntrinsicSizes(html) {
   });
 }
 
-for (const p of PAGES) {
-  const html = page({
-    slug: p.slug,
-    title: p.title,
-    desc: p.desc,
-    active: p.active,
-    body: p.body,
-    ogImage: p.ogImage,
-    noCta: !!p.noCta,
-    cta: p.cta || null,
-    theme: p.theme || '',
-    head: p.home ? JSONLD : '',
-  });
-  const out = withIntrinsicSizes(html);
-  fs.writeFileSync(path.join(OUT, p.slug), out);
-  console.log('wrote', p.slug, (out.length / 1024).toFixed(1) + 'KB');
+/* ------------------------------------------------------------------- render */
+
+const LOCALES = [
+  {
+    code: 'en', dir: 'ltr', T: enContent, out: OUT, A: 'assets/', R: '',
+    urlBase: SITE, ogLocale: 'en_US', ogAlt: 'ar_BH',
+  },
+  {
+    code: 'ar', dir: 'rtl', T: arContent, out: path.join(OUT, 'ar'), A: '../assets/', R: '../',
+    urlBase: `${SITE}/ar`, ogLocale: 'ar_BH', ogAlt: 'en_US',
+  },
+];
+
+/* Structural nav for a locale: labels translate, hrefs and ids do not. */
+function navFor(T) {
+  return [
+    { label: T.nav.home, href: 'index.html' },
+    { label: T.nav.about, href: 'about.html' },
+    /* Every company sits behind one group, so the bar stays short instead of
+       naming each one. The label is a real link to the overview page and a
+       separate caret button owns the disclosure. Contact is not a nav item:
+       the accent button at the end of the bar is the single way in. */
+    {
+      label: T.nav.ventures,
+      href: 'companies.html',
+      id: 'companies-menu',
+      children: [INPIPE_META, ...VENTURE_META].map((v) => ({ label: v.name, href: v.file })),
+    },
+  ];
 }
 
-/* robots.txt + sitemap.xml */
+const written = [];
+
+for (const loc of LOCALES) {
+  const T = loc.T;
+  if (!fs.existsSync(loc.out)) fs.mkdirSync(loc.out, { recursive: true });
+  const pages = pageList(T, { ...loc, NAV: navFor(T), active: '' });
+  for (const p of pages) {
+    const home = p.slug === 'index.html';
+    /* The switcher points at this same page in the other locale. */
+    const switchHref = loc.code === 'en'
+      ? (home ? 'ar/' : `ar/${p.slug}`)
+      : (home ? '../' : `../${p.slug}`);
+    const ctx = {
+      ...loc, NAV: navFor(T), active: p.active,
+      switchHref, switchLang: loc.code === 'en' ? 'ar' : 'en',
+    };
+    const key = { 'index.html': 'index', 'about.html': 'about', 'companies.html': 'companies',
+      'inpipe-energy.html': 'inpipe', 'trust-flow.html': 'trustFlow', 'esaal.html': 'esaal',
+      'dari.html': 'dari', 'saby.html': 'saby', 'contact.html': 'contact' }[p.slug];
+    const html = page(T, ctx, {
+      slug: p.slug, title: p.title, desc: p.desc, active: p.active,
+      body: p.body, ogImage: p.ogImage,
+      noCta: !!p.noCta, cta: ctaFor(T, key), theme: p.theme || '',
+      head: p.home ? jsonld(T, ctx) : '',
+    });
+    const out = withIntrinsicSizes(html);
+    fs.writeFileSync(path.join(loc.out, p.slug), out);
+    written.push({ loc: loc.code, slug: p.slug, kb: (out.length / 1024).toFixed(1) });
+    console.log(`wrote ${loc.code}/${p.slug}`, (out.length / 1024).toFixed(1) + 'KB');
+  }
+}
+
+/* robots.txt + sitemap.xml. The sitemap lists both locales and states the
+   alternates, so search engines pair the two versions instead of treating the
+   Arabic pages as duplicates. */
 fs.writeFileSync(path.join(OUT, 'robots.txt'), `User-agent: *
 Allow: /
 
@@ -1222,19 +1184,27 @@ Sitemap: ${SITE}/sitemap.xml
 `);
 
 const today = new Date().toISOString().slice(0, 10);
-const urls = PAGES.map((p, i) => {
-  const loc = p.slug === 'index.html' ? `${SITE}/` : `${SITE}/${p.slug}`;
-  const priority = p.slug === 'index.html' ? '1.0' : (i <= 3 ? '0.8' : '0.7');
-  return `  <url>
+const enPages = pageList(enContent, { code: 'en' });
+const urls = enPages.map((p, i) => {
+  const home = p.slug === 'index.html';
+  const enLoc = home ? `${SITE}/` : `${SITE}/${p.slug}`;
+  const arLoc = home ? `${SITE}/ar/` : `${SITE}/ar/${p.slug}`;
+  const priority = home ? '1.0' : (i <= 3 ? '0.8' : '0.7');
+  const entry = (loc) => `  <url>
     <loc>${loc}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>${priority}</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="${enLoc}"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="${arLoc}"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="${enLoc}"/>
   </url>`;
+  return entry(enLoc) + '\n' + entry(arLoc);
 }).join('\n');
 
 fs.writeFileSync(path.join(OUT, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${urls}
 </urlset>
 `);
@@ -1254,3 +1224,5 @@ if (CUSTOM_DOMAIN) {
   try { fs.unlinkSync(path.join(OUT, 'CNAME')); } catch {}
   console.log('wrote robots.txt, sitemap.xml (no CNAME -> github.io preview)');
 }
+
+console.log(`\n${written.length} pages: ${written.filter((w) => w.loc === 'en').length} en + ${written.filter((w) => w.loc === 'ar').length} ar`);
