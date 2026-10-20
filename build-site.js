@@ -243,7 +243,7 @@ function page(T, ctx, { slug, title, desc, active, head = '', body, ogImage = 'h
 <link rel="alternate" hreflang="en" href="${altEn}">
 <link rel="alternate" hreflang="ar" href="${altAr}">
 <link rel="alternate" hreflang="x-default" href="${altEn}">
-<meta name="theme-color" content="#0a1216">
+<meta name="theme-color" content="#363634">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="NEXGEN Holdings">
 <meta property="og:title" content="${title}">
@@ -260,9 +260,6 @@ ${ctx.ogAlt ? `<meta property="og:locale:alternate" content="${ctx.ogAlt}">
 <link rel="apple-touch-icon" href="${ctx.R}favicon.png">
 ${preload}
 <link rel="stylesheet" href="${ctx.A}css/site.css">
-<script>/* Honour ?lang=ar / ?lang=en as aliases of the /ar/ locale switch. Runs before
-   first paint so a query-param visitor is redirected with no English flash. */
-(function(){var m=/(?:^|[?&])lang=(ar|en)(?:&|$)/.exec(location.search);if(!m)return;if(m[1]!==${JSON.stringify(ctx.code)})location.replace(${JSON.stringify(ctx.switchHref)});})();</script>
 ${head}</head>
 <body>
 ${topbar(T, ctx)}
@@ -413,54 +410,6 @@ function splitImage(ctx, src, alt, opts = {}) {
 
 /* ------------------------------------------------------------------- pages */
 
-/* The home-page constellation: an abstract hub-and-ring node graph that draws
-   in with scroll progress. Every line carries pathLength="1" so a single
-   --prog custom property drives the whole assembly; each node carries a --t
-   threshold so it lights up in sequence. It is decorative (aria-hidden) and
-   defaults to its COMPLETE state in the markup, so reduced-motion and no-JS
-   visitors see the finished figure, not a half-drawn one. */
-function constellation() {
-  const spokes = [
-    [200, 200, 200, 74],
-    [200, 200, 312, 124],
-    [200, 200, 312, 276],
-    [200, 200, 200, 326],
-    [200, 200, 88, 276],
-    [200, 200, 88, 124],
-  ];
-  const ring = [
-    [200, 74, 312, 124],
-    [312, 124, 312, 276],
-    [312, 276, 200, 326],
-    [200, 326, 88, 276],
-    [88, 276, 88, 124],
-    [88, 124, 200, 74],
-  ];
-  const nodes = [
-    { x: 200, y: 200, r: 12, core: true, t: 0.05 },
-    { x: 200, y: 74, r: 7, t: 0.32 },
-    { x: 312, y: 124, r: 7, t: 0.42 },
-    { x: 312, y: 276, r: 7, t: 0.52 },
-    { x: 200, y: 326, r: 7, t: 0.62 },
-    { x: 88, y: 276, r: 7, t: 0.72 },
-    { x: 88, y: 124, r: 7, t: 0.82 },
-  ];
-  const line = (a, b, c, d, cls) =>
-    `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" pathLength="1" class="${cls}"></line>`;
-  const spokesHtml = spokes.map((s) => line(s[0], s[1], s[2], s[3], 'const-line')).join('\n        ');
-  const ringHtml = ring.map((s) => line(s[0], s[1], s[2], s[3], 'const-line const-line--ring')).join('\n        ');
-  const nodesHtml = nodes.map((n) =>
-    `<circle cx="${n.x}" cy="${n.y}" r="${n.r}" style="--t:${n.t}" class="${n.core ? 'const-node const-core' : 'const-node'}"></circle>`
-  ).join('\n        ');
-  return `      <figure class="assembly__figure" aria-hidden="true">
-        <svg class="constellation" viewBox="0 0 400 400" role="presentation" focusable="false">
-        ${spokesHtml}
-        ${ringHtml}
-        ${nodesHtml}
-        </svg>
-      </figure>`;
-}
-
 function homeBody(T, ctx) {
   const p = T.pages.index;
   return `${hero(T, ctx, {
@@ -472,19 +421,16 @@ function homeBody(T, ctx) {
     cls: ' hero--home hero--split',
   })}
 
-  <section class="section assembly" data-assembly>
-    <div class="container assembly__inner">
-${constellation()}
-      <div class="assembly__copy">
-        <div class="reveal">
-          <h2>${p.h2}</h2>
-          <p class="lead">${p.lead}</p>
-        </div>
-        <div class="reveal" data-delay="1">
-          <p>${p.p1}</p>
-          <p>${p.p2}</p>
-          <div class="btn-row mt-3"><a class="btn btn--outline" href="about.html">${p.btn}</a></div>
-        </div>
+  <section class="section">
+    <div class="container split split--editorial">
+      <div class="reveal">
+        <h2>${p.h2}</h2>
+        <p class="lead">${p.lead}</p>
+      </div>
+      <div class="reveal" data-delay="1">
+        <p>${p.p1}</p>
+        <p>${p.p2}</p>
+        <div class="btn-row mt-3"><a class="btn btn--outline" href="about.html">${p.btn}</a></div>
       </div>
     </div>
   </section>
@@ -496,7 +442,7 @@ ${constellation()}
         <h2>${p.focusH2}</h2>
         <p class="lead">${p.focusLead}</p>
       </div>
-      <div class="pillars pillars--chapters zoom-in mt-4">
+      <div class="pillars mt-4">
 ${pillarSections(T, ctx, 3, 4)}
       </div>
     </div>

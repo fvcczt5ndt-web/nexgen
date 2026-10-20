@@ -2,26 +2,29 @@
    NEXGEN Holdings — site.css
    Plain CSS, no build step, no frameworks.
 
-   Design direction (DESIGN-PLAN.md)
-   --------------------------------
-   "We build the future" — so the page is a dark cinematic ground you look
-   INTO, with the venture marks and the teal accent as the lit objects. Dark
-   petrol is the primary canvas; depth comes from lighter surfaces, not
-   shadows; the display serif states and a wide-tracked uppercase label system
-   structures. Motion is quiet-fast and scroll-driven, always ending in a
-   complete state.
+   Design direction
+   ----------------
+   A Gulf holding company reads as a portfolio, so the page is built like a
+   set of ledgers: one continuous paper ground, hairline rules that mark where
+   one entry ends and the next begins, and a petrol/teal palette lifted from
+   the company's own mark. Restraint everywhere; the only loud elements are
+   the display serif and the two dark statement bands.
 
    Architecture
    ------------
-   1.  ONE dark ground (--ground) for the whole document. Sections are
-       separated by surface lightness, not by flipping to paper.
-   2.  The petrol/teal accent (--teal / --teal-bright) is reserved — it is the
-       "lit" moment, never a wash.
+   1.  ONE paper ground for the whole document (--paper). Sections are
+       separated by whitespace + a hairline, not by flipping backgrounds.
+   2.  Petrol (--dark) is reserved for statement bands, the CTA band, the
+       footer, and the hero image scrim.
    3.  Mobile-first: base rules target 360-390px, scaling at 640 / 768 /
-       1024 / 1100 / 1240.
+       1024 / 1240.
    ========================================================================== */
 
 /* --- 0. Fonts (self-hosted) ---------------------------------------------- */
+/* Served from this origin rather than fonts.googleapis.com: no third-party
+   round trip, no per-visitor request to Google, and — the reason this changed
+   — no font swap reflowing the hero once it arrives. Both faces are variable,
+   so one file covers 400-600. */
 @font-face {
   font-family: "Newsreader";
   font-style: normal;
@@ -40,8 +43,15 @@
   src: url("../fonts/instrument-sans-latin.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
     U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
-    U+2212, U+2215, U+00FF, U+FEFF, U+FFFD;
+    U+2212, U+2215, U+FEFF, U+FFFD;
 }
+
+/* Arabic. Amiri (Naskh serif) carries the display levels and IBM Plex Sans
+   Arabic the body, mirroring the Latin two-role system: a serif that states and
+   a geometric sans that structures. Both files carry the full Latin set, so
+   brand names inside Arabic sentences set from the Arabic face rather than
+   falling back. Neither has letter-spacing applied anywhere — tracking severs
+   the joins between Arabic letters (see section 22). */
 @font-face {
   font-family: "Amiri";
   font-style: normal;
@@ -66,7 +76,7 @@
   font-weight: 400 500;
   font-display: swap;
   src: url("../fonts/plex-arabic-regular.woff2") format("woff2");
-  unicode-range: U+0600-06FF, U+0750-077F, U+0900-097F, U+FB50-FDFF, U+FE70-FEFF,
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF,
     U+0000-00FF, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212;
 }
 @font-face {
@@ -75,103 +85,88 @@
   font-weight: 600 700;
   font-display: swap;
   src: url("../fonts/plex-arabic-semibold.woff2") format("woff2");
-  unicode-range: U+0600-06FF, U+0750-077F, U+0900-097F, U+FB50-FDFF, U+FE70-FEFF,
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF,
     U+0000-00FF, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212;
 }
 
 /* --- 1. Tokens ----------------------------------------------------------- */
 :root {
-  /* Ground — petrol-tinted near-blacks, never pure black. Adjacent steps are
-     depth (1.03-1.15:1), not contrast; text never relies on a step. */
-  --ground-0: #080e12;   /* deepest — footer, statement base             */
-  --ground:   #0a1216;   /* page canvas                                 */
-  --ground-1: #0f1a20;   /* elevated band                               */
-  --ground-2: #16242b;   /* surface — panels, cards                     */
-  --ground-3: #1d2f38;   /* hover / active surface                      */
+  /* Colour — petrol neutrals tinted toward the brand hue (the mark is
+     #204060 petrol + #40c0c0 cyan; every neutral here carries 2-4% of it). */
+  --paper:      #f4f6f6;   /* page ground, whole document                  */
+  --panel:      #ffffff;   /* inset panels only, never full bands          */
+  --panel-2:    #eceff0;   /* secondary inset (image plates)               */
 
-  /* Text on dark (ratios measured against --ground #0a1216). */
-  --ink-on-dark:   #eaf1f2;   /* headings                 16.53:1 (AAA)  */
-  --body-on-dark:  #c3d1d4;   /* body copy                12.05:1 (AAA)  */
-  --muted-on-dark: #8aa0a6;   /* labels / meta             6.89:1 (AA)   */
+  --ink:        #111a1f;   /* headings               16.25:1 on paper      */
+  --body:       #3d474b;   /* body copy               8.79:1 on paper      */
+  --muted:      #5f6c72;   /* meta / labels           5.00:1 on paper      */
 
-  /* Accent family (the mark's petrol/teal). Fills only, never body text. */
-  --teal:        #2a9d99;   /* accent fills             5.74:1 on ground */
-  --teal-bright: #5fd3cf;   /* accent on dark          10.54:1 on ground */
-  --teal-ink:    #0a5a62;   /* accent text on lit tiles 7.12:1 on #eef4f4 */
+  --dark:       #0f1a20;   /* statement bands                              */
+  --dark-2:     #0a1216;   /* footer — one step deeper than the bands      */
 
-  /* The "lit" tiles — used only where dark-ink alpha artwork requires them
-     (venture marks). Light-surface text set is carried over, already verified. */
-  --lit:      #eef4f4;
-  --lit-2:    #ffffff;
-  --lit-ink:  #111a1f;   /* 16.25:1 on --lit   */
-  --lit-body: #3d474b;   /*  8.79:1 on --lit   */
-  --lit-muted:#5f6c72;   /*  5.00:1 on --lit   */
+  --teal:       #2a9d99;   /* accent FILLS only — 5.36:1 under --ink label */
+  --teal-ink:   #0a5a62;   /* accent text / links      7.30:1 on paper     */
+  --teal-bright:#5fd3cf;   /* accent on dark           9.85:1 on --dark    */
 
-  /* Rules / hairlines (dark) — borders are depth cues only. */
-  --hairline:     rgba(234, 241, 242, .10);
-  --line:         rgba(234, 241, 242, .18);
-  --line-strong:  rgba(234, 241, 242, .32);
-  --hairline-deep: rgba(0, 0, 0, .34);
+  --hairline:      rgba(16, 26, 31, .10);
+  --line:          rgba(16, 26, 31, .16);
+  --line-strong:   rgba(16, 26, 31, .28);
+  --hairline-dark: rgba(255, 255, 255, .12);
 
   /* Metrics */
   --topbar-h: 76px;
   --gutter: 20px;
   --container: 1200px;
   --radius: 6px;
-  --radius-lg: 12px;
-  --radius-xl: 18px;
+  --radius-lg: 10px;
+  --radius-xl: 16px;
 
-  /* Spacing — one 8px-derived scale. */
+  /* Spacing — one 8px-derived scale, used everywhere. No inline one-offs. */
   --s1: 8px;   --s2: 16px;  --s3: 24px;  --s4: 32px;
   --s5: 48px;  --s6: 64px;  --s7: 88px;  --s8: 112px;
 
+  /* One rhythm value => consecutive sections feel evenly paced */
   --pace: clamp(56px, 7vw, 96px);
 
-  /* Type scale — the display end is widened on purpose: the contrast between
-     the serif statement and the sans body is the "future" lever. */
-  --fs-label: .8125rem;                                     /* 13px         */
-  --fs-body: 1.0625rem;                                     /* 17px         */
-  --fs-lead:  clamp(1.1875rem, 1.35vw + .75rem, 1.375rem);  /* 19 -> 22     */
-  --fs-h4:    1.0625rem;                                    /* 17px         */
-  --fs-h3:    clamp(1.375rem, 2.1vw + .65rem, 1.75rem);     /* 22 -> 28     */
-  --fs-h2:    clamp(1.75rem, 3.4vw + .5rem, 2.625rem);      /* 28 -> 42     */
-  --fs-h1:    clamp(2.125rem, 4.6vw + .5rem, 3.5rem);       /* 34 -> 56     */
-  --fs-hero:  clamp(2.625rem, 6.4vw + .6rem, 5rem);         /* 42 -> 80     */
+  /* Type scale.
+     Every adjacent step clears 1.25 at the top of its clamp:
+       label 13 · body 17 (1.31) · lead 22 (1.29) · h3 28 (1.27) ·
+       h2 41 (1.46) · h1 52 (1.27) · hero 65 (1.25)  ==  --fs-hero is a full
+     step clear of --fs-h1. On narrow screens the clamps compress the display
+     end so the type still fits 360px; the full ladder is what desktop shows. */
+  --fs-label: .8125rem;                                      /* 13px floor  */
+  --fs-body: 1.0625rem;                                      /* 17px        */
+  --fs-lead:   clamp(1.1875rem, 1.35vw + .75rem, 1.375rem);  /* 19 -> 22    */
+  --fs-h4:     1.0625rem;                                    /* 17px        */
+  --fs-h3:     clamp(1.375rem, 2.1vw + .65rem, 1.75rem);     /* 22 -> 28    */  --fs-h2:     clamp(1.75rem,   3.4vw + .5rem, 2.5625rem);   /* 28 -> 41    */
+  --fs-h1:     clamp(2.125rem,  4.6vw + .5rem, 3.25rem);     /* 34 -> 52    */
+  --fs-hero:   clamp(2.5rem,    6vw + .5rem,   4.0625rem);   /* 40 -> 65    */
 
-  --lh-tight: 1.06;
+  --lh-tight: 1.08;
   --lh-h:     1.16;
-  --lh-body:  1.62;
+  --lh-body:  1.6;
   --lh-lead:  1.58;
 
-  /* Elevation — subtle; dark mode gets depth from surface, not shadow. */
-  --shadow-sm:    0 1px 0 rgba(0, 0, 0, .4);
-  --shadow-md:    0 18px 40px -26px rgba(0, 0, 0, .7);
-  --shadow-lg:    0 40px 80px -40px rgba(0, 0, 0, .85);
-  --shadow-panel: 0 1px 0 rgba(234, 241, 242, .06) inset, 0 24px 48px -32px rgba(0, 0, 0, .7);
+  --shadow-sm: 0 1px 2px rgba(16, 26, 31, .05);
+  --shadow-md: 0 16px 36px -22px rgba(16, 26, 31, .30);
+  --shadow-lg: 0 34px 64px -38px rgba(16, 26, 31, .42);
+  --shadow-panel: 0 1px 2px rgba(16, 26, 31, .03), 0 26px 50px -42px rgba(16, 26, 31, .32);
 
-  /* Families by ROLE. */
+  /* Two families by ROLE: Newsreader states, Instrument Sans structures. */
   --font-display: "Newsreader", Georgia, "Times New Roman", serif;
   --font-sans: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  /* Arabic families sit AFTER the Latin ones: Latin glyphs (brand names such
+     as NEXGEN or InPipe) still come from the Latin face, and only the Arabic
+     runs fall through to these. */
   --font-display-ar: "Amiri", "Noto Naskh Arabic", Georgia, serif;
   --font-sans-ar: "IBM Plex Sans Arabic", "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
 
-  /* Motion tokens — one curve family, used by every transition. */
-  --ease:       cubic-bezier(.23, 1, .32, 1);   /* strong ease-out (UI)    */
-  --ease-in-out: cubic-bezier(.77, 0, .175, 1); /* on-screen movement      */
-  --ease-expo:  cubic-bezier(.16, 1, .3, 1);    /* hero / large reveals    */
-  --dur-press:  140ms;
-  --dur-ui:     200ms;
-  --dur-panel:  240ms;
-  --dur-reveal: 560ms;
-  --dur-hero:   820ms;
-  --stagger:    50ms;
-
-  /* Grain — inline turbulence noise, ~5% opacity over imagery. */
-  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-
-  /* The home scroll narrative progress (0..1), driven by site.js. Defaults to
-     the COMPLETE state so reduced-motion and no-JS render everything fully. */
-  --prog: 1;
+  /* Motion tokens — one curve family, used by every transition below. */
+  --ease:        cubic-bezier(.23, 1, .32, 1);   /* strong ease-out (UI)   */
+  --ease-in-out: cubic-bezier(.77, 0, .175, 1);  /* on-screen movement     */
+  --dur-press:   140ms;
+  --dur-ui:      200ms;
+  --dur-reveal:  620ms;
 }
 
 @media (max-width: 939.98px) { :root { --topbar-h: 64px; } }
@@ -188,18 +183,18 @@ html {
 
 body {
   margin: 0;
-  background: var(--ground);
-  color: var(--body-on-dark);
+  background: var(--paper);          /* ONE continuous ground, whole doc   */
+  color: var(--body);
   font-family: var(--font-sans);
   font-weight: 400;
-  font-size: var(--fs-body);
+  font-size: var(--fs-body);         /* 17px */
   line-height: var(--lh-body);
   font-kerning: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   overflow-x: clip;
-  -webkit-tap-highlight-color: transparent;
+  -webkit-tap-highlight-color: transparent;   /* browser flash removed here  */
 }
 
 body.nav-open { overflow: hidden; }
@@ -214,11 +209,12 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   line-height: var(--lh-h);
   letter-spacing: -.008em;
-  color: var(--ink-on-dark);
+  color: var(--ink);
   text-wrap: balance;
 }
 
-/* Display serif carries the two top levels only. */
+/* Display serif carries the two top levels only. The webfont ships the wght
+   axis only (no opsz), which is 72KB lighter per page than the opsz build. */
 h1, h2 {
   font-family: var(--font-display);
   font-weight: 600;
@@ -229,58 +225,65 @@ h2 { font-size: var(--fs-h2); }
 h3 { font-size: var(--fs-h3); letter-spacing: -.012em; }
 h4 { font-size: var(--fs-h4); }
 
+/* Headings that follow content get air above; after an eyebrow they don't. */
 p:not(.eyebrow) + h2, p:not(.eyebrow) + h3,
 ul + h2, ul + h3, ol + h2, ol + h3,
 .grid + h2, .figure + h3, .stats + h2 { margin-top: 1.6em; }
 
-p { margin: 0 0 var(--s3); max-width: 68ch; color: var(--body-on-dark); }
+p { margin: 0 0 var(--s3); max-width: 68ch; }
 p:last-child { margin-bottom: 0; }
 
-a { color: var(--teal-bright); text-decoration: none; transition: color var(--dur-ui) var(--ease); }
-a:hover { color: var(--ink-on-dark); }
+a { color: var(--teal-ink); text-decoration: none; transition: color var(--dur-ui) var(--ease); }
+a:hover { color: var(--ink); }
 
 ul, ol { margin: 0; padding: 0; list-style: none; }
 
-strong { color: var(--ink-on-dark); font-weight: 600; }
+strong { color: var(--ink); font-weight: 600; }
 
 h1, h2, h3, h4, p, li, a, span { overflow-wrap: break-word; }
 
 :focus-visible {
-  outline: 3px solid var(--teal-bright);
+  outline: 3px solid var(--teal-ink);
   outline-offset: 3px;
   border-radius: 3px;
 }
+.section--dark :focus-visible,
+.footer :focus-visible,
+.topbar :focus-visible,
+.hero :focus-visible { outline-color: var(--teal-bright); }
 
 ::selection { background: var(--teal); color: #06201f; }
 
-/* --- The label system -----------------------------------------------------
-   The wayfinding device: wide-tracked uppercase sans micro-labels. Latin only;
-   RTL resets tracking and case (section 22). This is the single biggest change
-   from the old editorial "upright serif eyebrow". */
+/* The eyebrow is an editorial signpost, not a shouted micro-label: upright
+   serif in the accent colour, sentence case, no tracking. Italic is NOT used —
+   the webfont ships upright weights only, and synthesised slant on a serif
+   looks like a defect; the real italic axis costs +62KB per page. */
 .eyebrow {
-  display: inline-block;
+  display: block;
   margin: 0 0 var(--s2);
-  font-family: var(--font-sans);
-  font-size: var(--fs-label);
-  font-weight: 600;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--teal-bright);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--teal-ink);
 }
+.section--dark .eyebrow, .hero .eyebrow { color: var(--teal-bright); }
 
 .lead {
   font-size: var(--fs-lead);
   line-height: var(--lh-lead);
-  color: var(--body-on-dark);
+  color: var(--body);
   max-width: 60ch;
 }
+.section--dark .lead { color: rgba(255, 255, 255, .84); }
 
 .checklist { display: grid; gap: 10px; }
 .checklist li {
   position: relative;
   padding-inline-start: 26px;
   max-width: 62ch;
-  color: var(--body-on-dark);
+  color: var(--body);
 }
 .checklist li::before {
   content: "";
@@ -289,11 +292,13 @@ h1, h2, h3, h4, p, li, a, span { overflow-wrap: break-word; }
   top: .62em;
   width: 7px;
   height: 7px;
-  background: var(--teal-bright);
+  background: var(--teal);
   border-radius: 1px;
   transform: rotate(45deg);
 }
+.section--dark .checklist li { color: rgba(255, 255, 255, .84); }
 
+/* A ledger head: hairline + small caps label, used to open a run of entries. */
 .ledger {
   border-top: 1px solid var(--line);
   padding-top: var(--s3);
@@ -309,8 +314,8 @@ h1, h2, h3, h4, p, li, a, span { overflow-wrap: break-word; }
 
 .section, .next { padding-block: var(--pace); }
 
-/* Section separation: a hairline at the top edge of each section that follows
-   another, aligned to the content box. */
+/* Section separation without background flipping: one hairline at the top
+   edge of each section that follows another, aligned to the content box. */
 main > .section + .section,
 main > .section + .next,
 main > .next + .section {
@@ -321,46 +326,56 @@ main > .next + .section {
 }
 
 .inset {
-  background: var(--ground-2);
+  background: var(--panel);
   border: 1px solid var(--hairline);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-panel);
   padding: clamp(20px, 4vw, 44px);
 }
 
-/* Statement band: one step DEEPER than the canvas, with a teal breath rising
-   from one corner. This is the dark-regime replacement for the old paper fade
-   — depth instead of a light->dark jump. */
+/* Statement band. The generator emits .section--dark; this is the single
+   place that paints it, so a dark section can never silently go transparent.
+   .section--panel-dark/.panel-dark are kept as aliases for inset variants. */
+/* Statement bands arrive out of the page ground and return to it: the first
+   and last --pace of each band carry a paper fade, matching its own padding,
+   so no text ever sits on the transition. */
 .section--dark {
-  background-color: var(--ground-0);
-  background-image: radial-gradient(130% 120% at 8% 0%, #12222a 0%, var(--ground-0) 58%, #060b0e 100%);
-  color: var(--body-on-dark);
+  background-color: var(--dark);          /* opaque base under the gradients  */
+  background-image:
+    linear-gradient(180deg, rgba(244, 246, 246, 1) 0%, rgba(244, 246, 246, 0) 100%),
+    linear-gradient(180deg, rgba(244, 246, 246, 0) 0%, rgba(244, 246, 246, 1) 100%),
+    radial-gradient(130% 120% at 8% 0%, #16262e 0%, var(--dark) 58%, #0a1318 100%);
+  background-repeat: no-repeat;
+  background-size: 100% var(--pace), 100% var(--pace), 100% 100%;
+  background-position: top, bottom, center;
+  color: rgba(255, 255, 255, .84);
 }
-.section--dark h1, .section--dark h2, .section--dark h3, .section--dark h4 { color: var(--ink-on-dark); }
-.section--dark p { color: var(--body-on-dark); }
-.section--dark strong { color: var(--ink-on-dark); }
+.section--dark h1, .section--dark h2, .section--dark h3, .section--dark h4 { color: #fff; }
+.section--dark p { color: rgba(255, 255, 255, .82); }
+.section--dark strong { color: #fff; }
 .section--dark a { color: var(--teal-bright); }
-.section--dark a:hover { color: var(--ink-on-dark); }
-.section--dark .ledger { border-top-color: var(--hairline); }
+.section--dark a:hover { color: #fff; }
+.section--dark .ledger { border-top-color: var(--hairline-dark); }
 
 .section--panel-dark { padding-block: var(--pace); }
 .section--panel-dark > .container > .panel-dark,
 .panel-dark {
-  background-color: var(--ground-1);
-  background-image: radial-gradient(120% 130% at 12% 0%, #16262e 0%, var(--ground-1) 55%, #0a1318 100%);
-  color: var(--body-on-dark);
+  background-color: var(--dark);          /* opaque base under the gradient   */
+  background-image:
+    radial-gradient(120% 130% at 12% 0%, #16262e 0%, var(--dark) 55%, #0a1318 100%);
+  color: rgba(255, 255, 255, .86);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
   padding: clamp(28px, 5vw, 60px);
 }
-.panel-dark h1, .panel-dark h2, .panel-dark h3, .panel-dark h4 { color: var(--ink-on-dark); }
-.panel-dark strong { color: var(--ink-on-dark); }
-.panel-dark .lead { color: var(--body-on-dark); }
+.panel-dark h1, .panel-dark h2, .panel-dark h3, .panel-dark h4 { color: #fff; }
+.panel-dark strong { color: #fff; }
+.panel-dark .lead { color: rgba(255, 255, 255, .82); }
 .panel-dark .eyebrow { color: var(--teal-bright); }
-.panel-dark p { color: var(--body-on-dark); }
+.panel-dark p { color: rgba(255, 255, 255, .8); }
 
-/* An elevated band (one step lighter than the canvas). */
-.section--alt { background-color: var(--ground-1); }
+/* Legacy aliases: kept so an un-migrated block can never look broken. */
+.section--alt { background: transparent; }
 
 .grid { display: grid; gap: var(--s3); }
 .grid-2, .grid-3, .grid-4 { grid-template-columns: minmax(0, 1fr); }
@@ -372,7 +387,12 @@ main > .next + .section {
   align-items: center;
 }
 
+/* Editorial split: statement left, the reading column right. Used where a
+   section carries copy instead of an image, so the line length stays sane. */
 .split--editorial { align-items: start; }
+/* Two text columns share a top edge. Centring is for an image beside copy; when
+   both sides are copy it only pushes the shorter column down by the difference.
+   Browsers without :has() keep the centred fallback above. */
 .split:not(:has(figure)) { align-items: start; }
 .split--editorial > div:first-child { max-width: 34ch; }
 .split--editorial > div:last-child > p { max-width: 62ch; }
@@ -389,6 +409,7 @@ main > .next + .section {
 .measure { max-width: 68ch; }
 .measure-sm { max-width: 54ch; }
 
+/* Section intro sizes — replace the old inline max-width/margin stacks. */
 .intro        { max-width: 720px; margin-inline: auto; }
 .intro--wide  { max-width: 760px; margin-inline: auto; }
 .intro--space { margin-top: var(--s5); }
@@ -427,21 +448,21 @@ main > .next + .section {
               box-shadow var(--dur-ui) var(--ease);
 }
 
-/* On the dark ground the primary action is the lit object. */
-.btn--primary { background: var(--lit); color: var(--lit-ink); }
-.btn--accent  { background: var(--teal); color: #06201f; }
-.btn--outline { background: transparent; color: var(--ink-on-dark); border-color: var(--line-strong); }
-.btn--onDark  { background: transparent; color: var(--ink-on-dark); border-color: rgba(234, 241, 242, .42); }
-.btn--quiet   { background: transparent; color: var(--ink-on-dark); border-color: rgba(234, 241, 242, .34); }
+.btn--primary { background: var(--ink); color: #fff; }
+.btn--accent  { background: var(--teal); color: #08201f; }
+.btn--outline { background: transparent; color: var(--ink); border-color: var(--line-strong); }
+.btn--onDark  { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .42); }
+.btn--quiet   { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .34); }
 
+/* Press feedback on pointer-down, not on release. Hover is gated below. */
 .btn:active { transform: scale(.975); }
 
 @media (hover: hover) and (pointer: fine) {
-  .btn--primary:hover { background: #ffffff; color: var(--lit-ink); box-shadow: var(--shadow-md); }
-  .btn--accent:hover  { background: #34b0ab; }
-  .btn--outline:hover { border-color: var(--ink-on-dark); background: var(--ink-on-dark); color: var(--ground); }
-  .btn--onDark:hover  { background: var(--lit); color: var(--lit-ink); border-color: var(--lit); }
-  .btn--quiet:hover   { background: var(--lit); color: var(--lit-ink); border-color: var(--lit); }
+  .btn--primary:hover { background: var(--teal-ink); color: #fff; box-shadow: var(--shadow-md); }
+  .btn--accent:hover  { background: #25918d; }
+  .btn--outline:hover { border-color: var(--ink); background: var(--ink); color: #fff; }
+  .btn--onDark:hover  { background: #fff; color: var(--ink); border-color: #fff; }
+  .btn--quiet:hover   { background: #fff; color: var(--ink); border-color: #fff; }
 }
 
 .btn-row { display: flex; flex-wrap: wrap; gap: 14px; }
@@ -456,13 +477,13 @@ main > .next + .section {
   font-family: var(--font-sans);
   font-size: var(--fs-label);
   font-weight: 600;
-  letter-spacing: .06em;
+  letter-spacing: .05em;
   text-transform: uppercase;
-  color: var(--ink-on-dark);
+  color: var(--ink);
 }
 .link-arrow::after { content: "\2192"; transition: transform var(--dur-ui) var(--ease); }
 @media (hover: hover) and (pointer: fine) {
-  .link-arrow:hover { color: var(--teal-bright); }
+  .link-arrow:hover { color: var(--teal-ink); }
   .link-arrow:hover::after { transform: translateX(5px); }   /* flipped in section 22 */
 }
 
@@ -488,23 +509,32 @@ main > .next + .section {
   position: fixed;
   inset: 0 0 auto 0;
   z-index: 120;
-  background: rgba(8, 14, 18, .9);
-  border-bottom: 1px solid var(--hairline-deep);
+  background: var(--dark);
+  border-bottom: 1px solid var(--hairline-dark);
+  /* Hiding on the way down and returning on the way up is a transform, so the
+     bar keeps its own composited layer and never reflows the page. It also
+     makes .topbar the containing block for the drawer below, which is what
+     glues the drawer to the bar instead of to the viewport. */
   transform: translateY(0);
   transition: transform .28s var(--ease), box-shadow .3s var(--ease), background-color .3s var(--ease);
 }
 .topbar.is-hidden { transform: translateY(-101%); }
+/* No backdrop-filter here: it would make .topbar the containing block for its
+   fixed descendants and collapse the drawer. The bar is 97% opaque anyway, so
+   the blur was never doing visible work. */
 .topbar.is-stuck {
-  background: rgba(8, 14, 18, .97);
-  box-shadow: 0 12px 30px -22px rgba(0, 0, 0, .8);
+  background: rgba(10, 18, 22, .97);
+  box-shadow: 0 12px 30px -22px rgba(0, 0, 0, .7);
 }
+/* The bar is dark and the page ground is not: let it bleed a little instead of
+   ending on a hard 1px line. Invisible over the hero, where both are dark. */
 .topbar::after {
   content: "";
   position: absolute;
   inset: 100% 0 auto 0;
   height: 20px;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(8, 14, 18, .55) 0%, rgba(8, 14, 18, 0) 100%);
+  background: linear-gradient(180deg, rgba(15, 26, 32, .55) 0%, rgba(15, 26, 32, 0) 100%);
   opacity: 0;
   transition: opacity .3s var(--ease);
 }
@@ -517,6 +547,9 @@ main > .next + .section {
   height: var(--topbar-h);
 }
 
+/* The bar's trailing cluster: the language switch and the contact button. They
+   travel together so the CTA keeps its place at the end of the row and the
+   switch never collides with the nav. */
 .topbar__end {
   display: flex;
   align-items: center;
@@ -525,6 +558,9 @@ main > .next + .section {
   margin-inline-start: auto;
 }
 
+/* Language switch. Deliberately quiet — it is a utility, not a call to action:
+   no fill, no border, just the other language's own name in its own script.
+   Sized to a full 44px target because it is tapped, not read. */
 .lang-switch {
   display: inline-flex;
   align-items: center;
@@ -536,16 +572,21 @@ main > .next + .section {
   font-size: var(--fs-label);
   font-weight: 600;
   letter-spacing: .02em;
-  color: rgba(234, 241, 242, .70);
+  color: rgba(255, 255, 255, .70);
   white-space: nowrap;
   transition: color var(--dur-ui) var(--ease), background-color var(--dur-ui) var(--ease);
 }
 @media (hover: hover) and (pointer: fine) {
-  .lang-switch:hover { color: var(--ink-on-dark); background: rgba(234, 241, 242, .08); }
+  .lang-switch:hover { color: #fff; background: rgba(255, 255, 255, .08); }
 }
+/* On the Arabic pages the switch reads "English" — a Latin word. Keep it in the
+   Latin face so it does not get set in Amiri, where a lone Latin word at label
+   size looks like a different brand. */
 [dir="rtl"] .lang-switch { font-family: "Instrument Sans", "Helvetica Neue", Arial, sans-serif; }
 
 @media (max-width: 419.98px) {
+  /* 360px is tight: the brand, the switch, the CTA and the toggle all compete.
+     The switch keeps its 44px height but drops to the compact padding. */
   .lang-switch { padding: 0 8px; }
   .topbar__end { gap: 4px; }
 }
@@ -559,13 +600,13 @@ main > .next + .section {
   font-weight: 600;
   letter-spacing: .12em;
   text-transform: uppercase;
-  color: var(--ink-on-dark);
+  color: #fff;
 }
 .topbar__brand-tag {
   font-size: .66rem;
   letter-spacing: .14em;
   text-transform: uppercase;
-  color: rgba(234, 241, 242, .58);
+  color: rgba(255, 255, 255, .58);
 }
 
 .topbar__toggle {
@@ -573,10 +614,12 @@ main > .next + .section {
   margin-inline-start: auto;
   width: 48px;
   height: 48px;
+  /* The topbar row is tight at 360px; without this the button is flex-shrunk
+     to 22px and the touch target falls well under 44px. */
   flex: 0 0 auto;
   padding: 0;
   background: transparent;
-  border: 1px solid rgba(234, 241, 242, .26);
+  border: 1px solid rgba(255, 255, 255, .26);
   border-radius: var(--radius);
   cursor: pointer;
   touch-action: manipulation;
@@ -588,13 +631,17 @@ main > .next + .section {
   width: 20px;
   height: 2px;
   margin: 4px auto;
-  background: var(--ink-on-dark);
+  background: #fff;
   transition: transform .25s var(--ease), opacity .2s var(--ease);
 }
 .topbar__toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
 .topbar__toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
 .topbar__toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 
+/* Mobile: the nav becomes a slide-in panel anchored to the bottom edge of the
+   bar. It is absolutely positioned rather than fixed so it stays glued to the
+   bar when the bar translates away, and so a transform or filter anywhere on
+   .topbar can never re-anchor it by accident. */
 .topbar__nav {
   position: absolute;
   inset: 100% 0 auto 0;
@@ -603,7 +650,7 @@ main > .next + .section {
   display: flex;
   flex-direction: column;
   padding: var(--s4) var(--gutter) calc(var(--s5) + env(safe-area-inset-bottom, 0px));
-  background: var(--ground-0);
+  background: var(--dark-2);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
@@ -612,10 +659,10 @@ main > .next + .section {
   transition: transform .3s var(--ease), visibility .3s;
 }
 .nav-open .topbar__nav { transform: none; visibility: visible; }
-.nav-open .topbar { background: var(--ground-0); }
+.nav-open .topbar { background: var(--dark-2); }
 
 .topbar__menu { display: flex; flex-direction: column; }
-.topbar__menu > li { border-bottom: 1px solid var(--hairline); }
+.topbar__menu > li { border-bottom: 1px solid var(--hairline-dark); }
 
 .topbar__menu a {
   display: flex;
@@ -627,9 +674,9 @@ main > .next + .section {
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
-  color: var(--body-on-dark);
+  color: rgba(255, 255, 255, .82);
 }
-.topbar__menu a[aria-current="page"] { color: var(--ink-on-dark); }
+.topbar__menu a[aria-current="page"] { color: #fff; }
 .topbar__menu a[aria-current="page"]::after {
   content: "";
   width: 6px; height: 6px;
@@ -639,6 +686,9 @@ main > .next + .section {
 }
 
 /* --- 7a. Companies disclosure -------------------------------------------- */
+/* The group is a real link to the overview page plus a separate caret button
+   that owns the disclosure. Keeping the two apart means the label is always a
+   one-tap route to the overview, and opening the list never hijacks it. */
 .drop { display: flex; flex-wrap: wrap; align-items: center; }
 .drop > a { flex: 1 1 auto; }
 .drop__toggle {
@@ -651,7 +701,7 @@ main > .next + .section {
   padding: 0;
   background: none;
   border: 0;
-  color: var(--muted-on-dark);
+  color: rgba(255, 255, 255, .66);
   cursor: pointer;
   touch-action: manipulation;
 }
@@ -663,23 +713,28 @@ main > .next + .section {
   transform: rotate(45deg) translate(-2px, -2px);
   transition: transform .25s var(--ease);
 }
+/* Drawer: the list is a nested block, open by default so every venture is
+   reachable without JS. The caret collapses it. */
 .drop__menu {
   flex: 1 0 100%;
   margin-inline-start: 2px;
   padding: 0 0 10px 12px;
-  border-inline-start: 1px solid var(--hairline);
+  border-inline-start: 1px solid rgba(255, 255, 255, .12);
 }
 .drop__menu a {
   min-height: 48px;
   padding: 12px 2px;
   font-size: var(--fs-body);
-  color: var(--muted-on-dark);
+  color: rgba(255, 255, 255, .72);
 }
 .drop.is-collapsed .drop__menu { display: none; }
 .drop.is-collapsed .drop__caret { transform: rotate(-45deg) translate(0, -2px); }
-.drop.is-current > a { color: var(--ink-on-dark); }
+.drop.is-current > a { color: #fff; }
 .drop.is-current .drop__caret { border-color: var(--teal-bright); }
 
+/* The CTA lives in the bar itself, not inside the drawer. It has to clear the
+   44px touch minimum and still fit a 64px row next to the brand and the
+   toggle, so it gets its own compact metrics rather than .btn's roomy ones. */
 .topbar__cta {
   margin-top: 0;
   width: auto;
@@ -688,11 +743,17 @@ main > .next + .section {
   padding: 0 16px;
   white-space: nowrap;
 }
+/* 360px leaves about 120px for the button; tighten it rather than let the
+   label wrap onto a second line and grow past the bar. */
 @media (max-width: 379.98px) {
   .topbar__cta { padding: 0 12px; letter-spacing: .02em; }
 }
 
 /* --- 7b. Desktop navigation ---------------------------------------------- */
+/* Measured: with the ventures behind the Companies panel the row costs
+   brand + the labels + the button fit well inside the 1200px container, so it
+   appears once a 940px viewport can seat it. Below that the drawer is the
+   honest layout rather than a row that folds labels onto two lines. */
 @media (min-width: 940px) {
   .topbar__toggle { display: none; }
 
@@ -701,6 +762,8 @@ main > .next + .section {
     inset: auto;
     height: auto;
     flex-direction: row;
+    /* Stretch to the bar so the Companies panel can hang off the bar's own
+       bottom edge rather than off the 44px label row inside it. */
     align-self: stretch;
     align-items: stretch;
     gap: 6px;
@@ -724,11 +787,13 @@ main > .next + .section {
     font-weight: 500;
     letter-spacing: .03em;
     text-transform: uppercase;
+    /* Never fold a label across two lines: a two-line row is the tell of a
+       template that was not measured. */
     white-space: nowrap;
-    color: var(--muted-on-dark);
+    color: rgba(255, 255, 255, .74);
   }
   @media (hover: hover) and (pointer: fine) {
-    .topbar__menu a:hover { color: var(--ink-on-dark); }
+    .topbar__menu a:hover { color: #fff; }
   }
 
   .topbar__menu a::after {
@@ -741,15 +806,18 @@ main > .next + .section {
     transform-origin: left;   /* flipped for RTL in section 22 */
     transition: transform .25s var(--ease);
   }
-  .topbar__menu a[aria-current="page"] { color: var(--ink-on-dark); }
+  .topbar__menu a[aria-current="page"] { color: #fff; }
   .topbar__menu a[aria-current="page"]::after { transform: scaleX(1); }
   @media (hover: hover) and (pointer: fine) {
     .topbar__menu a:hover::after { transform: scaleX(1); }
   }
 
+  /* Desktop: the group is the label + its own caret, and the list becomes a
+     panel below them. The group stretches to the full bar height so the
+     panel's 100% lands under the bar's bottom edge instead of over it. */
   .drop { position: relative; align-self: stretch; flex-wrap: nowrap; }
-  .drop__toggle { width: 44px; height: 44px; color: var(--muted-on-dark); }
-  .drop.is-current .drop__toggle { color: var(--ink-on-dark); }
+  .drop__toggle { width: 44px; height: 44px; color: rgba(255, 255, 255, .74); }
+  .drop.is-current .drop__toggle { color: #fff; }
   .drop__menu {
     position: absolute;
     top: calc(100% + 8px);
@@ -759,10 +827,10 @@ main > .next + .section {
     min-width: 236px;
     margin: 0;
     padding: 8px;
-    border: 1px solid var(--line);
+    border: 1px solid rgba(255, 255, 255, .12);
     border-radius: var(--radius-lg);
-    background: var(--ground-1);
-    box-shadow: 0 28px 54px -24px rgba(0, 0, 0, .7);
+    background: var(--dark-2);
+    box-shadow: 0 28px 54px -24px rgba(0, 0, 0, .6);
     opacity: 0;
     visibility: hidden;
     transform: translateY(-6px);
@@ -776,20 +844,26 @@ main > .next + .section {
     border-radius: var(--radius);
     font-size: var(--fs-label);
     letter-spacing: .04em;
-    color: var(--muted-on-dark);
+    color: rgba(255, 255, 255, .74);
   }
   .drop__menu a::after { display: none; }
   @media (hover: hover) and (pointer: fine) {
-    .drop__menu a:hover { background: rgba(234, 241, 242, .08); color: var(--ink-on-dark); }
+    .drop__menu a:hover { background: rgba(255, 255, 255, .08); color: #fff; }
   }
-  .drop__menu a[aria-current="page"] { background: rgba(95, 211, 207, .14); color: var(--ink-on-dark); }
+  .drop__menu a[aria-current="page"] { background: rgba(95, 211, 207, .14); color: #fff; }
 
   .topbar__cta { margin-top: 0; width: auto; min-height: 44px; padding: 12px 20px; }
 }
 
-/* No-JS drawer fallback. */
+/* No-JS drawer fallback. The slide-in drawer is opened by the toggle, which is
+   inert without a script, so below the desktop breakpoint the menu would sit
+   hidden off-screen and every link, Companies included, would be unreachable.
+   With scripting off the bar becomes an in-flow header instead: brand and CTA
+   on one row, the full menu (Companies list expanded) beneath. A media query
+   rather than :not(.js) so script-enabled visitors never see it flash. */
 @media (scripting: none) and (max-width: 939.98px) {
   .topbar { position: relative; }
+  /* Hero rules come later in the file; the extra selector wins on specificity. */
   body .hero { margin-top: 0; }
   .topbar__inner { flex-wrap: wrap; height: auto; min-height: var(--topbar-h); }
   .topbar__toggle { display: none; }
@@ -807,7 +881,7 @@ main > .next + .section {
   }
 }
 
-/* --- 8. Hero ------------------------------------------------------------- */
+/* --- 9. Hero ------------------------------------------------------------- */
 .hero {
   position: relative;
   display: flex;
@@ -816,73 +890,59 @@ main > .next + .section {
   min-height: min(74vh, 660px);
   padding-block: var(--s7);
   overflow: hidden;
-  background-color: var(--ground);
-  color: var(--body-on-dark);
+  background-color: var(--dark);          /* opaque base; the image sits over it */
+  color: rgba(255, 255, 255, .86);
   isolation: isolate;
 }
-.hero--home { min-height: min(84vh, 780px); }
+.hero--home { min-height: min(80vh, 740px); }
+/* Only photo heroes reserve room for the fade below their copy. */
 .hero--photo { padding-bottom: calc(var(--s7) + var(--s6)); }
 
-.hero__media { position: absolute; inset: 0; z-index: -2; --hero-scale: 1; --hero-dim: .9; }
-.hero__media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 55%;
-  /* Unified petrol duotone grade, driven 1:1 by scroll progress (no transition:
-     a transition would fight the rAF update and lag). */
-  transform: scale(var(--hero-scale, 1));
-  filter: grayscale(1) contrast(1.08) brightness(var(--hero-dim, .9));
-  will-change: transform, filter;
-}
-/* Teal "screen" edge + petrol "multiply" base: the duotone. */
-.hero__media::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(120% 90% at 78% 20%, rgba(42, 157, 153, .34) 0%, rgba(42, 157, 153, 0) 58%),
-    linear-gradient(160deg, rgba(13, 34, 40, .60) 0%, rgba(8, 14, 18, .28) 60%, rgba(6, 11, 14, .55) 100%);
-  mix-blend-mode: normal;
-}
-.hero__media::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  opacity: .05;
-  background-image: var(--grain);
-  background-size: 140px 140px;
-  pointer-events: none;
-}
-/* Scrim: solid at the copy edge, open toward the image. */
+.hero__media { position: absolute; inset: 0; z-index: -2; }
+.hero__media img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 55%; }
+/* Scrim: heavy at the left where the type sits, lighter at the right so the
+   photograph still reads as a photograph. The last layer is the bridge: the
+   page ground fades in over the bottom of the hero, so near-black yields to
+   paper through one continuous value ramp instead of a cut. A plain fade of
+   --paper composites to a mathematically even ramp (a 246 to 24 travel has the
+   same step at every row), which is why there are no intermediate stops. */
 .hero--photo::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   background:
-    linear-gradient(90deg, var(--ground) 0%, var(--ground) 34%, rgba(10, 18, 22, .55) 48%, rgba(10, 18, 22, 0) 68%),
-    linear-gradient(180deg, rgba(8, 14, 18, .55) 0%, rgba(8, 14, 18, 0) 34%),
-    linear-gradient(180deg, rgba(8, 14, 18, 0) 55%, var(--ground) 100%);
+    linear-gradient(180deg, rgba(244, 246, 246, 0) 0%, rgba(244, 246, 246, 1) 100%) bottom / 100% var(--s7) no-repeat,
+    linear-gradient(180deg, rgba(10, 18, 22, .78) 0%, rgba(10, 18, 22, .52) 45%, rgba(10, 18, 22, .86) 100%),
+    linear-gradient(90deg, rgba(8, 15, 19, .80) 0%, rgba(8, 15, 19, .22) 62%);
 }
-/* InPipe: the source photo carries its own baked-in headline on the left, so
-   the scrim goes near-opaque under the copy and only opens on the right where
-   the equipment is. */
+.hero--photo.hero--bright::after {
+  background:
+    linear-gradient(180deg, rgba(244, 246, 246, 0) 0%, rgba(244, 246, 246, 1) 100%) bottom / 100% var(--s7) no-repeat,
+    linear-gradient(180deg, rgba(10, 18, 22, .70) 0%, rgba(10, 18, 22, .42) 45%, rgba(10, 18, 22, .80) 100%),
+    linear-gradient(90deg, rgba(8, 15, 19, .72) 0%, rgba(8, 15, 19, .14) 62%);
+}
+
+/* InPipe hero: the source photo is a partner slide with its own headline and
+   presenter caption baked into the left half. The scrim goes near-opaque under
+   the copy and only opens on the right, where the equipment is, so the two
+   sets of type never compete. */
 .hero--photo.hero--inpipe::after {
   background:
-    linear-gradient(180deg, rgba(8, 14, 18, .55) 0%, rgba(8, 14, 18, .20) 45%, rgba(8, 14, 18, .70) 100%),
-    linear-gradient(90deg, var(--ground) 0%, var(--ground) 50%, rgba(10, 18, 22, .30) 80%, rgba(10, 18, 22, .12) 100%);
+    linear-gradient(180deg, rgba(244, 246, 246, 0) 0%, rgba(244, 246, 246, 1) 100%) bottom / 100% var(--s7) no-repeat,
+    linear-gradient(180deg, rgba(10, 18, 22, .55) 0%, rgba(10, 18, 22, .20) 45%, rgba(10, 18, 22, .70) 100%),
+    linear-gradient(90deg, rgb(8, 15, 19) 0%, rgb(8, 15, 19) 50%, rgba(8, 15, 19, .30) 80%, rgba(8, 15, 19, .12) 100%);
 }
 .hero--inpipe .hero__media img { object-position: 78% 55%; }
+/* Below the desktop breakpoint every photo hero stacks: see section 20. */
 
-/* Venture hero: a compact petrol plate with a teal breath. */
+/* Venture hero: a compact petrol plate. No decorative grid, no empty void. */
 .hero--plate {
   min-height: 0;
   padding-block: clamp(52px, 9vw, 92px);
   text-align: center;
-  background-color: var(--ground);
-  background-image: radial-gradient(120% 110% at 50% 0%, #16262e 0%, var(--ground) 58%, #080e12 100%);
+  background-color: var(--dark);          /* opaque base under the gradient   */
+  background-image: radial-gradient(120% 110% at 50% 0%, #16262e 0%, var(--dark) 58%, #0a1318 100%);
 }
 .hero--plate .hero__inner { max-width: 760px; margin-inline: auto; }
 .hero--plate .lead { margin-inline: auto; }
@@ -892,10 +952,10 @@ main > .next + .section {
   height: 100px;
   padding: 12px;
   object-fit: contain;
-  background: var(--lit);
+  background: #fff;
   border-radius: 26px;
   margin: 0 auto var(--s3);
-  box-shadow: 0 0 0 1px rgba(234, 241, 242, .16), 0 18px 34px -12px rgba(0, 0, 0, .7);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .14), 0 18px 34px -12px rgba(0, 0, 0, .6);
 }
 .hero--plate .btn-row { justify-content: center; }
 @media (min-width: 700px) {
@@ -904,44 +964,45 @@ main > .next + .section {
 
 .hero__inner { position: relative; max-width: 720px; }
 .hero h1 {
-  color: var(--ink-on-dark);
+  color: #fff;
   font-size: var(--fs-hero);
-  font-weight: 600;
   letter-spacing: -.024em;
   margin-bottom: var(--s2);
 }
-.hero .lead { color: var(--body-on-dark); max-width: 56ch; }
+.hero .lead { color: rgba(255, 255, 255, .86); max-width: 56ch; }
 .hero__actions { margin-top: var(--s4); }
 .hero--plate .hero__actions { justify-content: center; }
 
-/* --- 9. Cards & venture grid --------------------------------------------- */
+/* --- 10. Cards & venture grid -------------------------------------------- */
 .card {
   display: flex;
   flex-direction: column;
   padding: var(--s4);
-  background: var(--ground-2);
+  background: var(--panel);
   border: 1px solid var(--hairline);
   border-radius: var(--radius-lg);
-  transition: transform var(--dur-ui) var(--ease), background-color var(--dur-ui) var(--ease),
+  transition: transform var(--dur-ui) var(--ease), box-shadow var(--dur-ui) var(--ease),
               border-color var(--dur-ui) var(--ease);
 }
 @media (hover: hover) and (pointer: fine) {
-  .card:hover { transform: translateY(-3px); border-color: var(--line); background: var(--ground-3); }
+  .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--line); }
 }
 .card h3 { margin-bottom: 8px; }
-.card p { color: var(--body-on-dark); }
+.card p { color: var(--body); }
 .card__foot { margin-top: auto; padding-top: var(--s3); }
 
-/* Venture card — the mark is a lit tile on the dark plate. */
-.venture { padding: 0; overflow: hidden; position: relative; background: var(--ground-2); }
+/* Venture card — the mark is a white tile on a pale plate. The artwork is the
+   bare logo (its badge rings and dark box were removed), so the tile carries
+   the depth and every company reads at the same weight. */
+.venture { padding: 0; overflow: hidden; position: relative; }
 .venture__media {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--s4) var(--s3);
   min-height: 176px;
-  background-color: var(--ground-1);
-  background-image: radial-gradient(120% 120% at 50% 0%, #16242b 0%, var(--ground-1) 70%);
+  background-color: #e8efef;              /* opaque base under the gradient   */
+  background-image: linear-gradient(180deg, #edf3f3 0%, #e1eaea 100%);
   border-bottom: 1px solid var(--hairline);
 }
 .venture__media img {
@@ -950,9 +1011,9 @@ main > .next + .section {
   max-width: 100%;
   padding: 12px;
   object-fit: contain;
-  background: var(--lit);
+  background: #fff;
   border-radius: 24px;
-  box-shadow: 0 0 0 1px rgba(234, 241, 242, .12), 0 16px 28px -16px rgba(0, 0, 0, .65);
+  box-shadow: 0 1px 0 rgba(16, 26, 31, .06), 0 16px 28px -16px rgba(16, 40, 46, .45);
   transition: transform .35s var(--ease);
 }
 @media (hover: hover) and (pointer: fine) {
@@ -963,15 +1024,16 @@ main > .next + .section {
   flex-direction: column;
   flex: 1;
   padding: var(--s3);
+  background: var(--panel);
 }
 .venture__kicker {
   margin: 0 0 6px;
   font-family: var(--font-sans);
   font-size: var(--fs-label);
   font-weight: 600;
-  letter-spacing: .08em;
+  letter-spacing: .07em;
   text-transform: uppercase;
-  color: var(--teal-bright);
+  color: var(--teal-ink);
 }
 .venture__title {
   font-family: var(--font-display);
@@ -979,21 +1041,21 @@ main > .next + .section {
   font-weight: 600;
   letter-spacing: -.01em;
   margin-bottom: 6px;
-  color: var(--ink-on-dark);
 }
 .venture__kicker + .venture__title { margin-top: 0; }
 .venture__body p { font-size: 1rem; margin-bottom: 10px; }
 .venture__body .card__foot { padding-top: var(--s2); }
 .card__foot .link-arrow { min-height: 44px; }
 
+/* Wide venture card: the mark plate beside the copy on desktop. */
 .venture__media img.venture__mark--round {
   width: 112px;
   height: 112px;
   padding: 0;
   object-fit: cover;
-  background: #0d0e10;
+  background: #0d0e10;                    /* the InPipe badge is its own black disc */
   border-radius: 50%;
-  box-shadow: 0 0 0 5px var(--lit), 0 16px 28px -14px rgba(0, 0, 0, .7);
+  box-shadow: 0 0 0 5px #fff, 0 16px 28px -14px rgba(16, 40, 46, .5);
 }
 @media (min-width: 900px) {
   .venture--wide { flex-direction: row; }
@@ -1005,6 +1067,8 @@ main > .next + .section {
 .feature { padding: var(--s3) 0; border-top: 1px solid var(--hairline); }
 .feature h3 { font-size: var(--fs-h4); margin-bottom: 6px; }
 
+/* Value cell: drop the tinted left bar (a lazy accent); use a hairline and
+   the accent as a small mark instead. */
 .value {
   position: relative;
   padding: var(--s3) 0 0;
@@ -1016,26 +1080,27 @@ main > .next + .section {
   position: absolute;
   inset-inline-start: 0; top: -1px;
   width: 34px; height: 2px;
-  background: var(--teal-bright);
+  background: var(--teal);
 }
 .value h3 { font-size: var(--fs-h4); margin-bottom: 4px; }
-.section--dark .value { border-top-color: var(--hairline); }
+.section--dark .value { border-top-color: var(--hairline-dark); }
 
 .panel {
   padding: var(--s4);
-  background: var(--ground-2);
+  background: var(--panel);
   border: 1px solid var(--hairline);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 .person { text-align: start; }
-.person__media { overflow: hidden; border-radius: var(--radius-lg); background: var(--ground-1); }
+.person__media { overflow: hidden; border-radius: var(--radius-lg); background: var(--panel-2); }
 .person__media img {
   width: 100%;
   aspect-ratio: 4 / 5;
   object-fit: cover;
   object-position: 50% 22%;
-  filter: saturate(.82) contrast(1.04) brightness(.96);
+  filter: saturate(.94) contrast(1.02);
   transition: transform .5s var(--ease);
 }
 @media (hover: hover) and (pointer: fine) {
@@ -1047,18 +1112,19 @@ main > .next + .section {
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 2px;
-  color: var(--ink-on-dark);
 }
 .person__role {
   font-family: var(--font-sans);
   font-size: var(--fs-label);
   font-weight: 600;
-  letter-spacing: .08em;
+  letter-spacing: .06em;
   text-transform: uppercase;
-  color: var(--teal-bright);
+  color: var(--teal-ink);
   margin: 0 0 10px;
 }
-.person__note { color: var(--body-on-dark); }
+.section--dark .person__role { color: var(--teal-bright); }
+.person__note { color: var(--body); }
+.section--dark .person__note { color: rgba(255, 255, 255, .82); }
 
 .advisor {
   display: flex;
@@ -1066,23 +1132,25 @@ main > .next + .section {
   align-items: center;
   min-height: 44px;
   padding: var(--s2);
-  background: var(--ground-2);
+  background: var(--panel);
   border: 1px solid var(--hairline);
   border-radius: var(--radius-lg);
   color: inherit;
-  transition: transform var(--dur-ui) var(--ease), background-color var(--dur-ui) var(--ease),
+  transition: transform var(--dur-ui) var(--ease), box-shadow var(--dur-ui) var(--ease),
               border-color var(--dur-ui) var(--ease);
 }
 @media (hover: hover) and (pointer: fine) {
-  .advisor:hover { transform: translateY(-3px); border-color: var(--line); background: var(--ground-3); color: inherit; }
+  .advisor:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--line); color: inherit; }
 }
-.advisor img { flex: 0 0 auto; width: 72px; height: 72px; border-radius: 50%; object-fit: cover; object-position: 50% 25%; filter: saturate(.85); }
-.advisor__name { display: block; font-family: var(--font-sans); font-weight: 600; font-size: 1rem; color: var(--ink-on-dark); margin: 0 0 2px; }
-.advisor__role { display: block; font-size: .9375rem; color: var(--muted-on-dark); margin: 0; }
+.advisor img { flex: 0 0 auto; width: 72px; height: 72px; border-radius: 50%; object-fit: cover; object-position: 50% 25%; }
+.advisor__name { display: block; font-family: var(--font-sans); font-weight: 600; font-size: 1rem; color: var(--ink); margin: 0 0 2px; }
+.advisor__role { display: block; font-size: .9375rem; color: var(--muted); margin: 0; }
 @media (hover: hover) and (pointer: fine) {
-  .advisor:hover .advisor__name { color: var(--teal-bright); }
+  .advisor:hover .advisor__name { color: var(--teal-ink); }
 }
 
+/* Partner team: a compact grid of round portraits. Grayscale is applied here
+   so every source photograph, whatever its colour, sits in one family. */
 .team-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s4) var(--s2); }
 .teammate { text-align: center; }
 .teammate img {
@@ -1091,70 +1159,74 @@ main > .next + .section {
   margin: 0 auto var(--s2);
   border-radius: 50%;
   object-fit: cover;
-  filter: grayscale(1) contrast(1.06) brightness(.96);
-  box-shadow: 0 0 0 3px var(--ground), 0 0 0 4px var(--line);
+  filter: grayscale(1) contrast(1.04);
+  box-shadow: 0 0 0 3px var(--panel), 0 0 0 4px var(--line);
 }
-.teammate__name { font-family: var(--font-display); font-size: 1.0625rem; font-weight: 600; margin: 0 0 2px; color: var(--ink-on-dark); }
-.teammate__role { margin: 0 auto; max-width: 22ch; font-size: .875rem; line-height: 1.4; color: var(--muted-on-dark); }
+.teammate__name { font-family: var(--font-display); font-size: 1.0625rem; font-weight: 600; margin: 0 0 2px; }
+.teammate__role { margin: 0 auto; max-width: 22ch; font-size: .875rem; line-height: 1.4; color: var(--muted); }
 @media (min-width: 640px) {
   .team-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s5) var(--s3); }
   .teammate img { width: 104px; height: 104px; }
 }
+/* A three-person group should not stretch across four columns; it stays
+   centred so the trio keeps the same portrait size as larger grids. */
 .team-grid--trio { max-width: 46rem; margin-inline: auto; }
 @media (min-width: 640px) {
   .team-grid--trio { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
+/* Advisors with no portrait in the source: named, not given a stock face. */
 .team-advisors { max-width: 46rem; margin: var(--s5) auto 0; text-align: center; }
 .team-advisors__title {
   font-family: var(--font-sans); font-size: .8125rem; font-weight: 600;
-  letter-spacing: .08em; text-transform: uppercase; color: var(--muted-on-dark);
+  letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
   margin: 0 0 var(--s3);
 }
 .team-advisors__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s2); }
 .team-advisors__list li { display: grid; gap: 2px; }
 .team-advisors__list strong { font-size: .9375rem; font-weight: 600; }
-.team-advisors__list span { font-size: .875rem; line-height: 1.4; color: var(--muted-on-dark); }
+.team-advisors__list span { font-size: .875rem; line-height: 1.4; color: var(--muted); }
 
-/* --- 10. Stats / credential band ----------------------------------------- */
+/* --- 11. Stats / credential band ----------------------------------------- */
 .stats {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
+  background: var(--hairline);
+  border: 1px solid var(--hairline);
   border-radius: var(--radius-lg);
   overflow: hidden;
 }
-.stat { padding: var(--s4) var(--s3); background: var(--ground-2); text-align: center; }
+.stat { padding: var(--s4) var(--s3); background: var(--panel); text-align: center; }
 .stat__value {
   font-family: var(--font-display);
   font-size: clamp(1.875rem, 4.4vw, 2.75rem);
   font-weight: 600;
   line-height: 1;
   font-variant-numeric: tabular-nums lining-nums;
-  color: var(--ink-on-dark);
+  color: var(--ink);
   margin-bottom: 10px;
 }
 .stat__value sup { font-size: .5em; vertical-align: super; margin-inline-start: 1px; }
-.stat__label { font-size: .9375rem; color: var(--muted-on-dark); margin: 0 auto; }
+.stat__label { font-size: .9375rem; color: var(--body); margin: 0 auto; }
 
-.section--dark .stats { background: var(--line); border-color: var(--line); }
+/* On a dark band: hairline-divided cells rather than floating cards. */
+.section--dark .stats { background: var(--hairline-dark); border-color: var(--hairline-dark); }
 .section--dark .stat { background: transparent; }
-.section--dark .stat__value { color: var(--ink-on-dark); }
-.section--dark .stat__label { color: var(--muted-on-dark); }
+.section--dark .stat__value { color: #fff; }
+.section--dark .stat__label { color: rgba(255, 255, 255, .78); }
 
 .cred-band {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 1px;
   margin-top: var(--s5);
-  background: var(--line);
-  border: 1px solid var(--line);
+  background: var(--hairline);
+  border: 1px solid var(--hairline);
   border-radius: var(--radius-xl);
   overflow: hidden;
 }
-.cred { background: var(--ground-2); padding: clamp(20px, 3.4vw, 30px); }
+.cred { background: var(--panel); padding: clamp(20px, 3.4vw, 30px); }
 .cred__kicker {
   margin: 0 0 6px;
   font-family: var(--font-sans);
@@ -1162,7 +1234,7 @@ main > .next + .section {
   font-weight: 600;
   letter-spacing: .08em;
   text-transform: uppercase;
-  color: var(--muted-on-dark);
+  color: var(--muted);
 }
 .cred__value {
   margin: 0 0 6px;
@@ -1171,11 +1243,11 @@ main > .next + .section {
   font-weight: 600;
   line-height: 1.05;
   letter-spacing: -.015em;
-  color: var(--ink-on-dark);
+  color: var(--ink);
 }
-.cred__note { margin: 0; font-size: .9375rem; color: var(--body-on-dark); max-width: 42ch; }
+.cred__note { margin: 0; font-size: .9375rem; color: var(--body); max-width: 42ch; }
 
-/* --- 11. Steps ----------------------------------------------------------- */
+/* --- 12. Steps ----------------------------------------------------------- */
 .steps { counter-reset: step; display: grid; gap: var(--s2); }
 .step {
   position: relative;
@@ -1194,13 +1266,13 @@ main > .next + .section {
   font-size: 1.125rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--teal-bright);
+  color: var(--teal-ink);
 }
 .step h3 { font-size: var(--fs-h4); margin-bottom: 4px; }
 .step p { font-size: 1rem; margin: 0; }
 .step > div { min-width: 0; }
 
-/* --- 12. Next-venture / continuity cue ----------------------------------- */
+/* --- 13. Next-venture / continuity cue ----------------------------------- */
 .next__inner {
   display: flex;
   flex-direction: column;
@@ -1210,7 +1282,7 @@ main > .next + .section {
 .next__inner h2 { margin-bottom: 6px; }
 .next__actions { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
 
-/* --- 13. CTA band + footer ----------------------------------------------- */
+/* --- 14. CTA band + footer ----------------------------------------------- */
 .cta-band { padding-block: 0 var(--pace); }
 .cta-band__inner {
   display: flex;
@@ -1218,28 +1290,28 @@ main > .next + .section {
   align-items: flex-start;
   gap: var(--s3);
   padding: var(--s5) var(--s4);
-  background: var(--ground-2);
+  background: var(--panel);
   border: 1px solid var(--hairline);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-panel);
 }
-.cta-band h2 { margin: 0 0 6px; font-size: clamp(1.5rem, 3vw, 2rem); color: var(--ink-on-dark); }
-.cta-band p { margin: 0; color: var(--body-on-dark); max-width: 46ch; }
+.cta-band h2 { margin: 0 0 6px; font-size: clamp(1.5rem, 3vw, 2rem); }
+.cta-band p { margin: 0; color: var(--body); max-width: 46ch; }
 .cta-band__actions { flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
 .cta-band__alt {
   display: inline-flex; align-items: center;
   min-height: 44px;
   font-size: .9375rem;
-  color: var(--muted-on-dark);
+  color: var(--muted);
   text-decoration: underline;
   text-decoration-color: var(--line-strong);
   text-underline-offset: 4px;
 }
 @media (hover: hover) and (pointer: fine) {
-  .cta-band__alt:hover { color: var(--teal-bright); text-decoration-color: currentColor; }
+  .cta-band__alt:hover { color: var(--teal-ink); text-decoration-color: currentColor; }
 }
 
-.footer { background: var(--ground-0); color: var(--muted-on-dark); font-size: 1rem; border-top: 1px solid var(--hairline-deep); }
+.footer { background: var(--dark-2); color: rgba(255, 255, 255, .72); font-size: 1rem; }
 .footer__top {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -1247,9 +1319,11 @@ main > .next + .section {
   padding-block: var(--s6) var(--s5);
 }
 .footer__brand img { height: 44px; width: auto; margin-bottom: var(--s2); }
-.footer__brand p { font-size: .9375rem; max-width: 36ch; color: var(--muted-on-dark); }
+.footer__brand p { font-size: .9375rem; max-width: 36ch; }
+/* These are real h2s for the document outline, but visually they are small
+   uppercase labels. The class carries the look so the level can be honest. */
 .footer__heading {
-  color: var(--ink-on-dark);
+  color: #fff;
   font-family: var(--font-sans);
   font-size: var(--fs-label);
   font-weight: 600;
@@ -1262,7 +1336,7 @@ main > .next + .section {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  color: var(--body-on-dark);
+  color: rgba(255, 255, 255, .74);
   transition: color var(--dur-ui) var(--ease);
 }
 .footer__contact { display: grid; gap: 10px; }
@@ -1270,7 +1344,7 @@ main > .next + .section {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  color: var(--body-on-dark);
+  color: rgba(255, 255, 255, .84);
   transition: color var(--dur-ui) var(--ease);
 }
 @media (hover: hover) and (pointer: fine) {
@@ -1281,7 +1355,7 @@ main > .next + .section {
   font-size: var(--fs-label);
   letter-spacing: .09em;
   text-transform: uppercase;
-  color: var(--muted-on-dark);
+  color: rgba(255, 255, 255, .58);
   margin-bottom: 2px;
 }
 .footer__bottom {
@@ -1290,28 +1364,28 @@ main > .next + .section {
   align-items: flex-start;
   gap: 8px;
   padding-block: var(--s3);
-  border-top: 1px solid var(--hairline-deep);
+  border-top: 1px solid var(--hairline-dark);
   font-size: .9375rem;
-  color: var(--muted-on-dark);
+  color: rgba(255, 255, 255, .64);
 }
-.footer__bottom a { display: inline-flex; align-items: center; min-height: 44px; color: var(--body-on-dark); }
+.footer__bottom a { display: inline-flex; align-items: center; min-height: 44px; color: rgba(255, 255, 255, .70); }
 .footer__bottom p { margin: 0; }
 
-/* --- 14. Contact --------------------------------------------------------- */
+/* --- 15. Contact --------------------------------------------------------- */
 .contact-card { display: grid; gap: var(--s3); }
 .contact-row {
   display: grid;
   gap: 4px;
   min-height: 44px;
   padding: var(--s3);
-  background: var(--ground-2);
+  background: var(--panel);
   border: 1px solid var(--hairline);
   border-radius: var(--radius-lg);
-  transition: border-color var(--dur-ui) var(--ease), background-color var(--dur-ui) var(--ease),
+  transition: border-color var(--dur-ui) var(--ease), box-shadow var(--dur-ui) var(--ease),
               transform var(--dur-ui) var(--ease);
 }
 @media (hover: hover) and (pointer: fine) {
-  .contact-row:hover { border-color: var(--line); background: var(--ground-3); transform: translateY(-2px); }
+  .contact-row:hover { border-color: var(--line); box-shadow: var(--shadow-md); transform: translateY(-2px); }
 }
 .contact-row__label {
   font-family: var(--font-sans);
@@ -1319,46 +1393,52 @@ main > .next + .section {
   font-weight: 600;
   letter-spacing: .08em;
   text-transform: uppercase;
-  color: var(--muted-on-dark);
+  color: var(--muted);
 }
-.contact-row__value { font-family: var(--font-display); font-size: 1.375rem; font-weight: 600; color: var(--ink-on-dark); }
+.contact-row__value { font-family: var(--font-display); font-size: 1.375rem; font-weight: 600; color: var(--ink); }
 @media (hover: hover) and (pointer: fine) {
-  .contact-row:hover .contact-row__value { color: var(--teal-bright); }
+  a.contact-row:hover .contact-row__value { color: var(--teal-ink); }
 }
-.contact-row__note { font-size: .9375rem; color: var(--body-on-dark); margin: 0; }
+.contact-row__note { font-size: .9375rem; color: var(--body); margin: 0; }
 
-/* --- 15. Media ----------------------------------------------------------- */
+/* --- 16. Media ----------------------------------------------------------- */
 .figure { margin: 0; }
 /* One photographic treatment across mismatched sources keeps the page coherent. */
 .figure img {
   width: 100%;
   border-radius: var(--radius-lg);
-  filter: saturate(.9) contrast(1.04) brightness(.96);
+  filter: saturate(.94) contrast(1.02);
 }
 .figure--crop img { aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 42%; }
 .figure--plate {
-  background: var(--ground-1);
+  background: var(--panel);       /* stays light: some marks have no alpha    */
   border: 1px solid var(--hairline);
   border-radius: var(--radius-lg);
   padding: var(--s4);
 }
 .figure--plate img { filter: none; }
-.figure figcaption { margin-top: 12px; font-size: .9375rem; color: var(--muted-on-dark); }
+.figure figcaption { margin-top: 12px; font-size: .9375rem; color: var(--muted); }
 .figure__mark { display: block; width: 160px; height: auto; margin-inline: auto; }
 .figure img.figure__mark { width: 160px; }
 .figure__mark--lg { width: 200px; }
 
-/* --- 16. Reveal on scroll (progressive enhancement) ---------------------- */
+/* Homepage image dock removed: the two portraits carried no information the
+   copy did not already state. The section is an editorial split instead. */
+
+/* --- 17. Reveal on scroll (progressive enhancement) ---------------------- */
+/* One orchestrated entrance, opacity + transform only, capped stagger. */
 .js .reveal {
   opacity: 0;
   transform: translateY(16px);
   transition: opacity var(--dur-reveal) var(--ease), transform var(--dur-reveal) var(--ease);
 }
 .js .reveal.is-visible { opacity: 1; transform: none; }
-.js .reveal[data-delay="1"] { transition-delay: calc(var(--stagger) * 1); }
-.js .reveal[data-delay="2"] { transition-delay: calc(var(--stagger) * 2); }
-.js .reveal[data-delay="3"] { transition-delay: calc(var(--stagger) * 3); }
+.js .reveal[data-delay="1"] { transition-delay: .06s; }
+.js .reveal[data-delay="2"] { transition-delay: .12s; }
+.js .reveal[data-delay="3"] { transition-delay: .18s; }
 
+/* Venture status marker: a venture that is not live yet says so plainly, in the
+   site's own type and accent, so no page implies a shipping product. */
 .status-note {
   display: inline-block;
   margin: 0 0 var(--s2);
@@ -1368,18 +1448,28 @@ main > .next + .section {
   font-weight: 600;
   letter-spacing: .06em;
   text-transform: uppercase;
-  color: var(--teal-bright);
-  background: rgba(42, 157, 153, .14);
-  border: 1px solid rgba(95, 211, 207, .34);
+  color: var(--teal-ink);
+  background: rgba(42, 157, 153, .12);
+  border: 1px solid rgba(42, 157, 153, .34);
   border-radius: 999px;
 }
+/* On the dark grounds the marker switches to the bright accent and a lighter
+   rule, matching the eyebrow treatment already used there. */
+.hero .status-note, .section--dark .status-note {
+  color: var(--teal-bright);
+  background: rgba(255, 255, 255, .08);
+  border-color: rgba(255, 255, 255, .28);
+}
+/* In a card body the paragraph rule (`.venture__body p`) outranks a bare class,
+   and the flex column would stretch the pill edge to edge; restate the size and
+   let the pill hug its own text. */
 .venture__body .status-note {
   font-size: var(--fs-label);
   align-self: flex-start;
   margin-bottom: 10px;
 }
 
-/* --- 17. Responsive scale-up --------------------------------------------- */
+/* --- 18. Responsive scale-up --------------------------------------------- */
 @media (min-width: 640px) {
   :root { --gutter: 24px; }
   .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1410,13 +1500,14 @@ main > .next + .section {
   .step { grid-template-columns: 56px minmax(0, 1fr); }
 }
 
-/* --- 18. Motion + print -------------------------------------------------- */
+/* --- 19. Motion + print -------------------------------------------------- */
+/* Reduced motion keeps the crossfade (it aids comprehension) and drops the
+   movement, rather than zeroing every transition. */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .js .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
   .card, .btn, .contact-row, .advisor, .person__media img,
-  .venture__media img, .link-arrow::after, .topbar__toggle span,
-  .hero__media img, .figure img { transition: none !important; }
+  .venture__media img, .link-arrow::after, .topbar__toggle span { transition: none !important; }
   .topbar { transition: none !important; }
   .drop__caret, .drop__menu { transition: none !important; }
   .btn:active { transform: none; }
@@ -1428,208 +1519,11 @@ main > .next + .section {
   .js .reveal { opacity: 1 !important; transform: none !important; }
 }
 
-/* --- 19. Home scroll narrative --------------------------------------------
-   Beat 1 (hero resolve), Beat 2 (assembly), Beat 3 (chapter strip),
-   Beat 4 (zoom into ventures). All progressive: with reduced-motion or no JS
-   the page is static and complete (--prog defaults to 1). */
-
-/* Beat 2 — the assembly band. The constellation is an inline SVG whose lines
-   draw with scroll progress (pathLength=1, dashoffset = 1 - --prog) and whose
-   nodes pop in at their own thresholds. */
-.assembly {
-  position: relative;
-  background-color: var(--ground);
-  background-image:
-    radial-gradient(70% 90% at 50% 0%, rgba(42, 157, 153, .10) 0%, rgba(42, 157, 153, 0) 62%),
-    linear-gradient(180deg, var(--ground-1) 0%, var(--ground) 100%);
-  border-block: 1px solid var(--hairline);
-  overflow: hidden;
-}
-.assembly__inner {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--s5);
-  align-items: center;
-}
-.assembly__figure {
-  position: relative;
-  aspect-ratio: 1 / 1;
-  max-width: 460px;
-  margin-inline: auto;
-  width: 100%;
-}
-.assembly__figure svg { width: 100%; height: 100%; overflow: visible; }
-.assembly__copy { display: grid; gap: var(--s4); }
-.assembly__copy > div:first-child h2 { max-width: 18ch; }
-.constellation line, .constellation path {
-  stroke: var(--teal-bright);
-  stroke-width: 1.2;
-  fill: none;
-  vector-effect: non-scaling-stroke;
-  stroke-linecap: round;
-}
-.constellation .const-line {
-  stroke-dasharray: 1;
-  stroke-dashoffset: calc(1 - var(--prog));
-  opacity: .8;
-}
-/* The outer ring lags the inner spokes: it draws from 20% -> 100% progress. */
-.constellation .const-line--ring {
-  stroke-dashoffset: calc(1 - clamp(0, (var(--prog) - .2) * 1.25, 1));
-}
-.constellation .const-node {
-  fill: var(--ground);
-  stroke: var(--teal-bright);
-  stroke-width: 1.4;
-  vector-effect: non-scaling-stroke;
-  /* Each node lights up past its own --t threshold: 0 below, ramps over the
-     next .1 of progress, 1 after. Default (--prog:1) = fully lit. */
-  opacity: clamp(0, calc((var(--prog) - var(--t, 0)) * 10), 1);
-}
-.constellation .const-core { fill: var(--teal-bright); stroke: none; }
-@media (min-width: 900px) {
-  .assembly__inner { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); }
-  .assembly__figure { order: 2; max-width: 560px; }
-}
-
-/* Beat 3 — the three focus areas as a horizontal chapter strip on desktop.
-   On mobile/tablet the pillars stack exactly as before. */
-@media (min-width: 1024px) {
-  .pillars--chapters {
-    display: flex;
-    gap: var(--s3);
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-    padding-block: var(--s2);
-    margin-inline: calc(-1 * var(--gutter));
-    padding-inline: var(--gutter);
-    -webkit-overflow-scrolling: touch;
-  }
-  .pillars--chapters::-webkit-scrollbar { display: none; }
-  .pillars--chapters .pillar {
-    flex: 0 0 min(480px, 78vw);
-    scroll-snap-align: start;
-    padding-block: var(--s5);
-    padding-inline: var(--s4);
-    border-top: 0;
-    border: 1px solid var(--hairline);
-    border-radius: var(--radius-xl);
-    background: var(--ground-1);
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--s4);
-  }
-  .pillars--chapters .pillar:first-child { padding-top: var(--s5); }
-  .pillars--chapters .pillar__head { position: static; }
-  .pillars--chapters .pillar__num { font-size: var(--fs-h3); letter-spacing: .04em; color: var(--teal-bright); }
-  .pillars--chapters .pillar__cards--2 { grid-template-columns: minmax(0, 1fr); }
-}
-
-/* Beat 4 — zoom into the ventures: the whole focus-areas block settles in from
-   a slight scale, then each card zooms to full. Reduced-motion: static. */
-.js .zoom-in { opacity: 0; transform: scale(.96); transition: opacity var(--dur-hero) var(--ease-expo), transform var(--dur-hero) var(--ease-expo); }
-.js .zoom-in.is-visible { opacity: 1; transform: none; }
-@media (prefers-reduced-motion: reduce) {
-  .js .zoom-in { opacity: 1 !important; transform: none !important; transition: none !important; }
-}
-
-/* --- 20. Focus areas + chips --------------------------------------------- */
-.pillars { display: grid; }
-.pillar {
-  display: grid;
-  gap: var(--s4);
-  padding-block: var(--s5);
-  border-top: 1px solid var(--hairline);
-}
-.pillar:first-child { border-top: 0; padding-top: 0; }
-.pillar__num {
-  margin: 0 0 var(--s1);
-  font-family: var(--font-sans);
-  font-size: var(--fs-label);
-  font-weight: 600;
-  letter-spacing: .14em;
-  color: var(--teal-bright);
-}
-.pillar__title { margin: 0 0 10px; font-size: var(--fs-h3); }
-.pillar__head p:last-child { margin: 0; color: var(--body-on-dark); max-width: 34ch; }
-.pillar__cards { display: grid; gap: var(--s3); grid-template-columns: minmax(0, 1fr); align-items: start; }
-@media (min-width: 640px) {
-  .pillar__cards--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
-}
-@media (min-width: 1024px) {
-  .pillar { grid-template-columns: minmax(0, .8fr) minmax(0, 2fr); gap: var(--s6); }
-  .pillar__head { position: sticky; top: calc(var(--topbar-h) + 24px); align-self: start; }
-}
-
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: var(--s3) 0 0;
-  padding: 0;
-  list-style: none;
-}
-.chips--center { justify-content: center; }
-.chips li {
-  padding: 10px 18px;
-  font-size: var(--fs-label);
-  font-weight: 600;
-  letter-spacing: .04em;
-  color: var(--ink-on-dark);
-  background: var(--ground-2);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-}
-.card__foot--links { display: flex; flex-wrap: wrap; gap: 4px 20px; }
-
-/* --- 21. Arabic / RTL -----------------------------------------------------
-   One direction-keyed block instead of a second stylesheet. */
-[dir="rtl"] {
-  --font-display: "Amiri", "Noto Naskh Arabic", "Times New Roman", serif;
-  --font-sans: "IBM Plex Sans Arabic", "Instrument Sans", "Noto Sans Arabic",
-    "Helvetica Neue", Arial, sans-serif;
-}
-
-[dir="rtl"] *,
-[dir="rtl"] *::before,
-[dir="rtl"] *::after { letter-spacing: 0 !important; }
-
-[dir="rtl"] .eyebrow,
-[dir="rtl"] .footer__heading,
-[dir="rtl"] .footer__label,
-[dir="rtl"] .venture__kicker,
-[dir="rtl"] .person__role,
-[dir="rtl"] .contact-row__label,
-[dir="rtl"] .status-note,
-[dir="rtl"] .cred__kicker,
-[dir="rtl"] .team-advisors__title,
-[dir="rtl"] .link-arrow { text-transform: none; }
-
-[dir="rtl"] .topbar__brand-name,
-[dir="rtl"] .topbar__brand-tag { font-family: "Instrument Sans", "Helvetica Neue", Arial, sans-serif; }
-
-[dir="rtl"] body { line-height: 1.75; }
-[dir="rtl"] .lead { line-height: 1.72; }
-[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4 { line-height: 1.35; }
-[dir="rtl"] .hero h1 { line-height: 1.28; }
-[dir="rtl"] .stat__value { line-height: 1.2; }
-[dir="rtl"] .teammate__role { line-height: 1.6; }
-
-[dir="rtl"] .link-arrow::after { content: "\2190"; }
-[dir="rtl"] .link-arrow:hover::after { transform: translateX(-5px); }
-[dir="rtl"] .topbar__menu a::after { transform-origin: right; }
-
-@media (max-width: 939.98px) {
-  [dir="rtl"] .topbar__nav { transform: translateX(-102%); }
-  [dir="rtl"] .nav-open .topbar__nav { transform: none; }
-}
-
-[dir="rtl"] .step::before { font-family: "IBM Plex Sans Arabic", "Instrument Sans", sans-serif; }
-
-[dir="rtl"] .figure figcaption,
-[dir="rtl"] .cred__note { font-family: var(--font-sans); }
-
-/* --- 22. Compact mobile --------------------------------------------------- */
+/* --- 19. Compact mobile ---------------------------------------------------
+   Below 640px a page is read one screen at a time, so the whole scale tightens
+   together: the spacing tokens, the type ladder, and the components that were
+   sized in absolute pixels. Nothing is removed; the same content simply takes
+   fewer screens. Body text stays at 16px and every target keeps its 44px. */
 @media (max-width: 639.98px) {
   :root {
     --pace: 40px;
@@ -1639,7 +1533,7 @@ main > .next + .section {
     --fs-h3: 1.1875rem;
     --fs-h2: 1.5rem;
     --fs-h1: 1.875rem;
-    --fs-hero: 2.375rem;
+    --fs-hero: 2.125rem;
     --lh-body: 1.55;
   }
 
@@ -1648,12 +1542,14 @@ main > .next + .section {
   .grid + h2, .figure + h3, .stats + h2 { margin-top: 1.2em; }
   .checklist { gap: 8px; }
 
+  /* Heroes: no viewport-height floor, less air above and below the copy. */
   .hero, .hero--home { min-height: 0; padding-block: var(--s5); }
   .hero--photo { padding-bottom: calc(var(--s5) + var(--s6)); }
   .hero--plate { padding-block: 40px; }
   .hero--plate .hero__mark { width: 76px; height: 76px; padding: 9px; border-radius: 20px; margin-bottom: var(--s2); }
   .hero__actions { margin-top: var(--s3); }
 
+  /* Cards and panels */
   .card, .panel { padding: var(--s3); }
   .venture { padding: 0; }
   .venture__media { min-height: 136px; padding: var(--s3); }
@@ -1663,16 +1559,20 @@ main > .next + .section {
   .contact-row { padding: var(--s2) var(--s3); }
   .contact-row__value { font-size: 1.25rem; }
 
+  /* Portraits and decorative marks: a square crop instead of a tall portrait,
+     and the round marks capped so they stop filling the whole screen. */
   .person__media img { aspect-ratio: 1 / 1; }
   .split > .figure:not(:has(img[src*="team-"])) { max-width: 230px; margin-inline: auto; }
   .split > .figure:has(img[src*="team-"]) { max-width: 320px; margin-inline: auto; }
   .figure img[src*="team-"] { aspect-ratio: 1 / 1; object-fit: cover; object-position: 50% 24%; }
 
+  /* Figures read better two across than four stacked. */
   .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .stat { padding: var(--s3) var(--s2); }
   .stat__value { font-size: 1.75rem; }
   .stat__label { font-size: .875rem; }
 
+  /* Call-to-action band and footer */
   .cta-band__inner { padding: var(--s4) var(--s3); }
   .cta-band h2 { font-size: 1.375rem; }
   .footer__top {
@@ -1681,53 +1581,69 @@ main > .next + .section {
     padding-block: var(--s5) var(--s4);
   }
   .footer__brand, .footer__top > div:last-child { grid-column: 1 / -1; }
-
-  .assembly__figure { max-width: 320px; }
 }
 
-/* --- 23. Company themes --------------------------------------------------- */
+/* Company themes. A venture keeps the NexGen system (type, spacing, cards,
+   layout, the dark ground) and changes only the accent, so it reads as its own
+   company inside the same family. The nav and footer stay NexGen teal. */
 .theme-saby {
-  --teal: #9d86f5;
-  --teal-bright: #b9a8ff;   /* 9.10:1 on --ground */
-  --teal-ink: #4a3aa8;
+  --teal: #9d86f5;          /* fills under dark labels  */
+  --teal-bright: #b9a8ff;   /* accent on dark grounds   */
+  --teal-ink: #4a3aa8;      /* accent text on paper     */
 }
 .theme-dari {
   --teal: #4fb0ea;
-  --teal-bright: #7cc6f5;   /* 10.13:1 on --ground */
+  --teal-bright: #7cc6f5;
   --teal-ink: #0b5d94;
 }
+/* Esaal's mark is a cyan disc, so the accent leans to aqua rather than Dari's
+   sky blue: a clear 13-degree step in hue keeps the two siblings apart on
+   sight. */
 .theme-esaal {
   --teal: #16a8c6;
-  --teal-bright: #6fd8f2;   /* 11.50:1 on --ground */
+  --teal-bright: #6fd8f2;
   --teal-ink: #08647e;
 }
+/* Trust Flow's own mark is a green-teal only four degrees off the NexGen accent,
+   which would read as a mistake rather than a sibling. Pushing it into green at
+   the same lightness and saturation keeps the family coherent while giving the
+   company its own colour: 25 degrees clear of NexGen, 37 from Esaal. */
 .theme-trust-flow {
   --teal: #2a9d69;
-  --teal-bright: #5fd39f;   /* 10.18:1 on --ground */
+  --teal-bright: #5fd39f;
   --teal-ink: #0a623a;
 }
 
-/* Venture heroes: the logo tile sits above the title, left-aligned. */
+/* Venture heroes: the company's logo tile sits above the title, left-aligned. */
 .hero--venture .hero__mark {
   display: block;
   width: 88px;
   height: 88px;
   padding: 11px;
   object-fit: contain;
-  background: var(--lit);
+  background: #fff;
   border-radius: 22px;
   margin: 0 0 var(--s3);
-  box-shadow: 0 0 0 2px var(--teal), 0 16px 30px -12px rgba(0, 0, 0, .65);
+  box-shadow: 0 0 0 2px var(--teal), 0 16px 30px -12px rgba(0, 0, 0, .55);
 }
 .hero--saby .hero__media img { object-position: 86% 50%; }
 .hero--dari .hero__media img { object-position: 92% 50%; }
+/* Esaal's photograph carries its detail in the right three quarters; this pan
+   keeps that while leaving the quieter left edge under the scrim. */
 .hero--esaal .hero__media img { object-position: 88% 50%; }
+/* Trust Flow's frame carries its subject in the right 43-99%; the narrow band
+   pans that far right so the whole subject survives the 4:3 crop. */
 .hero--trust-flow .hero__media img { object-position: 100% 50%; }
 @media (max-width: 639.98px) {
   .hero--venture .hero__mark { width: 72px; height: 72px; padding: 9px; border-radius: 18px; margin-bottom: var(--s2); }
 }
 
-/* --- 24. Photo heroes on every screen ------------------------------------ */
+/* --- 20. Photo heroes on every screen --------------------------------------
+   One rule for the whole site: a photograph is never hidden and never sits
+   behind the copy on a narrow screen. Below 1100px the copy takes the dark
+   ground on top and the photograph runs full width as a band directly under
+   it, blending up out of the ground and down into the page. On wide screens
+   the homepage splits: copy on the ground, photograph open on the right. */
 @media (max-width: 1099.98px) {
   .hero.hero--photo {
     flex-direction: column;
@@ -1754,18 +1670,24 @@ main > .next + .section {
   }
   .hero__media picture { display: contents; }
   .hero.hero--inpipe .hero__media img { object-position: 50% 62%; }
+  /* The abstract backdrop is a mood, not a subject: a slimmer band, darkened to
+     the same depth the wide hero gets from its scrim. */
   .hero.hero--abstract .hero__media { aspect-ratio: 2 / 1; }
-  .hero.hero--abstract .hero__media img { filter: grayscale(1) brightness(.5) contrast(1.08); }
+  .hero.hero--abstract .hero__media img { filter: brightness(.5) contrast(1.08); }
+  /* Top edge of the band dissolves into the copy's ground. */
   .hero.hero--photo .hero__media::before {
     content: "";
     position: absolute;
     inset: 0 0 auto 0;
     height: 42%;
     z-index: 1;
-    background: linear-gradient(180deg, var(--ground) 0%, rgba(10, 18, 22, 0) 100%);
+    background: linear-gradient(180deg, var(--dark) 0%, rgba(15, 26, 32, 0) 100%);
   }
-  .hero.hero--photo::after {
-    background: linear-gradient(180deg, rgba(10, 18, 22, 0) 0%, var(--ground) 100%) bottom / 100% var(--s6) no-repeat;
+  /* Bottom edge hands over to the page: the same value ramp as the wide hero. */
+  .hero.hero--photo::after,
+  .hero.hero--photo.hero--bright::after,
+  .hero.hero--photo.hero--inpipe::after {
+    background: linear-gradient(180deg, rgba(244, 246, 246, 0) 0%, rgba(244, 246, 246, 1) 100%) bottom / 100% var(--s6) no-repeat;
   }
 }
 @media (max-width: 639.98px) {
@@ -1776,6 +1698,7 @@ main > .next + .section {
 
 @media (min-width: 1100px) {
   .hero--split .hero__media { inset: 0 0 0 auto; width: 66%; }
+  /* A breath of the company accent rising from the lower left of the ground. */
   .hero--venture::before {
     content: "";
     position: absolute;
@@ -1790,8 +1713,137 @@ main > .next + .section {
   .hero--split .lead { font-size: 1.125rem; max-width: 34rem; }
   .hero--photo.hero--split::after {
     background:
-      linear-gradient(180deg, rgba(8, 14, 18, .55) 0%, rgba(8, 14, 18, 0) 34%),
-      linear-gradient(180deg, rgba(8, 14, 18, 0) 55%, var(--ground) 100%),
-      linear-gradient(90deg, var(--ground) 0%, var(--ground) 34%, rgba(10, 18, 22, .55) 46%, rgba(10, 18, 22, 0) 66%);
+      linear-gradient(180deg, rgba(244, 246, 246, 0) 0%, rgba(244, 246, 246, 1) 100%) bottom / 100% var(--s7) no-repeat,
+      linear-gradient(180deg, rgba(10, 18, 22, .35) 0%, rgba(10, 18, 22, 0) 28%),
+      linear-gradient(90deg, var(--dark) 0%, var(--dark) 34%, rgba(15, 26, 32, .55) 44%, rgba(15, 26, 32, 0) 62%);
   }
 }
+
+/* --- 21. Focus areas + chips ---------------------------------------------
+   Companies sit under the three areas NexGen works in. A pillar is a heading
+   column beside its company cards; on narrow screens they stack. */
+.pillars { display: grid; }
+.pillar {
+  display: grid;
+  gap: var(--s4);
+  padding-block: var(--s5);
+  border-top: 1px solid var(--hairline);
+}
+.pillar:first-child { border-top: 0; padding-top: 0; }
+.pillar__num {
+  margin: 0 0 var(--s1);
+  font-family: var(--font-sans);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: .12em;
+  color: var(--teal-ink);
+}
+.pillar__title { margin: 0 0 10px; font-size: var(--fs-h3); }
+.pillar__head p:last-child { margin: 0; color: var(--body); max-width: 34ch; }
+.pillar__cards { display: grid; gap: var(--s3); grid-template-columns: minmax(0, 1fr); align-items: start; }
+@media (min-width: 640px) {
+  .pillar__cards--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
+}
+@media (min-width: 1024px) {
+  .pillar { grid-template-columns: minmax(0, .8fr) minmax(0, 2fr); gap: var(--s6); }
+  .pillar__head { position: sticky; top: calc(var(--topbar-h) + 24px); align-self: start; }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: var(--s3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.chips--center { justify-content: center; }
+.chips li {
+  padding: 10px 18px;
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+.card__foot--links { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+
+/* --- 22. Arabic / RTL ------------------------------------------------------
+   One direction-keyed block instead of a second stylesheet, so the Arabic
+   locale can never drift away from the English one structurally.
+
+   Three things Arabic needs that Latin does not:
+   1. The two-role font system mapped to Arabic faces (serif display over
+      geometric sans), mirroring Newsreader over Instrument Sans.
+   2. letter-spacing forced to 0. Tracking is a Latin device; on Arabic it
+      severs the joins between letters and the word stops being a word.
+   3. The handful of genuinely directional details (the arrow glyph, the
+      underline's origin, which side the hero photograph sits on). */
+[dir="rtl"] {
+  --font-display: "Amiri", "Noto Naskh Arabic", "Times New Roman", serif;
+  --font-sans: "IBM Plex Sans Arabic", "Instrument Sans", "Noto Sans Arabic",
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Tracking off, everywhere. The Latin faces listed as a fallback still render
+   correctly at zero tracking. */
+[dir="rtl"] *,
+[dir="rtl"] *::before,
+[dir="rtl"] *::after { letter-spacing: 0 !important; }
+
+/* Arabic has no case, so an uppercase transform is a no-op — but leaving the
+   declaration in place makes the component look "wrong" to anyone reading the
+   CSS later. Reset it so the intent is explicit. */
+[dir="rtl"] .eyebrow,
+[dir="rtl"] .footer__heading,
+[dir="rtl"] .footer__label,
+[dir="rtl"] .venture__kicker,
+[dir="rtl"] .person__role,
+[dir="rtl"] .contact-row__label,
+[dir="rtl"] .status-note,
+[dir="rtl"] .cred__kicker,
+[dir="rtl"] .team-advisors__title,
+[dir="rtl"] .link-arrow { text-transform: none; }
+
+/* The brand wordmark is Latin artwork, not translated copy: keep it in the
+   Latin face even on Arabic pages, so the logo looks identical on both. */
+[dir="rtl"] .topbar__brand-name,
+[dir="rtl"] .topbar__brand-tag { font-family: "Instrument Sans", "Helvetica Neue", Arial, sans-serif; }
+
+/* Arabic ascenders and descenders sit deeper than Latin ones, and Naskh reads
+   small at the same nominal size — so the Arabic lines get a little more room.
+   Amiri's x-height ratio to Newsreader is 0.984, so the display sizes match at
+   their face value rather than needing to be scaled up. */
+[dir="rtl"] body { line-height: 1.75; }
+[dir="rtl"] .lead { line-height: 1.72; }
+[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4 { line-height: 1.35; }
+[dir="rtl"] .hero h1 { line-height: 1.28; }
+[dir="rtl"] .stat__value { line-height: 1.2; }
+[dir="rtl"] .teammate__role { line-height: 1.6; }
+
+/* The disclosure arrow, the link arrow and the nav underline all point in a
+   reading direction. */
+[dir="rtl"] .link-arrow::after { content: "\2190"; }
+[dir="rtl"] .link-arrow:hover::after { transform: translateX(-5px); }
+[dir="rtl"] .topbar__menu a::after { transform-origin: right; }
+
+/* The mobile drawer is anchored to one edge; mirror where it parks itself.
+   Scoped to the drawer's own breakpoint: above it the nav is position:static
+   (a normal row), and an unscoped transform would slide the whole desktop nav
+   off-screen. */
+@media (max-width: 939.98px) {
+  [dir="rtl"] .topbar__nav { transform: translateX(-102%); }
+  [dir="rtl"] .nav-open .topbar__nav { transform: none; }
+}
+
+/* Arabic numerals in the counters would fight the western digits used in the
+   copy, so the step counter stays as it is. The step gutter moves to the other
+   side automatically (grid follows the document direction). */
+[dir="rtl"] .step::before { font-family: "IBM Plex Sans Arabic", "Instrument Sans", sans-serif; }
+
+/* Amiri is a Naskh face: at the small label sizes its hairlines thin out, so
+   the display face is not used below the heading levels. */
+[dir="rtl"] .figure figcaption,
+[dir="rtl"] .cred__note { font-family: var(--font-sans); }

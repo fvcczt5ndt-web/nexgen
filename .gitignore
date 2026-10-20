@@ -1,14 +1,10 @@
 # dependencies
 tools/node_modules/
 node_modules/
-tools/pw/
 
 # local-only artifacts
 LIVE-URL.txt
 *.log
-
-# verification screenshots (regenerable evidence, not source)
-shots/
 
 # local backups
 .backup-*/
