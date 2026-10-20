@@ -1688,22 +1688,22 @@ main > .next + .section {
 /* --- 23. Company themes --------------------------------------------------- */
 .theme-saby {
   --teal: #9d86f5;
-  --teal-bright: #b9a8ff;   /* 8.9:1 on --ground */
+  --teal-bright: #b9a8ff;   /* 9.10:1 on --ground */
   --teal-ink: #4a3aa8;
 }
 .theme-dari {
   --teal: #4fb0ea;
-  --teal-bright: #7cc6f5;   /* 9.6:1 on --ground */
+  --teal-bright: #7cc6f5;   /* 10.13:1 on --ground */
   --teal-ink: #0b5d94;
 }
 .theme-esaal {
   --teal: #16a8c6;
-  --teal-bright: #6fd8f2;   /* 10.9:1 on --ground */
+  --teal-bright: #6fd8f2;   /* 11.50:1 on --ground */
   --teal-ink: #08647e;
 }
 .theme-trust-flow {
   --teal: #2a9d69;
-  --teal-bright: #5fd39f;   /* 8.6:1 on --ground */
+  --teal-bright: #5fd39f;   /* 10.18:1 on --ground */
   --teal-ink: #0a623a;
 }
 
