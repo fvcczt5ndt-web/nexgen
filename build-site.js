@@ -260,6 +260,9 @@ ${ctx.ogAlt ? `<meta property="og:locale:alternate" content="${ctx.ogAlt}">
 <link rel="apple-touch-icon" href="${ctx.R}favicon.png">
 ${preload}
 <link rel="stylesheet" href="${ctx.A}css/site.css">
+<script>/* Honour ?lang=ar / ?lang=en as aliases of the /ar/ locale switch. Runs before
+   first paint so a query-param visitor is redirected with no English flash. */
+(function(){var m=/(?:^|[?&])lang=(ar|en)(?:&|$)/.exec(location.search);if(!m)return;if(m[1]!==${JSON.stringify(ctx.code)})location.replace(${JSON.stringify(ctx.switchHref)});})();</script>
 ${head}</head>
 <body>
 ${topbar(T, ctx)}

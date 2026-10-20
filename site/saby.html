@@ -27,6 +27,9 @@
 <link rel="preload" href="assets/fonts/newsreader-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/instrument-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
+<script>/* Honour ?lang=ar / ?lang=en as aliases of the /ar/ locale switch. Runs before
+   first paint so a query-param visitor is redirected with no English flash. */
+(function(){var m=/(?:^|[?&])lang=(ar|en)(?:&|$)/.exec(location.search);if(!m)return;if(m[1]!=="en")location.replace("ar/saby.html");})();</script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
