@@ -207,8 +207,58 @@
     }, { passive: true });
   }
 
+  /* --- Home scroll narrative ----------------------------------------------
+     Hero resolve + assembly drawing. Both are 1:1 with scroll and skipped
+     under reduced-motion, where the CSS defaults (--prog:1, scale:1) are the
+     complete static state. No JS = no effect, still complete. */
+  var heroEl = doc.querySelector('.hero--home');
+  var assemblyEl = doc.querySelector('[data-assembly]');
+
+  if (!reduceMotion) {
+    var heroTitle = heroEl && heroEl.querySelector('h1');
+    var heroMedia = heroEl && heroEl.querySelector('.hero__media');
+    var heroTick = false;
+    var paintHero = function () {
+      heroTick = false;
+      var rect = heroEl.getBoundingClientRect();
+      var travel = Math.max(1, rect.height);
+      var passed = Math.max(0, -rect.top);
+      var p = Math.min(1, passed / (travel * 0.72));
+      if (heroMedia) {
+        heroMedia.style.setProperty('--hero-scale', (1 + 0.06 * p).toFixed(4));
+        heroMedia.style.setProperty('--hero-dim', (0.9 - 0.16 * p).toFixed(4));
+      }
+      if (heroTitle) {
+        /* RTL is protected by [dir="rtl"] { letter-spacing: 0 !important }. */
+        heroTitle.style.letterSpacing = (-0.024 + 0.012 * p).toFixed(4) + 'em';
+      }
+    };
+    if (heroEl) {
+      window.addEventListener('scroll', function () {
+        if (!heroTick) { heroTick = true; window.requestAnimationFrame(paintHero); }
+      }, { passive: true });
+      paintHero();
+    }
+
+    var asmTick = false;
+    var paintAssembly = function () {
+      asmTick = false;
+      var rect = assemblyEl.getBoundingClientRect();
+      var vh = window.innerHeight || 1;
+      var p = 1 - ((rect.top - vh * 0.18) / (vh * 0.85));
+      p = Math.max(0, Math.min(1, p));
+      assemblyEl.style.setProperty('--prog', p.toFixed(4));
+    };
+    if (assemblyEl) {
+      window.addEventListener('scroll', function () {
+        if (!asmTick) { asmTick = true; window.requestAnimationFrame(paintAssembly); }
+      }, { passive: true });
+      paintAssembly();
+    }
+  }
+
   /* --- Reveal on scroll -------------------------------------------------- */
-  var revealables = Array.prototype.slice.call(doc.querySelectorAll('.reveal'));
+  var revealables = Array.prototype.slice.call(doc.querySelectorAll('.reveal, .zoom-in'));
 
   if (!revealables.length) return;
 
